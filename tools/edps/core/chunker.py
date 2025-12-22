@@ -4,6 +4,26 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 
+def _parse_chapter_number(num_str: str) -> int:
+    """Convert chapter number (Roman or Arabic) to integer."""
+    # Try Arabic first
+    if num_str.isdigit():
+        return int(num_str)
+
+    # Roman numeral conversion
+    roman_map = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+    result = 0
+    prev = 0
+    for char in reversed(num_str.upper()):
+        val = roman_map.get(char, 0)
+        if val < prev:
+            result -= val
+        else:
+            result += val
+        prev = val
+    return result
+
+
 @dataclass
 class ChapterMarker:
     """A detected chapter/section marker."""
@@ -98,6 +118,8 @@ def chunk_by_markers(
 
     sections = []
     section_num = 1
+    book_num = 1
+    prev_chapter_int = 0
 
     for i, marker in enumerate(markers):
         start = marker["start_pos"]
@@ -111,10 +133,16 @@ def chunk_by_markers(
         section_text = text[start:end]
         word_count = len(section_text.split())
 
+        # Detect book boundary: chapter number reset (e.g., XI -> I)
+        chapter_int = _parse_chapter_number(marker["number"])
+        if chapter_int <= prev_chapter_int and i > 0:
+            book_num += 1
+        prev_chapter_int = chapter_int
+
         section = Section(
             id=f"{section_num:03d}",
             title=marker["title"],
-            location=f"Chapter {marker['number']}",
+            location=f"Book {book_num}, Chapter {marker['number']}",
             start_byte=start,
             end_byte=end,
             word_count=word_count,
