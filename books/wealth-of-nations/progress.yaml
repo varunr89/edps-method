@@ -1,0 +1,33 @@
+# Progress Tracking for The Wealth of Nations
+# Update this file as you complete sections
+
+# Completed sections (add section IDs as you finish)
+completed_sections: []
+
+# Quiz scores (section_id: score out of 8)
+quiz_scores: {}
+
+# Recall scores (section_id: self-rating 0-5)
+recall_scores: {}
+
+# Streaks and stats
+stats:
+  current_streak: 0
+  longest_streak: 0
+  total_sections_completed: 0
+  total_time_spent_minutes: 0
+  average_quiz_score: null
+  average_recall_score: null
+
+# Weekly synthesis tracking
+weekly_syntheses: []
+  # Example:
+  # - date: "2025-01-01"
+  #   sections_covered: ["001", "002", "003", "004", "005", "006", "007", "008"]
+  #   file: "weekly/2025-01-01.md"
+
+# Notes and reflections
+notes:
+  last_updated: null
+  current_focus: null
+  blockers: []

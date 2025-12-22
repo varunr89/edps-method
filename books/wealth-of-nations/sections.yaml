@@ -1,0 +1,161 @@
+# Section Plan for The Wealth of Nations
+# Each section is ~1,500-3,000 words, aligned to chapter boundaries
+
+# Conceptual scaffold: The book's 7 load-bearing claims
+claims:
+  - id: division_of_labor
+    claim: "Division of labor is the primary driver of productivity and wealth"
+  - id: market_extent
+    claim: "The extent of the market limits the degree of specialization possible"
+  - id: price_formation
+    claim: "Natural price emerges from competition; market price fluctuates around it"
+  - id: wages_profits_rents
+    claim: "Output is distributed among wages (labor), profits (capital), and rents (land)"
+  - id: capital_accumulation
+    claim: "Savings become investment; capital accumulation drives growth"
+  - id: free_trade
+    claim: "Trade restrictions harm wealth; nations benefit from specialization and exchange"
+  - id: limited_government
+    claim: "Government should provide defense, justice, and public works—little else"
+
+# Section definitions
+sections:
+  # Book I: Of the Causes of Improvement in the Productive Powers of Labour
+  - id: "001"
+    title: "Division of Labor: The Pin Factory"
+    location: "Book I, Chapter 1"
+    priority: must
+    claim_tags: [division_of_labor]
+    description: "The famous pin factory example showing how specialization multiplies productivity"
+
+  - id: "002"
+    title: "The Origin of Division of Labor"
+    location: "Book I, Chapter 2"
+    priority: must
+    claim_tags: [division_of_labor]
+    description: "Division of labor arises from the human propensity to truck, barter, and exchange"
+
+  - id: "003"
+    title: "Market Extent Limits Specialization"
+    location: "Book I, Chapter 3"
+    priority: must
+    claim_tags: [market_extent, division_of_labor]
+    description: "Larger markets enable greater specialization; water transport extends markets"
+
+  - id: "004"
+    title: "Origin and Use of Money"
+    location: "Book I, Chapter 4"
+    priority: must
+    claim_tags: [price_formation]
+    description: "Money emerges to solve the double coincidence of wants problem"
+
+  - id: "005"
+    title: "Real vs Nominal Price (Part 1)"
+    location: "Book I, Chapter 5 (first half)"
+    priority: must
+    claim_tags: [price_formation]
+    description: "Labor as the real measure of value; distinction between value in use and value in exchange"
+
+  - id: "006"
+    title: "Real vs Nominal Price (Part 2)"
+    location: "Book I, Chapter 5 (second half)"
+    priority: skim
+    claim_tags: [price_formation]
+    description: "Historical examples of price measurement; gold and silver as nominal measures"
+
+  - id: "007"
+    title: "Component Parts of Price"
+    location: "Book I, Chapter 6"
+    priority: must
+    claim_tags: [wages_profits_rents]
+    description: "Price resolves into wages, profit, and rent—the three original sources of revenue"
+
+  - id: "008"
+    title: "Natural vs Market Price"
+    location: "Book I, Chapter 7"
+    priority: must
+    claim_tags: [price_formation]
+    description: "Natural price as center of gravity; market price fluctuates based on supply and demand"
+
+  - id: "009"
+    title: "Wages of Labor (Part 1)"
+    location: "Book I, Chapter 8 (first half)"
+    priority: must
+    claim_tags: [wages_profits_rents]
+    description: "What determines wages; the bargaining power of workers vs masters"
+
+  - id: "010"
+    title: "Wages of Labor (Part 2)"
+    location: "Book I, Chapter 8 (second half)"
+    priority: skim
+    claim_tags: [wages_profits_rents]
+    description: "Historical and geographical variations in wages"
+
+  - id: "011"
+    title: "Profits of Stock"
+    location: "Book I, Chapter 9"
+    priority: must
+    claim_tags: [wages_profits_rents, capital_accumulation]
+    description: "What determines profit rates; relationship between wages and profits"
+
+  - id: "012"
+    title: "Wages and Profits in Different Employments (Part 1)"
+    location: "Book I, Chapter 10 (Part 1)"
+    priority: must
+    claim_tags: [wages_profits_rents]
+    description: "Five causes of wage differentials: agreeableness, difficulty, constancy, trust, probability of success"
+
+  - id: "013"
+    title: "Wages and Profits in Different Employments (Part 2)"
+    location: "Book I, Chapter 10 (Part 2)"
+    priority: skim
+    claim_tags: [wages_profits_rents]
+    description: "Policy distortions that cause artificial wage differentials"
+
+  - id: "014"
+    title: "Rent of Land"
+    location: "Book I, Chapter 11 (introduction)"
+    priority: must
+    claim_tags: [wages_profits_rents]
+    description: "Rent as the residual after wages and profits; what land produces that affords rent"
+
+  # Book II: Of the Nature, Accumulation, and Employment of Stock
+  - id: "015"
+    title: "Division of Stock"
+    location: "Book II, Chapter 1"
+    priority: must
+    claim_tags: [capital_accumulation]
+    description: "Capital vs revenue; fixed vs circulating capital"
+
+  - id: "016"
+    title: "Money as Part of Capital"
+    location: "Book II, Chapter 2"
+    priority: skim
+    claim_tags: [capital_accumulation]
+    description: "The role of money in the capital stock; banking and paper money"
+
+  - id: "017"
+    title: "Accumulation of Capital"
+    location: "Book II, Chapter 3"
+    priority: must
+    claim_tags: [capital_accumulation]
+    description: "Savings become investment; parsimony vs prodigality; productive vs unproductive labor"
+
+  - id: "018"
+    title: "Stock Lent at Interest"
+    location: "Book II, Chapter 4"
+    priority: skim
+    claim_tags: [capital_accumulation]
+    description: "Interest rates and their determination"
+
+  - id: "019"
+    title: "Different Employments of Capital"
+    location: "Book II, Chapter 5"
+    priority: must
+    claim_tags: [capital_accumulation]
+    description: "Agriculture, manufacturing, wholesale, retail—which employments are most productive"
+
+  # Add more sections as you progress through the book
+  # Book III: Of the different Progress of Opulence in different Nations
+  # Book IV: Of Systems of Political Economy (critique of mercantilism)
+  # Book V: Of the Revenue of the Sovereign or Commonwealth

@@ -1,0 +1,29 @@
+# Book Metadata
+title: "An Inquiry into the Nature and Causes of the Wealth of Nations"
+short_title: "The Wealth of Nations"
+author: "Adam Smith"
+year: 1776
+edition: "Public domain (Project Gutenberg)"
+source_url: "https://www.gutenberg.org/ebooks/3300"
+
+# Progress tracking
+status: in_progress  # planned | in_progress | completed
+start_date: null
+completion_date: null
+
+# Organization
+tags:
+  - economics
+  - capitalism
+  - political-economy
+  - enlightenment
+
+# Structure
+total_sections: null  # Set after chunking
+estimated_hours: null  # Set after first pass
+
+# Notes
+notes: |
+  The foundational text of modern economics. Smith examines how nations
+  become wealthy through division of labor, free markets, and limited
+  government intervention. Written during the Scottish Enlightenment.

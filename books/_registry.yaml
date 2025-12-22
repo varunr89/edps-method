@@ -1,0 +1,374 @@
+# EDPS Method: Book Registry
+# Complete reading roadmap organized by category
+
+# =============================================================================
+# FOUNDATIONS OF POLITICAL AND ECONOMIC ORDER
+# =============================================================================
+# These texts explain how modern states, rights, and governance emerged.
+
+books:
+  - slug: wealth-of-nations
+    title: "An Inquiry into the Nature and Causes of the Wealth of Nations"
+    author: "Adam Smith"
+    year: 1776
+    status: in_progress
+    priority: 1
+    category: "Foundations of Political and Economic Order"
+    tags: [economics, capitalism, political-economy, enlightenment]
+    why: "The foundational text of modern economics. Examines how nations become wealthy through division of labor, free markets, and limited government."
+
+  - slug: leviathan
+    title: "Leviathan"
+    author: "Thomas Hobbes"
+    year: 1651
+    status: planned
+    priority: 2
+    category: "Foundations of Political and Economic Order"
+    tags: [political-philosophy, state, social-contract]
+    why: "Explains why modern states claim monopoly over force. Without strong central authority, life descends into chaos ('state of nature'). Foundational for understanding government legitimacy."
+
+  - slug: two-treatises
+    title: "Two Treatises of Government"
+    author: "John Locke"
+    year: 1689
+    status: planned
+    priority: 3
+    category: "Foundations of Political and Economic Order"
+    tags: [political-philosophy, liberalism, natural-rights]
+    why: "Introduces natural rights (life, liberty, property) and consent of the governed. Directly influences liberal democracy and constitutionalism."
+
+  - slug: social-contract
+    title: "The Social Contract"
+    author: "Jean-Jacques Rousseau"
+    year: 1762
+    status: planned
+    priority: 4
+    category: "Foundations of Political and Economic Order"
+    tags: [political-philosophy, democracy, general-will]
+    why: "Argues that political authority comes from the 'general will' of the people. Essential for understanding populism, republicanism, and revolutionary politics."
+
+  - slug: federalist-papers
+    title: "The Federalist Papers"
+    author: "Alexander Hamilton, James Madison, John Jay"
+    year: 1788
+    status: planned
+    priority: 5
+    category: "Foundations of Political and Economic Order"
+    tags: [political-philosophy, constitution, governance]
+    why: "Practical application of Enlightenment political theory. Explains checks and balances, faction control, and constitutional design."
+
+# =============================================================================
+# CAPITALISM, CLASS, AND POWER
+# =============================================================================
+# Critical perspectives on capitalism and its social effects.
+
+  - slug: capital-vol-1
+    title: "Capital, Volume I"
+    author: "Karl Marx"
+    year: 1867
+    status: planned
+    priority: 6
+    category: "Capitalism, Class, and Power"
+    tags: [economics, capitalism, critique, class]
+    why: "Systematic critique of capitalism. Introduces surplus value and class struggle. Modern labor politics and inequality debates cannot be understood without it."
+
+  - slug: protestant-ethic
+    title: "The Protestant Ethic and the Spirit of Capitalism"
+    author: "Max Weber"
+    year: 1905
+    status: planned
+    priority: 7
+    category: "Capitalism, Class, and Power"
+    tags: [sociology, capitalism, culture, religion]
+    why: "Explains how cultural values (discipline, delayed gratification) enabled capitalism's rise. Adds sociological lens to Smith."
+
+  - slug: theory-of-leisure-class
+    title: "The Theory of the Leisure Class"
+    author: "Thorstein Veblen"
+    year: 1899
+    status: planned
+    priority: 8
+    category: "Capitalism, Class, and Power"
+    tags: [economics, sociology, consumption, status]
+    why: "Introduces 'conspicuous consumption'—spending to signal status. Directly relevant to consumer culture and social media behavior."
+
+# =============================================================================
+# SCIENCE, RATIONALITY, AND MODERN KNOWLEDGE
+# =============================================================================
+# The intellectual foundations of the scientific worldview.
+
+  - slug: novum-organum
+    title: "Novum Organum"
+    author: "Francis Bacon"
+    year: 1620
+    status: planned
+    priority: 9
+    category: "Science, Rationality, and Modern Knowledge"
+    tags: [philosophy, science, method]
+    why: "Lays groundwork for the scientific method—systematic observation and experimentation. Modern science and evidence-based policy trace back here."
+
+  - slug: discourse-on-method
+    title: "Discourse on the Method"
+    author: "René Descartes"
+    year: 1637
+    status: planned
+    priority: 10
+    category: "Science, Rationality, and Modern Knowledge"
+    tags: [philosophy, rationalism, epistemology]
+    why: "Introduces methodological skepticism ('I think, therefore I am'). Crucial for understanding modern philosophy and scientific reasoning."
+
+  - slug: principia
+    title: "Principia Mathematica"
+    author: "Isaac Newton"
+    year: 1687
+    status: planned
+    priority: 11
+    category: "Science, Rationality, and Modern Knowledge"
+    tags: [physics, mathematics, science]
+    reading_mode: selective
+    why: "Demonstrates that the universe operates according to discoverable laws. This mechanistic worldview shapes modern economics and systems thinking."
+
+# =============================================================================
+# SOCIETY, NORMS, AND THE INDIVIDUAL
+# =============================================================================
+# How societies hold together and shape individuals.
+
+  - slug: democracy-in-america
+    title: "Democracy in America"
+    author: "Alexis de Tocqueville"
+    year: 1840
+    status: planned
+    priority: 12
+    category: "Society, Norms, and the Individual"
+    tags: [political-science, democracy, sociology]
+    why: "Analyzes democracy's social effects: equality, conformity, individualism, tyranny of the majority. Remarkably predictive of modern mass democracy."
+
+  - slug: division-of-labor
+    title: "The Division of Labor in Society"
+    author: "Émile Durkheim"
+    year: 1893
+    status: planned
+    priority: 13
+    category: "Society, Norms, and the Individual"
+    tags: [sociology, social-cohesion, modernity]
+    why: "Explains how social cohesion shifts from tradition to interdependence. Useful for understanding specialization, bureaucracy, and alienation."
+
+  - slug: civilization-and-its-discontents
+    title: "Civilization and Its Discontents"
+    author: "Sigmund Freud"
+    year: 1930
+    status: planned
+    priority: 14
+    category: "Society, Norms, and the Individual"
+    tags: [psychology, culture, repression]
+    why: "Argues that society requires repression of individual instincts, producing psychological tension. Influences modern views of identity and therapy."
+
+# =============================================================================
+# WAR, TECHNOLOGY, AND THE MODERN STATE
+# =============================================================================
+# Violence, power, and the modern state apparatus.
+
+  - slug: on-war
+    title: "On War"
+    author: "Carl von Clausewitz"
+    year: 1832
+    status: planned
+    priority: 15
+    category: "War, Technology, and the Modern State"
+    tags: [military, strategy, politics]
+    why: "Defines war as politics by other means. Foundational for military strategy, geopolitics, and understanding state conflict."
+
+  - slug: origins-of-totalitarianism
+    title: "The Origins of Totalitarianism"
+    author: "Hannah Arendt"
+    year: 1951
+    status: planned
+    priority: 16
+    category: "War, Technology, and the Modern State"
+    tags: [political-philosophy, totalitarianism, history]
+    why: "Explains how mass society, ideology, and bureaucracy enabled fascism and Stalinism. Essential for understanding modern authoritarianism."
+
+# =============================================================================
+# CULTURE, MEANING, AND MODERN ANXIETY
+# =============================================================================
+# The search for meaning in modern life.
+
+  - slug: genealogy-of-morality
+    title: "On the Genealogy of Morality"
+    author: "Friedrich Nietzsche"
+    year: 1887
+    status: planned
+    priority: 17
+    category: "Culture, Meaning, and Modern Anxiety"
+    tags: [philosophy, ethics, power]
+    why: "Challenges moral systems as historical constructions tied to power. Influences modern critiques of religion, ethics, and identity."
+
+  - slug: "1984"
+    title: "1984"
+    author: "George Orwell"
+    year: 1949
+    status: planned
+    priority: 18
+    category: "Culture, Meaning, and Modern Anxiety"
+    tags: [fiction, dystopia, surveillance, politics]
+    why: "Explores surveillance, propaganda, and language control—highly relevant to modern information ecosystems."
+
+  - slug: brave-new-world
+    title: "Brave New World"
+    author: "Aldous Huxley"
+    year: 1932
+    status: planned
+    priority: 19
+    category: "Culture, Meaning, and Modern Anxiety"
+    tags: [fiction, dystopia, consumption, control]
+    why: "Shows control through pleasure, consumption, and conditioning—arguably closer to modern consumer societies than Orwell."
+
+# =============================================================================
+# VALUE INVESTING FOUNDATIONS
+# =============================================================================
+# The intellectual core of long-term, analysis-driven investing.
+
+  - slug: security-analysis
+    title: "Security Analysis"
+    author: "Benjamin Graham & David Dodd"
+    year: 1934
+    status: planned
+    priority: 20
+    category: "Value Investing Foundations"
+    tags: [investing, valuation, finance]
+    why: "Foundational text of value investing. Introduces intrinsic value and margin of safety. Buffett calls it the most important investing book ever written."
+
+  - slug: intelligent-investor
+    title: "The Intelligent Investor"
+    author: "Benjamin Graham"
+    year: 1949
+    status: planned
+    priority: 21
+    category: "Value Investing Foundations"
+    tags: [investing, behavior, finance]
+    why: "Accessible companion to Security Analysis. Introduces 'Mr. Market' metaphor. As much about behavioral discipline as finance."
+
+  - slug: buffett-letters
+    title: "Berkshire Hathaway Shareholder Letters"
+    author: "Warren Buffett"
+    year: 1965
+    status: planned
+    priority: 22
+    category: "Value Investing Foundations"
+    tags: [investing, capital-allocation, business]
+    why: "Living textbook of applied capitalism. Economic moats, ROIC, management quality. Operationalizes Smith's idea of productive capital."
+
+  - slug: poor-charlies-almanack
+    title: "Poor Charlie's Almanack"
+    author: "Charles T. Munger"
+    year: 2005
+    status: planned
+    priority: 23
+    category: "Value Investing Foundations"
+    tags: [investing, mental-models, psychology]
+    why: "Mental framework behind Buffett's success. Multidisciplinary thinking, cognitive biases. Bridge between investing and philosophy."
+
+# =============================================================================
+# BUSINESS QUALITY AND GROWTH
+# =============================================================================
+# Qualitative analysis of companies.
+
+  - slug: common-stocks-uncommon-profits
+    title: "Common Stocks and Uncommon Profits"
+    author: "Philip Fisher"
+    year: 1958
+    status: planned
+    priority: 24
+    category: "Business Quality and Growth"
+    tags: [investing, growth, management]
+    why: "Qualitative business analysis. Management integrity, R&D, long-term growth. Buffett merged Fisher's ideas with Graham's framework."
+
+# =============================================================================
+# INDEXING, INSTITUTIONS, AND THE MARKET AS A SYSTEM
+# =============================================================================
+# Understanding markets as complex systems.
+
+  - slug: little-book-common-sense-investing
+    title: "The Little Book of Common Sense Investing"
+    author: "John C. Bogle"
+    year: 2007
+    status: planned
+    priority: 25
+    category: "Indexing and Market Systems"
+    tags: [investing, indexing, costs]
+    why: "Intellectual foundation of Vanguard-style indexing. Costs and turnover dominate returns. Humility about forecasting."
+
+  - slug: four-pillars-of-investing
+    title: "The Four Pillars of Investing"
+    author: "William Bernstein"
+    year: 2002
+    status: planned
+    priority: 26
+    category: "Indexing and Market Systems"
+    tags: [investing, history, psychology]
+    why: "Synthesis of theory, history, psychology, and institutional realities. Explains why most investors fail even when they know theory."
+
+# =============================================================================
+# ACCOUNTING, CAPITAL ALLOCATION, AND REAL ECONOMICS
+# =============================================================================
+# Rigorous valuation and probabilistic thinking.
+
+  - slug: investment-valuation
+    title: "Investment Valuation"
+    author: "Aswath Damodaran"
+    year: 2012
+    status: planned
+    priority: 27
+    category: "Valuation and Capital Allocation"
+    tags: [investing, valuation, dcf, finance]
+    why: "Modern reference for valuation. DCF analysis, risk modeling. If Smith explains why capital matters, Damodaran explains how to price it."
+
+  - slug: expectations-investing
+    title: "Expectations Investing"
+    author: "Michael Mauboussin"
+    year: 2001
+    status: planned
+    priority: 28
+    category: "Valuation and Capital Allocation"
+    tags: [investing, expectations, probability]
+    why: "Separating skill from luck. What market prices imply. Companies as probabilistic cash-flow streams."
+
+# =============================================================================
+# BEHAVIORAL AND PSYCHOLOGICAL FOUNDATIONS
+# =============================================================================
+# Why humans systematically misjudge.
+
+  - slug: thinking-fast-and-slow
+    title: "Thinking, Fast and Slow"
+    author: "Daniel Kahneman"
+    year: 2011
+    status: planned
+    priority: 29
+    category: "Behavioral and Psychological Foundations"
+    tags: [psychology, decision-making, biases]
+    why: "Why humans systematically misjudge risk and probability. Directly applicable to market bubbles, panic selling, and overconfidence."
+
+# =============================================================================
+# READING PATHS
+# =============================================================================
+# Suggested sequences for different goals
+
+reading_paths:
+  minimal_powerful:
+    name: "Minimal but Powerful Path"
+    description: "After Wealth of Nations, maximum insight with minimum volume"
+    sequence:
+      - [two-treatises, social-contract, federalist-papers]  # Political foundations
+      - [capital-vol-1, protestant-ethic]  # Capitalism from opposing lenses
+      - [democracy-in-america, division-of-labor]  # Democracy and social structure
+      - [genealogy-of-morality, origins-of-totalitarianism]  # Power, morality, crises
+
+  investing_core:
+    name: "Investing Core"
+    description: "Essential investing canon"
+    sequence:
+      - intelligent-investor
+      - security-analysis
+      - buffett-letters
+      - common-stocks-uncommon-profits
+      - little-book-common-sense-investing
