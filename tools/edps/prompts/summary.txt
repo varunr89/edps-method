@@ -1,0 +1,68 @@
+You are analyzing a section from "{book_title}" by {author}.
+
+## Section Details
+- Section: {section_id}
+- Title: {section_title}
+- Location: {location}
+
+## Source Text
+{source_text}
+
+## Task
+Generate a structured summary following this EXACT format:
+
+---
+
+# Section {section_id}: {section_title}
+
+> Location: {location}
+> Generator: 🤖 AI-generated
+> Last updated: {date}
+
+---
+
+## TLDR
+
+[Write exactly 3 sentences summarizing the core claim.]
+
+---
+
+## Key Terms
+
+- **[Term 1]**: [definition as used in this text]
+- **[Term 2]**: [definition]
+- **[Term 3]**: [definition]
+- **[Term 4]**: [definition]
+- **[Term 5]**: [definition]
+
+---
+
+## Argument Structure
+
+1. [First premise or observation from the text]
+2. [Second step in the author's reasoning]
+3. [Third step]
+4. [Fourth step]
+5. [Conclusion or implication]
+
+---
+
+## Modern Application
+
+[Write 3-5 sentences connecting this to something from the last 10 years: policy, technology, markets, or society. Be specific.]
+
+---
+
+## Source Pointers
+
+- **Key passage**: [quote a key sentence and its approximate location]
+- **Best example**: [describe the author's main example]
+- **Strongest argument**: [identify the most compelling point]
+
+---
+
+## Generation Notes
+
+- Model: {model}
+- Prompt version: 1.0
+- Human edits: none

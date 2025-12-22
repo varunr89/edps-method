@@ -1,0 +1,73 @@
+You are creating retrieval practice questions for a section from "{book_title}" by {author}.
+
+## Section Details
+- Section: {section_id}
+- Title: {section_title}
+- Location: {location}
+
+## Summary
+{summary_text}
+
+## Source Text
+{source_text}
+
+## Task
+Create exactly 8 questions following this format:
+
+---
+
+# Quiz: Section {section_id}
+
+> Generator: 🤖 AI-generated
+> Total questions: 8
+> Time estimate: 10-15 minutes
+
+---
+
+## Instructions
+
+1. Answer all questions **from memory** — no peeking at notes or source
+2. Write your answers in `quiz-answers.md`
+3. Score yourself after completing all questions
+
+---
+
+## Recall Questions
+
+*Answer each in 1-2 sentences.*
+
+### 1. Main Claim
+[Ask about the central argument]
+
+### 2. Mechanism
+[Ask about a process or cause-effect relationship]
+
+### 3. Example
+[Ask about an example from the text]
+
+### 4. Define: [Key Term 1]
+[Ask for definition of first key term]
+
+### 5. Define: [Key Term 2]
+[Ask for definition of second key term]
+
+---
+
+## Explain Questions
+
+*Answer each in 3-5 sentences.*
+
+### 6. Teach It Back
+[Ask to explain a concept to a smart 15-year-old]
+
+### 7. Counterfactual
+[Ask what would happen if a key condition were different]
+
+---
+
+## Apply Question
+
+*Answer in 3-5 sentences.*
+
+### 8. Modern Connection
+[Ask to connect a concept to a specific modern phenomenon]
