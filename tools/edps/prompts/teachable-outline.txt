@@ -1,0 +1,95 @@
+You are creating a 60-minute teaching outline for "{book_title}" by {author}.
+
+## Book Details
+- Title: {book_title}
+- Author: {author}
+- Total sections: {section_count}
+
+## All Section Summaries
+{all_summaries}
+
+## Task
+Create a comprehensive 60-minute teaching plan following this EXACT format:
+
+---
+
+# Teaching {book_title} in 60 Minutes
+
+> Generator: 🤖→👤 AI-drafted, reader-refined
+> Generated: {date}
+
+## Audience
+
+[Describe the ideal audience: educated general reader, undergraduate, professional. What prior knowledge is assumed?]
+
+## Learning Objectives
+
+By the end, students will be able to:
+1. [First testable objective - what can they explain?]
+2. [Second testable objective - what can they analyze?]
+3. [Third testable objective - what can they apply?]
+
+## Outline
+
+### Segment 1: [Title] (10 min)
+- **Key point**: [One sentence capturing the core idea]
+- **From the book**: [Specific example or argument from the text]
+- **Modern parallel**: [Contemporary example that illustrates this]
+- **Transition**: [How this leads to the next segment]
+
+### Segment 2: [Title] (10 min)
+- **Key point**: [One sentence capturing the core idea]
+- **From the book**: [Specific example or argument from the text]
+- **Modern parallel**: [Contemporary example that illustrates this]
+- **Transition**: [How this leads to the next segment]
+
+### Segment 3: [Title] (10 min)
+- **Key point**: [One sentence capturing the core idea]
+- **From the book**: [Specific example or argument from the text]
+- **Modern parallel**: [Contemporary example that illustrates this]
+- **Transition**: [How this leads to the next segment]
+
+### Segment 4: [Title] (10 min)
+- **Key point**: [One sentence capturing the core idea]
+- **From the book**: [Specific example or argument from the text]
+- **Modern parallel**: [Contemporary example that illustrates this]
+- **Transition**: [How this leads to the next segment]
+
+### Segment 5: [Title] (10 min)
+- **Key point**: [One sentence capturing the core idea]
+- **From the book**: [Specific example or argument from the text]
+- **Modern parallel**: [Contemporary example that illustrates this]
+- **Transition**: [How this leads to the next segment]
+
+### Segment 6: Synthesis & Discussion (10 min)
+- **Recap**: [The 5 key points in one paragraph]
+- **Discussion questions**:
+  1. [Open-ended question for group discussion]
+  2. [Question that challenges assumptions]
+  3. [Question connecting to students' experiences]
+- **If you remember one thing**: [The single most important takeaway]
+
+## Predicted Student Questions
+
+1. **Q**: [Likely question a student would ask]
+   **A**: [Concise answer grounded in the text]
+
+2. **Q**: [Likely question a student would ask]
+   **A**: [Concise answer grounded in the text]
+
+3. **Q**: [Likely question a student would ask]
+   **A**: [Concise answer grounded in the text]
+
+4. **Q**: [Likely question a student would ask]
+   **A**: [Concise answer grounded in the text]
+
+5. **Q**: [Likely question a student would ask]
+   **A**: [Concise answer grounded in the text]
+
+---
+
+## Generation Notes
+
+- Model: {model}
+- Prompt version: 1.0
+- Human edits: none
