@@ -93,7 +93,7 @@ For each section, follow this loop:
 
 | Step | What to do | File |
 |------|------------|------|
-| **1. Listen** | Upload `source.txt` to [NotebookLM](https://notebooklm.google.com/) and generate an audio overview | `sections/<id>/source.txt` |
+| **1. Listen** | Upload the source file to [NotebookLM](https://notebooklm.google.com/) and generate an audio overview | `sections/<id>/EDPS-<slug>-<id>.txt` |
 | **2. Recall** | Write what you remember — **without looking** — in the recall template | `sections/<id>/recall.md` |
 | **3. Read** | Consult the summary. Fill in gaps in your recall notes. | `sections/<id>/summary.md` |
 | **4. Quiz** | Answer questions from memory. Score yourself. | `sections/<id>/quiz.md` |
@@ -170,8 +170,8 @@ If you don't have an API key, you can still use this system by copying prompts i
 
 ```bash
 mkdir -p books/my-book/sections/001
-# Copy your chapter text into:
-# books/my-book/sections/001/source.txt
+# Copy your chapter text into (naming makes it easy to upload to NotebookLM):
+# books/my-book/sections/001/EDPS-my-book-001.txt
 ```
 
 ### 2. Generate content manually
@@ -202,7 +202,7 @@ edps-method/
 │   │   ├── progress.yaml           # Your progress tracking
 │   │   └── sections/
 │   │       └── 001/                # One folder per section
-│   │           ├── source.txt      # Raw chapter text
+│   │           ├── EDPS-wealth-of-nations-001.txt  # Raw chapter text (NotebookLM-friendly name)
 │   │           ├── summary.md      # AI-generated summary
 │   │           ├── quiz.md         # AI-generated quiz
 │   │           └── recall.md       # Your recall notes

@@ -354,7 +354,7 @@ flowchart LR
         end
 
         subgraph READ["Step 3"]
-            RD_IN[/"📥 source.txt<br/>+ summary.md"/]
+            RD_IN[/"📥 EDPS-slug-id.txt<br/>+ summary.md"/]
             RD_ACT[📖 Selective read<br/>definitions + arguments]
             RD_OUT[/"📤 updated recall.md"/]
             RD_IN --> RD_ACT --> RD_OUT
@@ -508,7 +508,7 @@ flowchart LR
 
 | Resource           | File              | Generator | Purpose                                   | Requirements                                             |
 | ------------------ | ----------------- | --------- | ----------------------------------------- | -------------------------------------------------------- |
-| **Source Text**    | `source.txt`      | 🔧        | Raw book text for this section            | 1,500-3,000 words, aligned to chapter/heading boundaries |
+| **Source Text**    | `EDPS-<slug>-<id>.txt` | 🔧   | Raw book text for this section            | 1,500-3,000 words, aligned to chapter/heading boundaries |
 | **Summary**        | `summary.md`      | 🤖        | Structured breakdown of the section       | See spec below                                           |
 | **Podcast Script** | `podcast.md`      | 🤖        | Two-speaker dialogue for audio generation | See spec below                                           |
 | **Podcast Audio**  | `podcast.mp3`     | 🔧        | Listenable episode (TTS from script)      | 5-15 min, normalized to -16 LUFS                         |
@@ -907,7 +907,7 @@ flowchart TB
                 end
 
                 subgraph SECTIONS["sections/"]
-                    S001[001/<br/>source.txt<br/>summary.md<br/>podcast.md<br/>quiz.md<br/>recall.md]
+                    S001[001/<br/>EDPS-slug-001.txt<br/>summary.md<br/>podcast.md<br/>quiz.md<br/>recall.md]
                     S002[002/...]
                 end
 
@@ -952,7 +952,7 @@ flowchart TD
     end
 
     subgraph PERSECTION["Per-Section Generated"]
-        SRC[source.txt]
+        SRC[EDPS-slug-id.txt]
         SUM[summary.md]
         POD[podcast.md]
         QUIZ[quiz.md]
