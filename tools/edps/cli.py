@@ -3,6 +3,7 @@ import typer
 
 from edps.commands.init import init as init_command
 from edps.commands.ingest import ingest as ingest_command
+from edps.commands.generate import generate as generate_command
 
 app = typer.Typer(
     name="edps",
@@ -19,6 +20,7 @@ def version():
 
 app.command(name="init")(init_command)
 app.command(name="ingest")(ingest_command)
+app.command(name="generate")(generate_command)
 
 
 if __name__ == "__main__":
