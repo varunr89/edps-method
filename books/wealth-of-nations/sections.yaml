@@ -1,161 +1,193 @@
-# Section Plan for The Wealth of Nations
-# Each section is ~1,500-3,000 words, aligned to chapter boundaries
-
-# Conceptual scaffold: The book's 7 load-bearing claims
-claims:
-  - id: division_of_labor
-    claim: "Division of labor is the primary driver of productivity and wealth"
-  - id: market_extent
-    claim: "The extent of the market limits the degree of specialization possible"
-  - id: price_formation
-    claim: "Natural price emerges from competition; market price fluctuates around it"
-  - id: wages_profits_rents
-    claim: "Output is distributed among wages (labor), profits (capital), and rents (land)"
-  - id: capital_accumulation
-    claim: "Savings become investment; capital accumulation drives growth"
-  - id: free_trade
-    claim: "Trade restrictions harm wealth; nations benefit from specialization and exchange"
-  - id: limited_government
-    claim: "Government should provide defense, justice, and public works—little else"
-
-# Section definitions
 sections:
-  # Book I: Of the Causes of Improvement in the Productive Powers of Labour
-  - id: "001"
-    title: "Division of Labor: The Pin Factory"
-    location: "Book I, Chapter 1"
-    priority: must
-    claim_tags: [division_of_labor]
-    description: "The famous pin factory example showing how specialization multiplies productivity"
-
-  - id: "002"
-    title: "The Origin of Division of Labor"
-    location: "Book I, Chapter 2"
-    priority: must
-    claim_tags: [division_of_labor]
-    description: "Division of labor arises from the human propensity to truck, barter, and exchange"
-
-  - id: "003"
-    title: "Market Extent Limits Specialization"
-    location: "Book I, Chapter 3"
-    priority: must
-    claim_tags: [market_extent, division_of_labor]
-    description: "Larger markets enable greater specialization; water transport extends markets"
-
-  - id: "004"
-    title: "Origin and Use of Money"
-    location: "Book I, Chapter 4"
-    priority: must
-    claim_tags: [price_formation]
-    description: "Money emerges to solve the double coincidence of wants problem"
-
-  - id: "005"
-    title: "Real vs Nominal Price (Part 1)"
-    location: "Book I, Chapter 5 (first half)"
-    priority: must
-    claim_tags: [price_formation]
-    description: "Labor as the real measure of value; distinction between value in use and value in exchange"
-
-  - id: "006"
-    title: "Real vs Nominal Price (Part 2)"
-    location: "Book I, Chapter 5 (second half)"
-    priority: skim
-    claim_tags: [price_formation]
-    description: "Historical examples of price measurement; gold and silver as nominal measures"
-
-  - id: "007"
-    title: "Component Parts of Price"
-    location: "Book I, Chapter 6"
-    priority: must
-    claim_tags: [wages_profits_rents]
-    description: "Price resolves into wages, profit, and rent—the three original sources of revenue"
-
-  - id: "008"
-    title: "Natural vs Market Price"
-    location: "Book I, Chapter 7"
-    priority: must
-    claim_tags: [price_formation]
-    description: "Natural price as center of gravity; market price fluctuates based on supply and demand"
-
-  - id: "009"
-    title: "Wages of Labor (Part 1)"
-    location: "Book I, Chapter 8 (first half)"
-    priority: must
-    claim_tags: [wages_profits_rents]
-    description: "What determines wages; the bargaining power of workers vs masters"
-
-  - id: "010"
-    title: "Wages of Labor (Part 2)"
-    location: "Book I, Chapter 8 (second half)"
-    priority: skim
-    claim_tags: [wages_profits_rents]
-    description: "Historical and geographical variations in wages"
-
-  - id: "011"
-    title: "Profits of Stock"
-    location: "Book I, Chapter 9"
-    priority: must
-    claim_tags: [wages_profits_rents, capital_accumulation]
-    description: "What determines profit rates; relationship between wages and profits"
-
-  - id: "012"
-    title: "Wages and Profits in Different Employments (Part 1)"
-    location: "Book I, Chapter 10 (Part 1)"
-    priority: must
-    claim_tags: [wages_profits_rents]
-    description: "Five causes of wage differentials: agreeableness, difficulty, constancy, trust, probability of success"
-
-  - id: "013"
-    title: "Wages and Profits in Different Employments (Part 2)"
-    location: "Book I, Chapter 10 (Part 2)"
-    priority: skim
-    claim_tags: [wages_profits_rents]
-    description: "Policy distortions that cause artificial wage differentials"
-
-  - id: "014"
-    title: "Rent of Land"
-    location: "Book I, Chapter 11 (introduction)"
-    priority: must
-    claim_tags: [wages_profits_rents]
-    description: "Rent as the residual after wages and profits; what land produces that affords rent"
-
-  # Book II: Of the Nature, Accumulation, and Employment of Stock
-  - id: "015"
-    title: "Division of Stock"
-    location: "Book II, Chapter 1"
-    priority: must
-    claim_tags: [capital_accumulation]
-    description: "Capital vs revenue; fixed vs circulating capital"
-
-  - id: "016"
-    title: "Money as Part of Capital"
-    location: "Book II, Chapter 2"
-    priority: skim
-    claim_tags: [capital_accumulation]
-    description: "The role of money in the capital stock; banking and paper money"
-
-  - id: "017"
-    title: "Accumulation of Capital"
-    location: "Book II, Chapter 3"
-    priority: must
-    claim_tags: [capital_accumulation]
-    description: "Savings become investment; parsimony vs prodigality; productive vs unproductive labor"
-
-  - id: "018"
-    title: "Stock Lent at Interest"
-    location: "Book II, Chapter 4"
-    priority: skim
-    claim_tags: [capital_accumulation]
-    description: "Interest rates and their determination"
-
-  - id: "019"
-    title: "Different Employments of Capital"
-    location: "Book II, Chapter 5"
-    priority: must
-    claim_tags: [capital_accumulation]
-    description: "Agriculture, manufacturing, wholesale, retail—which employments are most productive"
-
-  # Add more sections as you progress through the book
-  # Book III: Of the different Progress of Opulence in different Nations
-  # Book IV: Of Systems of Political Economy (critique of mercantilism)
-  # Book V: Of the Revenue of the Sovereign or Commonwealth
+- end_byte: 32705
+  id: '001'
+  location: Book 1, Chapter I
+  start_byte: 10814
+  title: OF THE DIVISION OF LABOUR
+  word_count: 3484
+- end_byte: 42391
+  id: '002'
+  location: Book 1, Chapter II
+  start_byte: 32705
+  title: OF THE PRINCIPLE WHICH GIVES OCCASION
+  word_count: 1576
+- end_byte: 53896
+  id: '003'
+  location: Book 1, Chapter III
+  start_byte: 42391
+  title: THAT THE DIVISION OF LABOUR IS
+  word_count: 1852
+- end_byte: 70447
+  id: '004'
+  location: Book 1, Chapter IV
+  start_byte: 53896
+  title: OF THE ORIGIN AND USE OF MONEY
+  word_count: 2652
+- end_byte: 114392
+  id: '005'
+  location: Book 1, Chapter V
+  start_byte: 70447
+  title: OF THE REAL AND NOMINAL PRICE OF
+  word_count: 7162
+- end_byte: 132854
+  id: '006'
+  location: Book 1, Chapter VI
+  start_byte: 114392
+  title: OF THE COMPONENT PART OF THE PRICE OF COMMODITIES
+  word_count: 2990
+- end_byte: 156041
+  id: '007'
+  location: Book 1, Chapter VII
+  start_byte: 132854
+  title: OF THE NATURAL AND MARKET PRICE OF COMMODITIES
+  word_count: 3688
+- end_byte: 215951
+  id: 008
+  location: Book 1, Chapter VIII
+  start_byte: 156041
+  title: OF THE WAGES OF LABOUR
+  word_count: 9403
+- end_byte: 243784
+  id: 009
+  location: Book 1, Chapter IX
+  start_byte: 215951
+  title: OF THE PROFITS OF STOCK
+  word_count: 4538
+- end_byte: 360679
+  id: '010'
+  location: Book 1, Chapter X
+  start_byte: 243784
+  title: OF WAGES AND PROFIT IN THE DIFFERENT
+  word_count: 18317
+- end_byte: 662678
+  id: '011'
+  location: Book 1, Chapter XI
+  start_byte: 360679
+  title: OF THE RENT OF LAND
+  word_count: 48294
+- end_byte: 682488
+  id: '012'
+  location: Book 2, Chapter I
+  start_byte: 662678
+  title: OF THE DIVISION OF STOCK
+  word_count: 3134
+- end_byte: 806474
+  id: '013'
+  location: Book 2, Chapter II
+  start_byte: 682488
+  title: OF MONEY, CONSIDERED AS A PARTICULAR
+  word_count: 19796
+- end_byte: 857765
+  id: '014'
+  location: Book 2, Chapter III
+  start_byte: 806474
+  title: OF THE ACCUMULATION OF CAPITAL, OR OF
+  word_count: 8002
+- end_byte: 879793
+  id: '015'
+  location: Book 2, Chapter IV
+  start_byte: 857765
+  title: OF STOCK LENT AT INTEREST
+  word_count: 3620
+- end_byte: 922069
+  id: '016'
+  location: Book 2, Chapter V
+  start_byte: 879793
+  title: OF THE DIFFERENT EMPLOYMENTS OF CAPITALS
+  word_count: 6614
+- end_byte: 934922
+  id: '017'
+  location: Book 3, Chapter I
+  start_byte: 922069
+  title: OF THE NATURAL PROGRESS OF OPULENCE
+  word_count: 1977
+- end_byte: 964978
+  id: 018
+  location: Book 3, Chapter II
+  start_byte: 934922
+  title: OF THE DISCOURAGEMENT OF AGRICULTURE
+  word_count: 4720
+- end_byte: 993545
+  id: 019
+  location: Book 3, Chapter III
+  start_byte: 964978
+  title: OF THE RISE AND PROGRESS OF CITIES
+  word_count: 4438
+- end_byte: 1028168
+  id: '020'
+  location: Book 3, Chapter IV
+  start_byte: 993545
+  title: HOW THE COMMERCE OF TOWNS CONTRIBUTED
+  word_count: 5428
+- end_byte: 1087907
+  id: '021'
+  location: Book 4, Chapter I
+  start_byte: 1028168
+  title: OF THE PRINCIPLE OF THE COMMERCIAL OR
+  word_count: 9364
+- end_byte: 1141073
+  id: '022'
+  location: Book 4, Chapter II
+  start_byte: 1087907
+  title: OF RESTRAINTS UPON IMPORTATION FROM
+  word_count: 8336
+- end_byte: 1211068
+  id: '023'
+  location: Book 4, Chapter III
+  start_byte: 1141073
+  title: OF THE EXTRAORDINARY RESTRAINTS UPON
+  word_count: 11221
+- end_byte: 1224790
+  id: '024'
+  location: Book 4, Chapter IV
+  start_byte: 1211068
+  title: OF DRAWBACKS
+  word_count: 2115
+- end_byte: 1326909
+  id: '025'
+  location: Book 4, Chapter V
+  start_byte: 1224790
+  title: OF BOUNTIES
+  word_count: 16401
+- end_byte: 1357731
+  id: '026'
+  location: Book 4, Chapter VI
+  start_byte: 1326909
+  title: OF TREATIES OF COMMERCE
+  word_count: 4959
+- end_byte: 1591107
+  id: '027'
+  location: Book 4, Chapter VII
+  start_byte: 1357731
+  title: OF COLONIES
+  word_count: 36596
+- end_byte: 1644054
+  id: 028
+  location: Book 4, Chapter VIII
+  start_byte: 1591107
+  title: CONCLUSION OF THE MERCANTILE SYSTEM
+  word_count: 8388
+- end_byte: 1719616
+  id: 029
+  location: Book 4, Chapter IX
+  start_byte: 1644054
+  title: OF THE AGRICULTURAL SYSTEMS, OR OF
+  word_count: 11565
+- end_byte: 2046989
+  id: '030'
+  location: Book 5, Chapter I
+  start_byte: 1719616
+  title: OF THE EXPENSES OF THE SOVEREIGN OR COMMONWEALTH
+  word_count: 50823
+- end_byte: 2298155
+  id: '031'
+  location: Book 5, Chapter II
+  start_byte: 2046989
+  title: OF THE SOURCES OF THE GENERAL OR PUBLIC
+  word_count: 39895
+- end_byte: 2432686
+  id: '032'
+  location: Book 5, Chapter III
+  start_byte: 2298155
+  title: OF PUBLIC DEBTS
+  word_count: 21069
