@@ -60,7 +60,8 @@ edps-method/
 
 ## The Science
 
-See [workflow-diagram.md](../workflow-diagram.md) for full research citations and methodology.
+See [workflow-diagram.md](./docs/workflow-diagram.md) for full research citations and methodology.
+
 
 **Key findings we implement:**
 
