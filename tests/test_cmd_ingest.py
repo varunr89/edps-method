@@ -54,3 +54,43 @@ to be considered a reasonable chapter length.
         sections = yaml.safe_load(sections_path.read_text())
         assert "sections" in sections
         assert len(sections["sections"]) == 2
+
+
+def test_ingest_creates_source_files(monkeypatch):
+    """edps ingest creates source.txt for each section."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+
+        raw_dir = tmpdir / "books_raw"
+        raw_dir.mkdir()
+        (raw_dir / "test-book.txt").write_text("""
+CHAPTER I.
+FIRST CHAPTER TITLE.
+
+First chapter content here.
+
+CHAPTER II.
+SECOND CHAPTER TITLE.
+
+Second chapter content here.
+""")
+
+        books_dir = tmpdir / "books"
+        books_dir.mkdir()
+
+        result = runner.invoke(app, [
+            "ingest", "test-book",
+            "--books-raw", str(raw_dir),
+            "--books-dir", str(books_dir),
+            "--yes",
+        ])
+
+        assert result.exit_code == 0
+
+        # Check source files created
+        source_001 = books_dir / "test-book" / "sections" / "001" / "source.txt"
+        source_002 = books_dir / "test-book" / "sections" / "002" / "source.txt"
+
+        assert source_001.exists()
+        assert source_002.exists()
+        assert "First chapter content" in source_001.read_text()
