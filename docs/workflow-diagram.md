@@ -1,4 +1,4 @@
-# Reading Lab: AI-Assisted Deep Learning from Books
+# EDPS Method-Implementation
 
 > A research-backed system for extracting lasting knowledge from important works.
 
