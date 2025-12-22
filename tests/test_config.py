@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from edps.config import load_config, EdpsConfig
+from edps.config import load_config, save_config, EdpsConfig
 
 
 def test_load_config_from_file():
@@ -49,3 +49,19 @@ def test_config_resolves_env_vars(monkeypatch):
         config = load_config(config_path)
 
         assert config.azure.api_key == "secret-from-env"
+
+
+def test_save_config_creates_file():
+    """save_config writes YAML to disk."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        config_path = Path(tmpdir) / "config.yaml"
+
+        config = EdpsConfig()
+        config.azure.endpoint = "https://my-endpoint.azure.com"
+        config.azure.api_key = "my-api-key"
+
+        save_config(config, config_path)
+
+        assert config_path.exists()
+        loaded = yaml.safe_load(config_path.read_text())
+        assert loaded["azure"]["endpoint"] == "https://my-endpoint.azure.com"

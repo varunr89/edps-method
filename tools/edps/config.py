@@ -1,6 +1,6 @@
 """Configuration management for EDPS CLI."""
 import os
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Optional
 
@@ -91,6 +91,28 @@ def load_config(config_path: Optional[Path] = None) -> EdpsConfig:
             )
 
     return config
+
+
+def save_config(config: EdpsConfig, config_path: Optional[Path] = None) -> None:
+    """Save configuration to YAML file.
+
+    Args:
+        config: Configuration to save
+        config_path: Path to save to. Defaults to ~/.edps/config.yaml
+    """
+    if config_path is None:
+        config_path = Path.home() / ".edps" / "config.yaml"
+
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+
+    data = {
+        "azure": asdict(config.azure),
+        "models": asdict(config.models),
+        "defaults": asdict(config.defaults),
+    }
+
+    with open(config_path, "w") as f:
+        yaml.dump(data, f, default_flow_style=False)
 
 
 def _resolve_env_var(value: str) -> str:
