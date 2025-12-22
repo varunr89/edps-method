@@ -59,6 +59,182 @@ RECALL_TEMPLATE = """<!-- TEMPLATE: Fill in sections below -->
 """
 
 
+# Template for one-pager.md - reader writes final distillation
+ONE_PAGER_TEMPLATE = """<!-- TEMPLATE: Fill in sections below after completing all sections -->
+# {book_title}: One-Pager
+
+> Generator: 👤 Reader-written
+> Author: {author}
+> Completed: [YYYY-MM-DD]
+
+---
+
+## The Book in 10 Sentences
+
+1. **The problem**: [What problem is the author solving?]
+2. **Core claim #1**: [First major argument]
+3. **Core claim #2**: [Second major argument]
+4. **Core claim #3**: [Third major argument]
+5. **The mechanism**: [Key process or causal chain]
+6. **Best example**: [Most memorable illustration from the text]
+7. **Limitation**: [What the author gets wrong or oversimplifies]
+8. **Modern relevance**: [What this explains about today]
+9. **Blind spot**: [What this does NOT explain]
+10. **The one idea**: [What I'll remember in 10 years]
+
+---
+
+## Constraints
+
+- Each sentence must contain a claim + implication (not just description)
+- Sentence 7 must be critical
+- Total length: 200-300 words max
+"""
+
+# Template for modern-mapping.md - reader writes contemporary connections
+MODERN_MAPPING_TEMPLATE = """<!-- TEMPLATE: Fill in sections below after completing the one-pager -->
+# Modern Mapping: {book_title}
+
+> Generator: 👤 Reader-written
+> Completed: [YYYY-MM-DD]
+
+---
+
+## Domain 1: [e.g., Technology & Labor]
+
+- **Book concept**: [What the author said]
+- **Modern manifestation**: [How it shows up today]
+- **Specific example**: [Company, policy, or event]
+- **What the author would say**: [Grounded speculation]
+
+## Domain 2: [e.g., Trade & Globalization]
+
+- **Book concept**: [What the author said]
+- **Modern manifestation**: [How it shows up today]
+- **Specific example**: [Company, policy, or event]
+- **What the author would say**: [Grounded speculation]
+
+## Domain 3: [e.g., Government & Regulation]
+
+- **Book concept**: [What the author said]
+- **Modern manifestation**: [How it shows up today]
+- **Specific example**: [Company, policy, or event]
+- **What the author would say**: [Grounded speculation]
+
+## Domain 4: [e.g., Inequality & Distribution]
+
+- **Book concept**: [What the author said]
+- **Modern manifestation**: [How it shows up today]
+- **Specific example**: [Company, policy, or event]
+- **What the author would say**: [Grounded speculation]
+
+## Domain 5: [e.g., Consumer Behavior]
+
+- **Book concept**: [What the author said]
+- **Modern manifestation**: [How it shows up today]
+- **Specific example**: [Company, policy, or event]
+- **What the author would say**: [Grounded speculation]
+
+---
+
+## Where the Book Falls Short
+
+[What modern phenomena would surprise or confuse the author? What has changed since publication that invalidates parts of the argument?]
+"""
+
+# Template for weekly synthesis - reader copies to weekly/YYYY-MM-DD.md
+WEEKLY_TEMPLATE = """<!-- TEMPLATE: Copy this file to weekly/YYYY-MM-DD.md when ready -->
+# Weekly Synthesis
+
+> Generator: 👤 Reader-written
+> Week of: [YYYY-MM-DD]
+> Sections covered: [001] - [00X]
+
+---
+
+## Top 3 Claims This Week
+
+*What are the most important ideas from the sections you completed?*
+
+1. **[Claim 1]**: [One sentence explanation]
+
+2. **[Claim 2]**: [One sentence explanation]
+
+3. **[Claim 3]**: [One sentence explanation]
+
+---
+
+## How They Connect
+
+*3-5 sentences explaining how these claims relate to each other. Are they building blocks? Tensions? Different facets of one idea?*
+
+[Your synthesis]
+
+---
+
+## One Strong Objection
+
+*What's the best counterargument to what you learned this week? State it fairly — as if you believed it.*
+
+[The objection in 2-3 sentences]
+
+---
+
+## My Response
+
+*How would the author respond? How do YOU respond?*
+
+[Your response in 2-3 sentences]
+
+---
+
+## Modern Connection
+
+*One specific thing in today's world that this week's reading helps explain. Be concrete — name a company, policy, technology, or event.*
+
+**Modern phenomenon**: [What you're connecting to]
+
+**How this week's reading explains it**: [2-3 sentences]
+
+---
+
+## Gaps & Questions
+
+*What are you still unsure about? What do you need to revisit?*
+
+- [ ] [Question or concept to revisit]
+- [ ] [Question or concept to revisit]
+- [ ] [Optional third item]
+
+---
+
+## Interleaved Quiz Score
+
+*If you took an interleaved quiz mixing questions from multiple sections:*
+
+**Score**: [ ] / [ ]
+**Sections with weakest recall**: [list section IDs]
+
+---
+
+## Time Log
+
+| Activity | Time |
+|----------|------|
+| New sections completed | [X] |
+| Total learning time | [X] hours |
+| Synthesis writing | [X] minutes |
+
+---
+
+## Next Week
+
+*What sections will you tackle? Any adjustments to your approach?*
+
+[Your plan]
+"""
+
+
 def generate(
     book_slug: str = typer.Argument(..., help="Book slug"),
     section_id: Optional[str] = typer.Argument(None, help="Section ID (e.g., '001'). If omitted, generates all."),
