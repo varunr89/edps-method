@@ -24,3 +24,7 @@ htmlcov/
 
 # OS
 .DS_Store
+
+# Book data (large files, generated content)
+books_raw/
+books/
