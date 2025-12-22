@@ -121,6 +121,19 @@ def _generate_content(
 
     Returns: "done", "skip", or "quit"
     """
+    # Podcast is a pass-through for now (use NotebookLM with source text instead)
+    if gen_type == "podcast":
+        output_path = section_dir / "podcast.md"
+        placeholder = f"""# Podcast: Section {section['id']}
+
+> **Use NotebookLM**: Upload the source text (`source.txt`) to [NotebookLM](https://notebooklm.google.com/) to generate an audio overview.
+
+This placeholder exists to preserve the workflow structure for future podcast generation features.
+"""
+        output_path.write_text(placeholder, encoding="utf-8")
+        console.print(f"[dim]Skipping podcast LLM call (use NotebookLM instead)[/dim]")
+        return "done"
+
     # Load and render prompt
     template = load_prompt(gen_type)
 

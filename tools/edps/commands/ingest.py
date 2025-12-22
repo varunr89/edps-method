@@ -38,6 +38,24 @@ def ingest(
     if books_dir is None:
         books_dir = Path.cwd() / "books"
 
+    # Validate slug exists in registry
+    registry_path = books_dir / "_registry.yaml"
+    if registry_path.exists():
+        registry = yaml.safe_load(registry_path.read_text())
+        registered_slugs = [b["slug"] for b in registry.get("books", [])]
+        if book_slug not in registered_slugs:
+            console.print(f"[red]Error:[/red] Slug '{book_slug}' not found in _registry.yaml")
+            console.print(f"[dim]Available slugs: {', '.join(registered_slugs[:5])}{'...' if len(registered_slugs) > 5 else ''}[/dim]")
+            console.print(f"\n[yellow]Hint:[/yellow] Add the book to _registry.yaml first:")
+            console.print(f"  - slug: {book_slug}")
+            console.print(f"    title: \"Your Book Title\"")
+            console.print(f"    author: \"Author Name\"")
+            console.print(f"    status: planned")
+            raise typer.Exit(1)
+    else:
+        console.print(f"[yellow]Warning:[/yellow] No _registry.yaml found at {registry_path}")
+        console.print("[dim]Proceeding without registry validation[/dim]")
+
     # Find raw text file
     raw_file = books_raw / f"{book_slug}.txt"
     if not raw_file.exists():

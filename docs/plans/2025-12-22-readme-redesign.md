@@ -1,3 +1,23 @@
+# README Redesign
+
+**Date**: 2025-12-22
+**Goal**: Make the README practical and actionable for users who want to fork and use the system
+
+## Design Decisions
+
+1. **Audience**: Others who want to adopt the method (fork and use)
+2. **Theory content**: One paragraph max, link to methodology page
+3. **Entry point**: Start fresh (delete existing books, add your own)
+4. **AI workflow**: CLI with API key (happy path) + manual copy-paste (fallback)
+5. **Audio generation**: NotebookLM (not AI-generated podcast.md)
+6. **Source material**: Project Gutenberg as happy path
+7. **Slug validation**: Must exist in `_registry.yaml` before ingestion
+
+---
+
+## Final README Content
+
+```markdown
 # EDPS Method
 
 A system for extracting lasting knowledge from important books, using spaced repetition, active recall, and AI-assisted content generation.
@@ -219,3 +239,12 @@ edps-method/
 ## License
 
 MIT
+```
+
+---
+
+## Changes Made During Design
+
+1. **podcast.md pass-through**: Modified `generate.py` to skip LLM calls for podcast and write a placeholder instead (saves tokens, users use NotebookLM)
+
+2. **Registry validation**: Modified `ingest.py` to require the slug to exist in `_registry.yaml` before ingestion (prevents duplicate slugs from typos)
