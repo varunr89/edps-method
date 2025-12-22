@@ -27,26 +27,18 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: |
-          pip install pyyaml
+        run: pip install pyyaml
 
       - name: Generate site pages
-        run: |
-          python tools/build_index.py
+        run: python tools/build_index.py
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./site
-          destination: ./_site
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          path: site
 
   deploy:
     environment:

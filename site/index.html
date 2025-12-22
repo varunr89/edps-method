@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The EDPS Method</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+Pro:wght@400;600&display=swap');
+
+:root {
+  --cream: #f8f5ef;
+  --cream-dark: #efe9dd;
+  --brown: #3d3328;
+  --brown-light: #5c4d3c;
+  --gold: #8b7355;
+  --gold-light: #a89070;
+  --accent: #c4a574;
+  --success: #5a7c5a;
+  --active: #7a6a4a;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Source Sans Pro', Georgia, serif;
+  background: var(--cream);
+  color: var(--brown);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* Subtle paper texture */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem 2rem 4rem;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  padding: 2rem 0 3rem;
+  border-bottom: 1px solid var(--cream-dark);
+  margin-bottom: 2.5rem;
+}
+
+.hero h1 {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--brown);
+  margin-bottom: 0.3rem;
+}
+
+.hero .subtitle {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.1rem;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  margin-bottom: 0.5rem;
+}
+
+.hero .learn-more {
+  font-size: 0.95rem;
+  color: var(--gold-light);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--gold-light);
+  transition: all 0.2s ease;
+}
+
+.hero .learn-more:hover {
+  color: var(--brown);
+  border-color: var(--brown);
+}
+
+.intro {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--brown-light);
+  max-width: 600px;
+  margin: 1.5rem auto;
+  line-height: 1.8;
+}
+
+/* Stats Cards */
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.stat-card {
+  background: var(--cream-dark);
+  padding: 1rem 1.5rem;
+  border-radius: 4px;
+  text-align: center;
+  min-width: 90px;
+}
+
+.stat-card .number {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--brown);
+}
+
+.stat-card .label {
+  font-size: 0.8rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* GitHub Link */
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.2rem;
+  background: var(--brown);
+  color: var(--cream);
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.github-link:hover {
+  background: var(--brown-light);
+}
+
+.github-link svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* Currently Reading */
+.currently-reading {
+  background: linear-gradient(135deg, var(--cream-dark) 0%, #f0ebe0 100%);
+  border: 1px solid #e5dfd0;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.currently-reading h2 {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.current-book {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.current-book .title {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--brown);
+}
+
+.current-book .author {
+  color: var(--brown-light);
+  font-size: 0.95rem;
+}
+
+.current-book .progress-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-bar-small {
+  width: 120px;
+  height: 6px;
+  background: var(--cream);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-small .fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
+
+.current-book .continue-link {
+  font-size: 0.9rem;
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.current-book .continue-link:hover {
+  color: var(--brown);
+}
+
+/* Section Header */
+.section-header {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--cream-dark);
+}
+
+/* Accordion Categories */
+.categories {
+  margin-bottom: 3rem;
+}
+
+details.category {
+  margin-bottom: 0.75rem;
+  background: white;
+  border: 1px solid #e8e3d8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+details.category[open] {
+  border-color: var(--gold-light);
+}
+
+summary.category-header {
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+summary.category-header::-webkit-details-marker {
+  display: none;
+}
+
+summary.category-header:hover {
+  background: var(--cream);
+}
+
+.category-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.category-title .arrow {
+  font-size: 0.7rem;
+  color: var(--gold);
+  transition: transform 0.2s ease;
+}
+
+details.category[open] .arrow {
+  transform: rotate(90deg);
+}
+
+.category-title h3 {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--brown);
+}
+
+.category-title .count {
+  font-size: 0.85rem;
+  color: var(--gold-light);
+  font-weight: normal;
+}
+
+.category-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.category-progress {
+  font-size: 0.85rem;
+  color: var(--gold-light);
+}
+
+/* Book List inside accordion */
+.book-list {
+  padding: 0.5rem 1.25rem 1.25rem;
+  border-top: 1px solid #eee;
+}
+
+.book-item {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f5f2ec;
+}
+
+.book-item:last-child {
+  border-bottom: none;
+}
+
+.book-status {
+  width: 20px;
+  font-size: 0.9rem;
+  color: var(--gold-light);
+}
+
+.book-status.in-progress {
+  color: var(--active);
+}
+
+.book-status.completed {
+  color: var(--success);
+}
+
+.book-info {
+  flex: 1;
+}
+
+.book-info a {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.05rem;
+  color: var(--brown);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.book-info a:hover {
+  color: var(--gold);
+}
+
+.book-info .author {
+  font-size: 0.85rem;
+  color: var(--brown-light);
+  margin-left: 0.3rem;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid var(--cream-dark);
+  color: var(--gold-light);
+  font-size: 0.85rem;
+}
+
+.footer a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    padding: 2rem 1.25rem;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .stats {
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 0.75rem 1rem;
+    min-width: 70px;
+  }
+
+  .stat-card .number {
+    font-size: 1.5rem;
+  }
+
+  .current-book {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <h1>THE EDPS METHOD</h1>
+      <p class="subtitle">Ebbinghaus · Dunlosky · Paivio · Sweller</p>
+      <a href="./methodology.html" class="learn-more">What is this? →</a>
+
+      <p class="intro">
+        I'm Varun, and I'm working through the foundational texts that shaped
+        how we think about economics, politics, and human behavior. This page
+        exists for public accountability—when others can see my progress,
+        I show up consistently.
+      </p>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="number">29</div>
+          <div class="label">Books</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">1</div>
+          <div class="label">Active</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">0</div>
+          <div class="label">Done</div>
+        </div>
+      </div>
+
+      <a href="https://github.com/varunr89/edps-method" class="github-link" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        View on GitHub
+      </a>
+    </header>
+
+
+    <div class="currently-reading">
+      <h2>Currently Reading</h2>
+      <div class="current-book">
+        <div>
+          <span class="title">The Wealth of Nations</span>
+          <span class="author">— Adam Smith</span>
+        </div>
+        <div class="progress-info">
+          <div class="progress-bar-small">
+            <div class="fill" style="width: 0%"></div>
+          </div>
+          <span style="font-size: 0.85rem; color: var(--gold-light);">0% · 19 sections</span>
+          <a href="./wealth-of-nations.html" class="continue-link">Continue →</a>
+        </div>
+      </div>
+    </div>
+
+    <section class="categories">
+      <h2 class="section-header">Reading Roadmap</h2>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>Foundations of Political and Economic Order <span class="count">(5)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status in-progress">◐</span>
+          <div class="book-info">
+            <a href="./wealth-of-nations.html">The Wealth of Nations</a>
+            <span class="author">— Adam Smith</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./leviathan.html">Leviathan</a>
+            <span class="author">— Thomas Hobbes</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./two-treatises.html">Two Treatises of Government</a>
+            <span class="author">— John Locke</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./social-contract.html">The Social Contract</a>
+            <span class="author">— Jean-Jacques Rousseau</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./federalist-papers.html">The Federalist Papers</a>
+            <span class="author">— Alexander Hamilton, James Madison, John Jay</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>Capitalism, Class, and Power <span class="count">(3)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./capital-vol-1.html">Capital, Volume I</a>
+            <span class="author">— Karl Marx</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./protestant-ethic.html">The Protestant Ethic and the Spirit of Capitalism</a>
+            <span class="author">— Max Weber</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./theory-of-leisure-class.html">The Theory of the Leisure Class</a>
+            <span class="author">— Thorstein Veblen</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>Science, Rationality, and Modern Knowledge <span class="count">(3)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./novum-organum.html">Novum Organum</a>
+            <span class="author">— Francis Bacon</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./discourse-on-method.html">Discourse on the Method</a>
+            <span class="author">— René Descartes</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./principia.html">Principia Mathematica</a>
+            <span class="author">— Isaac Newton</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>Society, Norms, and the Individual <span class="count">(3)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./democracy-in-america.html">Democracy in America</a>
+            <span class="author">— Alexis de Tocqueville</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./division-of-labor.html">The Division of Labor in Society</a>
+            <span class="author">— Émile Durkheim</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./civilization-and-its-discontents.html">Civilization and Its Discontents</a>
+            <span class="author">— Sigmund Freud</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>War, Technology, and the Modern State <span class="count">(2)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./on-war.html">On War</a>
+            <span class="author">— Carl von Clausewitz</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./origins-of-totalitarianism.html">The Origins of Totalitarianism</a>
+            <span class="author">— Hannah Arendt</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>Culture, Meaning, and Modern Anxiety <span class="count">(3)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./genealogy-of-morality.html">On the Genealogy of Morality</a>
+            <span class="author">— Friedrich Nietzsche</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./1984.html">1984</a>
+            <span class="author">— George Orwell</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./brave-new-world.html">Brave New World</a>
+            <span class="author">— Aldous Huxley</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>Value Investing Foundations <span class="count">(4)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./security-analysis.html">Security Analysis</a>
+            <span class="author">— Benjamin Graham &amp; David Dodd</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./intelligent-investor.html">The Intelligent Investor</a>
+            <span class="author">— Benjamin Graham</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./buffett-letters.html">Berkshire Hathaway Shareholder Letters</a>
+            <span class="author">— Warren Buffett</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./poor-charlies-almanack.html">Poor Charlie&#x27;s Almanack</a>
+            <span class="author">— Charles T. Munger</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>Business Quality and Growth <span class="count">(1)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./common-stocks-uncommon-profits.html">Common Stocks and Uncommon Profits</a>
+            <span class="author">— Philip Fisher</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>Indexing and Market Systems <span class="count">(2)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./little-book-common-sense-investing.html">The Little Book of Common Sense Investing</a>
+            <span class="author">— John C. Bogle</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./four-pillars-of-investing.html">The Four Pillars of Investing</a>
+            <span class="author">— William Bernstein</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>Valuation and Capital Allocation <span class="count">(2)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./investment-valuation.html">Investment Valuation</a>
+            <span class="author">— Aswath Damodaran</span>
+          </div>
+        </div>
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./expectations-investing.html">Expectations Investing</a>
+            <span class="author">— Michael Mauboussin</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+      <details class="category">
+        <summary class="category-header">
+          <div class="category-title">
+            <span class="arrow">▶</span>
+            <h3>Behavioral and Psychological Foundations <span class="count">(1)</span></h3>
+          </div>
+          <div class="category-meta">
+            <span class="category-progress">0% complete</span>
+          </div>
+        </summary>
+        <div class="book-list">
+        <div class="book-item">
+          <span class="book-status ">○</span>
+          <div class="book-info">
+            <a href="./thinking-fast-and-slow.html">Thinking, Fast and Slow</a>
+            <span class="author">— Daniel Kahneman</span>
+          </div>
+        </div>
+        </div>
+      </details>
+
+    </section>
+
+    <footer class="footer">
+      <p>Last updated: December 21, 2025</p>
+      <p style="margin-top: 0.5rem;">Built with the EDPS Method · <a href="https://github.com/varunr89/edps-method">GitHub</a></p>
+    </footer>
+  </div>
+</body>
+</html>

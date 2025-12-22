@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Origins of Totalitarianism — EDPS Method</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+Pro:wght@400;600&display=swap');
+
+:root {
+  --cream: #f8f5ef;
+  --cream-dark: #efe9dd;
+  --brown: #3d3328;
+  --brown-light: #5c4d3c;
+  --gold: #8b7355;
+  --gold-light: #a89070;
+  --accent: #c4a574;
+  --success: #5a7c5a;
+  --active: #7a6a4a;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Source Sans Pro', Georgia, serif;
+  background: var(--cream);
+  color: var(--brown);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* Subtle paper texture */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem 2rem 4rem;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  padding: 2rem 0 3rem;
+  border-bottom: 1px solid var(--cream-dark);
+  margin-bottom: 2.5rem;
+}
+
+.hero h1 {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--brown);
+  margin-bottom: 0.3rem;
+}
+
+.hero .subtitle {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.1rem;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  margin-bottom: 0.5rem;
+}
+
+.hero .learn-more {
+  font-size: 0.95rem;
+  color: var(--gold-light);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--gold-light);
+  transition: all 0.2s ease;
+}
+
+.hero .learn-more:hover {
+  color: var(--brown);
+  border-color: var(--brown);
+}
+
+.intro {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--brown-light);
+  max-width: 600px;
+  margin: 1.5rem auto;
+  line-height: 1.8;
+}
+
+/* Stats Cards */
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.stat-card {
+  background: var(--cream-dark);
+  padding: 1rem 1.5rem;
+  border-radius: 4px;
+  text-align: center;
+  min-width: 90px;
+}
+
+.stat-card .number {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--brown);
+}
+
+.stat-card .label {
+  font-size: 0.8rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* GitHub Link */
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.2rem;
+  background: var(--brown);
+  color: var(--cream);
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.github-link:hover {
+  background: var(--brown-light);
+}
+
+.github-link svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* Currently Reading */
+.currently-reading {
+  background: linear-gradient(135deg, var(--cream-dark) 0%, #f0ebe0 100%);
+  border: 1px solid #e5dfd0;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.currently-reading h2 {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.current-book {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.current-book .title {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--brown);
+}
+
+.current-book .author {
+  color: var(--brown-light);
+  font-size: 0.95rem;
+}
+
+.current-book .progress-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-bar-small {
+  width: 120px;
+  height: 6px;
+  background: var(--cream);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-small .fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
+
+.current-book .continue-link {
+  font-size: 0.9rem;
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.current-book .continue-link:hover {
+  color: var(--brown);
+}
+
+/* Section Header */
+.section-header {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--cream-dark);
+}
+
+/* Accordion Categories */
+.categories {
+  margin-bottom: 3rem;
+}
+
+details.category {
+  margin-bottom: 0.75rem;
+  background: white;
+  border: 1px solid #e8e3d8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+details.category[open] {
+  border-color: var(--gold-light);
+}
+
+summary.category-header {
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+summary.category-header::-webkit-details-marker {
+  display: none;
+}
+
+summary.category-header:hover {
+  background: var(--cream);
+}
+
+.category-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.category-title .arrow {
+  font-size: 0.7rem;
+  color: var(--gold);
+  transition: transform 0.2s ease;
+}
+
+details.category[open] .arrow {
+  transform: rotate(90deg);
+}
+
+.category-title h3 {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--brown);
+}
+
+.category-title .count {
+  font-size: 0.85rem;
+  color: var(--gold-light);
+  font-weight: normal;
+}
+
+.category-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.category-progress {
+  font-size: 0.85rem;
+  color: var(--gold-light);
+}
+
+/* Book List inside accordion */
+.book-list {
+  padding: 0.5rem 1.25rem 1.25rem;
+  border-top: 1px solid #eee;
+}
+
+.book-item {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f5f2ec;
+}
+
+.book-item:last-child {
+  border-bottom: none;
+}
+
+.book-status {
+  width: 20px;
+  font-size: 0.9rem;
+  color: var(--gold-light);
+}
+
+.book-status.in-progress {
+  color: var(--active);
+}
+
+.book-status.completed {
+  color: var(--success);
+}
+
+.book-info {
+  flex: 1;
+}
+
+.book-info a {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.05rem;
+  color: var(--brown);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.book-info a:hover {
+  color: var(--gold);
+}
+
+.book-info .author {
+  font-size: 0.85rem;
+  color: var(--brown-light);
+  margin-left: 0.3rem;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid var(--cream-dark);
+  color: var(--gold-light);
+  font-size: 0.85rem;
+}
+
+.footer a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    padding: 2rem 1.25rem;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .stats {
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 0.75rem 1rem;
+    min-width: 70px;
+  }
+
+  .stat-card .number {
+    font-size: 1.5rem;
+  }
+
+  .current-book {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <p style="margin-bottom: 2rem;"><a href="./index.html" style="color: var(--gold); text-decoration: none;">← Back to Reading List</a></p>
+
+    <header style="margin-bottom: 2rem;">
+      <h1 style="font-family: 'Crimson Pro', Georgia, serif; font-size: 2rem; margin-bottom: 0.5rem;">The Origins of Totalitarianism</h1>
+      <p style="color: var(--brown-light); font-size: 1.1rem;">Hannah Arendt (1951)</p>
+      <p style="color: var(--gold); font-size: 0.9rem; margin-top: 0.5rem;">War, Technology, and the Modern State</p>
+    </header>
+
+    <blockquote style="font-style: italic; color: var(--brown-light); border-left: 3px solid var(--gold-light); padding-left: 1rem; margin: 1.5rem 0;">Explains how mass society, ideology, and bureaucracy enabled fascism and Stalinism. Essential for understanding modern authoritarianism.</blockquote>
+
+    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+      <span class="book-status " style="font-size: 1.2rem;">○</span>
+      <span style="color: var(--brown-light);">Planned</span>
+      <span style="color: var(--gold-light);">·</span>
+      <span style="color: var(--gold-light);">0/0 sections (0%)</span>
+    </div>
+
+    <div class="progress-bar-small" style="width: 100%; height: 8px; margin-bottom: 2rem;">
+      <div class="fill" style="width: 0%;"></div>
+    </div>
+
+    <section>
+      <h2 class="section-header">Sections</h2>
+      <div class="book-list" style="background: white; border: 1px solid #e8e3d8; border-radius: 4px; padding: 1rem;">
+        <p style="color: var(--gold-light); font-style: italic;">No sections defined yet.</p>
+      </div>
+    </section>
+
+    <footer class="footer" style="margin-top: 3rem;">
+      <p><a href="https://github.com/varunr89/edps-method">View on GitHub</a></p>
+    </footer>
+  </div>
+</body>
+</html>
