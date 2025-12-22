@@ -1,4 +1,4 @@
-"""Generate command - create AI content for sections."""
+"""Generate command - create AI content and templates for sections."""
 from datetime import date
 from pathlib import Path
 from typing import Optional
@@ -15,13 +15,57 @@ from edps.core.ui import confirm_action
 console = Console()
 
 
+# Template for recall.md - human-writable memory exercise
+RECALL_TEMPLATE = """<!-- TEMPLATE: Fill in sections below -->
+# Recall: Section {section_id}
+
+> Section: {title}
+> Date: {date}
+> Time spent: [X minutes]
+
+---
+
+## From Memory (before re-reading)
+
+*Write these BEFORE looking at source or summary:*
+
+1. [Main claim as I remember it]
+2. [Key mechanism or process]
+3. [Example I remember]
+4. [Modern parallel that came to mind]
+5. [Something I'm unsure about]
+
+---
+
+## After Selective Reading
+
+*Corrections after reviewing source:*
+
+- Correction 1: [what I got wrong or missed]
+- Correction 2: [additional nuance]
+
+---
+
+## Self-Score
+
+- Recall accuracy: [0-5]
+- Confidence: [low / medium / high]
+
+---
+
+## One Sentence I'd Tell Someone
+
+[If I had 30 seconds to explain this section, I'd say...]
+"""
+
+
 def generate(
     book_slug: str = typer.Argument(..., help="Book slug"),
     section_id: Optional[str] = typer.Argument(None, help="Section ID (e.g., '001'). If omitted, generates all."),
     books_dir: Optional[Path] = typer.Option(None, "--books-dir", help="Path to books directory"),
     config_path: Optional[Path] = typer.Option(None, "--config-path", help="Path to config file"),
     yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmations"),
-    gen_type: str = typer.Option("all", "--type", "-t", help="Type to generate: summary, podcast, quiz, or all"),
+    gen_type: str = typer.Option("all", "--type", "-t", help="Type to generate: summary, podcast, quiz, recall, or all"),
 ) -> None:
     """Generate AI content for book sections."""
 
@@ -66,7 +110,7 @@ def generate(
     # Determine what to generate
     types_to_generate = []
     if gen_type == "all":
-        types_to_generate = ["summary", "podcast", "quiz"]
+        types_to_generate = ["summary", "podcast", "quiz", "recall"]
     else:
         types_to_generate = [gen_type]
 
@@ -141,6 +185,18 @@ This placeholder exists to preserve the workflow structure for future podcast ge
 """
         output_path.write_text(placeholder, encoding="utf-8")
         console.print(f"[dim]Skipping podcast LLM call (use NotebookLM instead)[/dim]")
+        return "done"
+
+    # Recall is a human-writable template (no LLM call)
+    if gen_type == "recall":
+        output_path = section_dir / "recall.md"
+        content = RECALL_TEMPLATE.format(
+            section_id=section["id"],
+            title=section.get("title", ""),
+            date=date.today().isoformat(),
+        )
+        output_path.write_text(content, encoding="utf-8")
+        console.print(f"[dim]Created recall.md template (human-writable)[/dim]")
         return "done"
 
     # Load and render prompt

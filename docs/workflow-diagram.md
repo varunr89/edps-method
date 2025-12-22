@@ -363,7 +363,7 @@ flowchart LR
         subgraph QUIZ["Step 4"]
             Q_IN[/"📥 quiz.md"/]
             Q_ACT[❓ Answer without<br/>looking]
-            Q_OUT[/"📤 quiz-answers.md"/]
+            Q_OUT[/"📤 quiz.md (filled in)"/]
             Q_IN --> Q_ACT --> Q_OUT
         end
 
@@ -512,9 +512,8 @@ flowchart LR
 | **Summary**        | `summary.md`      | 🤖        | Structured breakdown of the section       | See spec below                                           |
 | **Podcast Script** | `podcast.md`      | 🤖        | Two-speaker dialogue for audio generation | See spec below                                           |
 | **Podcast Audio**  | `podcast.mp3`     | 🔧        | Listenable episode (TTS from script)      | 5-15 min, normalized to -16 LUFS                         |
-| **Quiz**           | `quiz.md`         | 🤖        | Retrieval practice questions              | See spec below                                           |
+| **Quiz**           | `quiz.md`         | 🤖→👤     | Retrieval practice questions (answers inline) | See spec below                                           |
 | **Recall**         | `recall.md`       | 👤        | Your active recall output                 | See spec below                                           |
-| **Quiz Answers**   | `quiz-answers.md` | 👤        | Your quiz responses + score               | Written after taking quiz                                |
 
 ### Resources (per book)
 
@@ -961,7 +960,6 @@ flowchart TD
 
     subgraph YOUWRITE["Reader-Written"]
         RECALL[recall.md]
-        QUIZANS[quiz-answers.md]
     end
 
     subgraph PERIODIC["Periodic Synthesis"]
@@ -988,7 +986,6 @@ flowchart TD
 
     AUDIO --> RECALL
     SUM --> RECALL
-    QUIZ --> QUIZANS
 
     RECALL --> WEEKLY
     WEEKLY --> ONEP

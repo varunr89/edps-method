@@ -11,7 +11,6 @@ from rich.prompt import Prompt
 from edps.config import load_config
 from edps.core.state import detect_book_state
 from edps.commands.generate import generate
-from edps.commands.template import template
 
 console = Console()
 
@@ -71,7 +70,7 @@ def run(
         options.append("[3] Regenerate a specific section")
 
         if state.summaries_done > 0:
-            options.append("[4] Generate templates (recall.md, quiz-answers.md)")
+            options.append("[4] Generate recall templates (recall.md)")
 
         options.append("[5] View cost summary")
         options.append("[q] Quit")
@@ -106,10 +105,13 @@ def run(
                 gen_type=gen_type,
             )
         elif choice == "4":
-            template(
+            generate(
                 book_slug=book_slug,
                 section_id=None,
                 books_dir=books_dir,
+                config_path=config_path,
+                yes=True,
+                gen_type="recall",
             )
         elif choice == "5":
             console.print("\n[dim]Cost tracking not yet implemented[/dim]")

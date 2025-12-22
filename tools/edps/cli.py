@@ -4,7 +4,6 @@ import typer
 from edps.commands.init import init as init_command
 from edps.commands.ingest import ingest as ingest_command
 from edps.commands.generate import generate as generate_command
-from edps.commands.template import template as template_command
 from edps.commands.run import run as run_command
 
 app = typer.Typer(
@@ -23,7 +22,6 @@ def version():
 app.command(name="init")(init_command)
 app.command(name="ingest")(ingest_command)
 app.command(name="generate")(generate_command)
-app.command(name="template")(template_command)
 app.command(name="run")(run_command)
 
 

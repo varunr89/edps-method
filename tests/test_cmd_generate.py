@@ -210,3 +210,70 @@ def test_generate_podcast_skips_llm_call():
         # complete() should never be called for podcast
         mock_client.complete.assert_not_called()
         mock_client.preview.assert_not_called()
+
+
+def test_generate_recall_creates_template():
+    """edps generate --type recall creates recall.md template without LLM call."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+
+        # Setup book structure
+        book_dir = tmpdir / "books" / "test-book"
+        section_dir = book_dir / "sections" / "001"
+        section_dir.mkdir(parents=True)
+
+        # Create sections.yaml
+        (book_dir / "sections.yaml").write_text(yaml.dump({
+            "sections": [{
+                "id": "001",
+                "title": "Test Chapter",
+                "location": "Chapter 1",
+                "word_count": 500,
+            }]
+        }))
+
+        # Create meta.yaml
+        (book_dir / "meta.yaml").write_text(yaml.dump({
+            "title": "Test Book",
+            "author": "Test Author",
+        }))
+
+        # Create source file with new naming format
+        (section_dir / "EDPS-test-book-001.txt").write_text("This is the chapter content.")
+
+        # Create config
+        config_dir = tmpdir / ".edps"
+        config_dir.mkdir()
+        (config_dir / "config.yaml").write_text(yaml.dump({
+            "azure": {
+                "endpoint": "https://test.azure.com",
+                "api_key": "test-key",
+            }
+        }))
+
+        # Mock LLMClient - should NOT be called for recall
+        with patch("edps.commands.generate.LLMClient") as MockClient:
+            mock_client = MagicMock()
+            MockClient.return_value = mock_client
+
+            result = runner.invoke(app, [
+                "generate", "test-book", "001",
+                "--books-dir", str(tmpdir / "books"),
+                "--config-path", str(config_dir / "config.yaml"),
+                "--yes",
+                "--type", "recall",
+            ])
+
+        assert result.exit_code == 0, result.output
+
+        # Check recall.md created with template
+        recall_path = section_dir / "recall.md"
+        assert recall_path.exists()
+        content = recall_path.read_text()
+        assert "From Memory" in content
+        assert "Test Chapter" in content
+        assert "<!-- TEMPLATE" in content
+
+        # Verify LLM was NOT called
+        mock_client.complete.assert_not_called()
+        mock_client.preview.assert_not_called()
