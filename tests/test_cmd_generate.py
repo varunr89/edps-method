@@ -39,8 +39,8 @@ def test_generate_creates_summary(monkeypatch):
             "author": "Test Author",
         }))
 
-        # Create source.txt
-        (section_dir / "source.txt").write_text("This is the chapter content.")
+        # Create source file with new naming format
+        (section_dir / "EDPS-test-book-001.txt").write_text("This is the chapter content.")
 
         # Create config
         config_dir = tmpdir / ".edps"
@@ -115,8 +115,8 @@ def test_generate_podcast_is_passthrough():
             "author": "Test Author",
         }))
 
-        # Create source.txt
-        (section_dir / "source.txt").write_text("This is the chapter content.")
+        # Create source file with new naming format
+        (section_dir / "EDPS-test-book-001.txt").write_text("This is the chapter content.")
 
         # Create config
         config_dir = tmpdir / ".edps"
@@ -180,8 +180,8 @@ def test_generate_podcast_skips_llm_call():
             "author": "Test Author",
         }))
 
-        # Create source.txt
-        (section_dir / "source.txt").write_text("This is the chapter content.")
+        # Create source file with new naming format
+        (section_dir / "EDPS-test-book-001.txt").write_text("This is the chapter content.")
 
         # Create config
         config_dir = tmpdir / ".edps"

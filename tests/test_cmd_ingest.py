@@ -57,7 +57,7 @@ to be considered a reasonable chapter length.
 
 
 def test_ingest_creates_source_files(monkeypatch):
-    """edps ingest creates source.txt for each section."""
+    """edps ingest creates EDPS-slug-id.txt for each section."""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
 
@@ -87,9 +87,9 @@ Second chapter content here.
 
         assert result.exit_code == 0
 
-        # Check source files created
-        source_001 = books_dir / "test-book" / "sections" / "001" / "source.txt"
-        source_002 = books_dir / "test-book" / "sections" / "002" / "source.txt"
+        # Check source files created with new naming format
+        source_001 = books_dir / "test-book" / "sections" / "001" / "EDPS-test-book-001.txt"
+        source_002 = books_dir / "test-book" / "sections" / "002" / "EDPS-test-book-002.txt"
 
         assert source_001.exists()
         assert source_002.exists()

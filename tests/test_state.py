@@ -37,12 +37,12 @@ def test_detect_state_with_sections():
         # Create some generated files
         section_001 = book_dir / "sections" / "001"
         section_001.mkdir(parents=True)
-        (section_001 / "source.txt").write_text("content")
+        (section_001 / "EDPS-test-book-001.txt").write_text("content")
         (section_001 / "summary.md").write_text("summary")
 
         section_002 = book_dir / "sections" / "002"
         section_002.mkdir(parents=True)
-        (section_002 / "source.txt").write_text("content")
+        (section_002 / "EDPS-test-book-002.txt").write_text("content")
 
         state = detect_book_state(book_dir)
 
