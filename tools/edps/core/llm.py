@@ -1,4 +1,4 @@
-"""Azure AI Foundry LLM client."""
+"""Azure AI Foundry LLM client using Anthropic SDK."""
 from dataclasses import dataclass
 from typing import Optional
 
@@ -27,7 +27,7 @@ class LLMPreview:
 
 
 class LLMClient:
-    """Client for Azure AI Foundry with Claude models."""
+    """Client for Azure AI Foundry with Claude models via Anthropic SDK."""
 
     def __init__(self, config: EdpsConfig):
         """Initialize client with config.
@@ -43,14 +43,13 @@ class LLMClient:
         self._client = None
 
     def _get_client(self):
-        """Lazy-load the Azure client."""
+        """Lazy-load the Anthropic Foundry client."""
         if self._client is None:
-            from azure.ai.inference import ChatCompletionsClient
-            from azure.core.credentials import AzureKeyCredential
+            from anthropic import AnthropicFoundry
 
-            self._client = ChatCompletionsClient(
-                endpoint=self.endpoint,
-                credential=AzureKeyCredential(self.api_key),
+            self._client = AnthropicFoundry(
+                api_key=self.api_key,
+                base_url=self.endpoint,
             )
         return self._client
 
@@ -100,24 +99,23 @@ class LLMClient:
         Returns:
             LLMResponse with content and usage
         """
-        from azure.ai.inference.models import UserMessage
-
         model = model or self.default_model
         temperature = temperature if temperature is not None else self.temperature
         max_tokens = max_tokens or self.max_tokens
 
         client = self._get_client()
 
-        response = client.complete(
+        response = client.messages.create(
             model=model,
-            messages=[UserMessage(content=prompt)],
+            messages=[{"role": "user", "content": prompt}],
             temperature=temperature,
             max_tokens=max_tokens,
         )
 
-        content = response.choices[0].message.content
-        input_tokens = response.usage.prompt_tokens
-        output_tokens = response.usage.completion_tokens
+        # Extract text content from response
+        content = response.content[0].text
+        input_tokens = response.usage.input_tokens
+        output_tokens = response.usage.output_tokens
         cost = estimate_cost(input_tokens, output_tokens, model)
 
         return LLMResponse(
