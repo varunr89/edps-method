@@ -73,10 +73,16 @@ def generate(
     # Generate for each section
     for section in sections:
         section_dir = book_dir / "sections" / section["id"]
-        source_path = section_dir / "source.txt"
+
+        # Look for source file (new naming: EDPS-slug-id.txt, fallback: source.txt)
+        source_filename = f"EDPS-{book_slug}-{section['id']}.txt"
+        source_path = section_dir / source_filename
+        if not source_path.exists():
+            # Fallback to legacy source.txt
+            source_path = section_dir / "source.txt"
 
         if not source_path.exists():
-            console.print(f"[yellow]Warning:[/yellow] No source.txt for section {section['id']}, skipping")
+            console.print(f"[yellow]Warning:[/yellow] No source file for section {section['id']}, skipping")
             continue
 
         source_text = source_path.read_text(encoding="utf-8")
@@ -98,6 +104,7 @@ def generate(
                 meta=meta,
                 section_dir=section_dir,
                 skip_confirm=yes,
+                book_slug=book_slug,
             )
 
             if result == "quit":
@@ -116,6 +123,7 @@ def _generate_content(
     meta: dict,
     section_dir: Path,
     skip_confirm: bool,
+    book_slug: str = "",
 ) -> str:
     """Generate a single piece of content.
 
@@ -124,9 +132,10 @@ def _generate_content(
     # Podcast is a pass-through for now (use NotebookLM with source text instead)
     if gen_type == "podcast":
         output_path = section_dir / "podcast.md"
+        source_filename = f"EDPS-{book_slug}-{section['id']}.txt" if book_slug else "source.txt"
         placeholder = f"""# Podcast: Section {section['id']}
 
-> **Use NotebookLM**: Upload the source text (`source.txt`) to [NotebookLM](https://notebooklm.google.com/) to generate an audio overview.
+> **Use NotebookLM**: Upload the source text (`{source_filename}`) to [NotebookLM](https://notebooklm.google.com/) to generate an audio overview.
 
 This placeholder exists to preserve the workflow structure for future podcast generation features.
 """

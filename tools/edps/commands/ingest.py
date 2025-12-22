@@ -129,15 +129,16 @@ def ingest(
 
     console.print(f"[green]✓[/green] Created {sections_yaml}")
 
-    # Write source.txt for each section
+    # Write source files for each section (named for easy NotebookLM upload)
     for s in sections:
         section_dir = sections_dir / s.id
         section_dir.mkdir(exist_ok=True)
 
-        source_file = section_dir / "source.txt"
+        source_filename = f"EDPS-{book_slug}-{s.id}.txt"
+        source_file = section_dir / source_filename
         source_file.write_text(s.text, encoding="utf-8")
 
-    console.print(f"[green]✓[/green] Created {len(sections)} source.txt files")
+    console.print(f"[green]✓[/green] Created {len(sections)} source files (EDPS-{book_slug}-XXX.txt)")
 
     # Create meta.yaml if it doesn't exist
     meta_path = book_dir / "meta.yaml"
