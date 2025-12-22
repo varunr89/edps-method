@@ -50,6 +50,6 @@ Second chapter content here.
     assert len(sections) == 2
     assert sections[0].id == "001"
     assert sections[0].title == "OF THE DIVISION OF LABOUR"
-    assert sections[0].location == "Chapter I"
+    assert sections[0].location == "Book 1, Chapter I"
     assert sections[0].word_count > 0
     assert "greatest improvement" in sections[0].text
