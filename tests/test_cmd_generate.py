@@ -277,3 +277,96 @@ def test_generate_recall_creates_template():
         # Verify LLM was NOT called
         mock_client.complete.assert_not_called()
         mock_client.preview.assert_not_called()
+
+
+def test_generate_book_creates_outputs_directory():
+    """edps generate --type book creates outputs/ and weekly/ directories with templates."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
+
+        # Setup book structure with multiple sections
+        book_dir = tmpdir / "books" / "test-book"
+        for section_id in ["001", "002"]:
+            section_dir = book_dir / "sections" / section_id
+            section_dir.mkdir(parents=True)
+            (section_dir / f"EDPS-test-book-{section_id}.txt").write_text(f"Content for section {section_id}.")
+            (section_dir / "summary.md").write_text(f"# Summary {section_id}\n\nTLDR content.")
+            (section_dir / "quiz.md").write_text(f"# Quiz {section_id}\n\n1. Question?")
+
+        # Create sections.yaml
+        (book_dir / "sections.yaml").write_text(yaml.dump({
+            "sections": [
+                {"id": "001", "title": "Chapter 1", "location": "Ch 1", "word_count": 500},
+                {"id": "002", "title": "Chapter 2", "location": "Ch 2", "word_count": 500},
+            ]
+        }))
+
+        # Create meta.yaml
+        (book_dir / "meta.yaml").write_text(yaml.dump({
+            "title": "Test Book",
+            "author": "Test Author",
+        }))
+
+        # Create config
+        config_dir = tmpdir / ".edps"
+        config_dir.mkdir()
+        (config_dir / "config.yaml").write_text(yaml.dump({
+            "azure": {
+                "endpoint": "https://test.azure.com",
+                "api_key": "test-key",
+            }
+        }))
+
+        # Mock LLM for AI-generated content
+        mock_response = LLMResponse(
+            content="# Teaching Test Book\n\nGenerated content.",
+            input_tokens=100,
+            output_tokens=50,
+            cost=0.001,
+            model="claude-sonnet-4-20250514",
+        )
+
+        with patch("edps.commands.generate.LLMClient") as MockClient:
+            mock_client = MagicMock()
+            mock_client.preview.return_value = MagicMock(
+                input_tokens=100,
+                estimated_output_tokens=500,
+                estimated_cost=0.01,
+                model="claude-sonnet-4-20250514",
+                prompt="test prompt",
+            )
+            mock_client.complete.return_value = mock_response
+            mock_client.default_model = "claude-sonnet-4-20250514"
+            MockClient.return_value = mock_client
+
+            result = runner.invoke(app, [
+                "generate", "test-book",
+                "--books-dir", str(tmpdir / "books"),
+                "--config-path", str(config_dir / "config.yaml"),
+                "--yes",
+                "--type", "book",
+            ])
+
+        assert result.exit_code == 0, result.output
+
+        # Check outputs/ directory created
+        outputs_dir = book_dir / "outputs"
+        assert outputs_dir.exists()
+
+        # Check template files created
+        assert (outputs_dir / "one-pager.md").exists()
+        assert "TEMPLATE" in (outputs_dir / "one-pager.md").read_text()
+        assert "Test Book" in (outputs_dir / "one-pager.md").read_text()
+
+        assert (outputs_dir / "modern-mapping.md").exists()
+        assert "TEMPLATE" in (outputs_dir / "modern-mapping.md").read_text()
+
+        # Check AI-generated files created
+        assert (outputs_dir / "teachable-outline.md").exists()
+        assert (outputs_dir / "question-bank.md").exists()
+
+        # Check weekly/ directory created with template
+        weekly_dir = book_dir / "weekly"
+        assert weekly_dir.exists()
+        assert (weekly_dir / "_template.md").exists()
+        assert "Weekly Synthesis" in (weekly_dir / "_template.md").read_text()
