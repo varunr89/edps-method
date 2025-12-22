@@ -241,9 +241,9 @@ def generate(
     books_dir: Optional[Path] = typer.Option(None, "--books-dir", help="Path to books directory"),
     config_path: Optional[Path] = typer.Option(None, "--config-path", help="Path to config file"),
     yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmations"),
-    gen_type: str = typer.Option("all", "--type", "-t", help="Type to generate: summary, podcast, quiz, recall, or all"),
+    gen_type: str = typer.Option("all", "--type", "-t", help="Type: all, sections, book, summary, podcast, quiz, recall"),
 ) -> None:
-    """Generate AI content for book sections."""
+    """Generate AI content for book sections and book-level outputs."""
 
     # Load config
     config = load_config(config_path)
@@ -284,55 +284,72 @@ def generate(
     client = LLMClient(config)
 
     # Determine what to generate
+    generate_sections = gen_type in ["all", "sections", "summary", "podcast", "quiz", "recall"]
+    generate_book = gen_type in ["all", "book"]
+
     types_to_generate = []
     if gen_type == "all":
         types_to_generate = ["summary", "podcast", "quiz", "recall"]
-    else:
+    elif gen_type == "sections":
+        types_to_generate = ["summary", "podcast", "quiz", "recall"]
+    elif gen_type in ["summary", "podcast", "quiz", "recall"]:
         types_to_generate = [gen_type]
 
     # Generate for each section
-    for section in sections:
-        section_dir = book_dir / "sections" / section["id"]
+    if generate_sections:
+        for section in sections:
+            section_dir = book_dir / "sections" / section["id"]
 
-        # Look for source file (new naming: EDPS-slug-id.txt, fallback: source.txt)
-        source_filename = f"EDPS-{book_slug}-{section['id']}.txt"
-        source_path = section_dir / source_filename
-        if not source_path.exists():
-            # Fallback to legacy source.txt
-            source_path = section_dir / "source.txt"
+            # Look for source file (new naming: EDPS-slug-id.txt, fallback: source.txt)
+            source_filename = f"EDPS-{book_slug}-{section['id']}.txt"
+            source_path = section_dir / source_filename
+            if not source_path.exists():
+                # Fallback to legacy source.txt
+                source_path = section_dir / "source.txt"
 
-        if not source_path.exists():
-            console.print(f"[yellow]Warning:[/yellow] No source file for section {section['id']}, skipping")
-            continue
-
-        source_text = source_path.read_text(encoding="utf-8")
-
-        for gen_type_item in types_to_generate:
-            output_path = section_dir / f"{gen_type_item}.md"
-
-            # Skip if already exists
-            if output_path.exists():
-                console.print(f"[dim]Skipping {section['id']}/{gen_type_item}.md (exists)[/dim]")
+            if not source_path.exists():
+                console.print(f"[yellow]Warning:[/yellow] No source file for section {section['id']}, skipping")
                 continue
 
-            # Generate
-            result = _generate_content(
-                client=client,
-                gen_type=gen_type_item,
-                section=section,
-                source_text=source_text,
-                meta=meta,
-                section_dir=section_dir,
-                skip_confirm=yes,
-                book_slug=book_slug,
-            )
+            source_text = source_path.read_text(encoding="utf-8")
 
-            if result == "quit":
-                raise typer.Exit(0)
-            elif result == "skip":
-                continue
+            for gen_type_item in types_to_generate:
+                output_path = section_dir / f"{gen_type_item}.md"
 
-            console.print(f"[green]✓[/green] Created {output_path}")
+                # Skip if already exists
+                if output_path.exists():
+                    console.print(f"[dim]Skipping {section['id']}/{gen_type_item}.md (exists)[/dim]")
+                    continue
+
+                # Generate
+                result = _generate_content(
+                    client=client,
+                    gen_type=gen_type_item,
+                    section=section,
+                    source_text=source_text,
+                    meta=meta,
+                    section_dir=section_dir,
+                    skip_confirm=yes,
+                    book_slug=book_slug,
+                )
+
+                if result == "quit":
+                    raise typer.Exit(0)
+                elif result == "skip":
+                    continue
+
+                console.print(f"[green]✓[/green] Created {output_path}")
+
+    # Generate book-level content
+    if generate_book:
+        _generate_book_content(
+            client=client,
+            book_dir=book_dir,
+            meta=meta,
+            sections=sections,
+            skip_confirm=yes,
+            book_slug=book_slug,
+        )
 
 
 def _generate_content(
@@ -428,3 +445,132 @@ This placeholder exists to preserve the workflow structure for future podcast ge
     console.print(f"[dim]Tokens: {response.input_tokens} in, {response.output_tokens} out. Cost: ${response.cost:.4f}[/dim]")
 
     return "done"
+
+
+def _write_template(path: Path, template: str, **kwargs) -> None:
+    """Write a template file if it doesn't exist."""
+    if path.exists():
+        console.print(f"[dim]Skipping {path.name} (exists)[/dim]")
+        return
+    content = template.format(**kwargs) if kwargs else template
+    path.write_text(content, encoding="utf-8")
+    console.print(f"[green]✓[/green] Created {path.parent.name}/{path.name}")
+
+
+def _generate_book_content(
+    client: LLMClient,
+    book_dir: Path,
+    meta: dict,
+    sections: list,
+    skip_confirm: bool,
+    book_slug: str = "",
+) -> None:
+    """Generate book-level outputs (templates and AI-generated)."""
+    console.print("\n[bold]Generating book-level outputs...[/bold]")
+
+    # Create directories
+    outputs_dir = book_dir / "outputs"
+    outputs_dir.mkdir(exist_ok=True)
+
+    weekly_dir = book_dir / "weekly"
+    weekly_dir.mkdir(exist_ok=True)
+
+    book_title = meta.get("title", book_slug)
+    author = meta.get("author", "Unknown")
+
+    # Generate templates (no LLM call)
+    _write_template(outputs_dir / "one-pager.md", ONE_PAGER_TEMPLATE, book_title=book_title, author=author)
+    _write_template(outputs_dir / "modern-mapping.md", MODERN_MAPPING_TEMPLATE, book_title=book_title)
+    _write_template(weekly_dir / "_template.md", WEEKLY_TEMPLATE)
+
+    # Collect all summaries and quizzes
+    all_summaries = []
+    all_quizzes = []
+    for section in sections:
+        section_dir = book_dir / "sections" / section["id"]
+        summary_path = section_dir / "summary.md"
+        if summary_path.exists():
+            all_summaries.append(f"## Section {section['id']}: {section.get('title', '')}\n\n{summary_path.read_text()}")
+        quiz_path = section_dir / "quiz.md"
+        if quiz_path.exists():
+            all_quizzes.append(f"## Section {section['id']}: {section.get('title', '')}\n\n{quiz_path.read_text()}")
+
+    section_ids = [s["id"] for s in sections]
+    section_range = f"{section_ids[0]}-{section_ids[-1]}" if section_ids else "none"
+
+    # Generate teachable-outline.md (AI)
+    teachable_path = outputs_dir / "teachable-outline.md"
+    if not teachable_path.exists() and all_summaries:
+        _generate_ai_book_content(
+            client=client,
+            output_path=teachable_path,
+            prompt_name="teachable-outline",
+            meta=meta,
+            all_content="\n\n---\n\n".join(all_summaries),
+            content_key="all_summaries",
+            section_count=len(sections),
+            section_range=section_range,
+            skip_confirm=skip_confirm,
+        )
+
+    # Generate question-bank.md (AI)
+    qbank_path = outputs_dir / "question-bank.md"
+    if not qbank_path.exists() and all_quizzes:
+        _generate_ai_book_content(
+            client=client,
+            output_path=qbank_path,
+            prompt_name="question-bank",
+            meta=meta,
+            all_content="\n\n---\n\n".join(all_quizzes),
+            content_key="all_quizzes",
+            section_count=len(sections),
+            section_range=section_range,
+            skip_confirm=skip_confirm,
+        )
+
+
+def _generate_ai_book_content(
+    client: LLMClient,
+    output_path: Path,
+    prompt_name: str,
+    meta: dict,
+    all_content: str,
+    content_key: str,
+    section_count: int,
+    section_range: str,
+    skip_confirm: bool,
+) -> None:
+    """Generate AI book-level content."""
+    template = load_prompt(prompt_name)
+
+    prompt_vars = {
+        "book_title": meta.get("title", "Unknown"),
+        "author": meta.get("author", "Unknown"),
+        content_key: all_content,
+        "section_count": section_count,
+        "section_range": section_range,
+        "date": date.today().isoformat(),
+        "model": client.default_model,
+    }
+
+    prompt = render_prompt(template, **prompt_vars)
+
+    # Preview
+    preview = client.preview(prompt, estimated_output_tokens=2000)
+
+    # Confirm
+    if not skip_confirm:
+        action = confirm_action(
+            title=f"Generate {output_path.name}",
+            section="book-level",
+            preview=preview,
+        )
+        if action in ["quit", "skip"]:
+            return
+
+    # Execute
+    response = client.complete(prompt)
+    output_path.write_text(response.content, encoding="utf-8")
+
+    console.print(f"[green]✓[/green] Created {output_path.parent.name}/{output_path.name}")
+    console.print(f"[dim]Tokens: {response.input_tokens} in, {response.output_tokens} out. Cost: ${response.cost:.4f}[/dim]")
