@@ -280,3 +280,23 @@ def run_hook(staged_files: list[str], base_path: Path = None) -> list[Path]:
             modified_files.append(book_path / "progress.yaml")
 
     return modified_files
+
+
+def main():
+    """CLI entry point for hook mode."""
+    import sys
+
+    if "--hook" in sys.argv:
+        # Read staged files from stdin
+        staged = sys.stdin.read().strip().split("\n")
+        staged = [f for f in staged if f]  # Remove empty lines
+
+        modified = run_hook(staged)
+
+        # Print modified files for the hook to stage
+        for path in modified:
+            print(path)
+
+
+if __name__ == "__main__":
+    main()
