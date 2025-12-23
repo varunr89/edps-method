@@ -1,0 +1,10 @@
+completed_sections: []
+
+quiz_scores: {}
+
+recall_scores: {}
+
+stats:
+  total_sections_completed: 0
+  average_quiz_score: null
+  average_recall_score: null

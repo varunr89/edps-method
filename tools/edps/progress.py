@@ -1,5 +1,6 @@
 """Progress detection and sync module."""
 import re
+import yaml
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -151,3 +152,84 @@ def parse_staged_files(staged_files: list[str]) -> dict[str, set[str]]:
             result[book_slug].add(section_id)
 
     return result
+
+
+def update_progress(book_path: Path, section_updates: dict[str, SectionStatus]) -> None:
+    """
+    Update progress.yaml for a book with new section statuses.
+
+    - Adds/removes sections from completed_sections based on is_complete
+    - Updates quiz_scores and recall_scores
+    - Recalculates stats
+
+    Args:
+        book_path: Path to the book directory (contains progress.yaml)
+        section_updates: Dict mapping section_id to SectionStatus
+    """
+    progress_file = book_path / "progress.yaml"
+
+    # Load existing or create default
+    if progress_file.exists():
+        progress = yaml.safe_load(progress_file.read_text()) or {}
+    else:
+        progress = {}
+
+    # Ensure required keys exist
+    progress.setdefault("completed_sections", [])
+    progress.setdefault("quiz_scores", {})
+    progress.setdefault("recall_scores", {})
+    progress.setdefault("stats", {})
+
+    # Update each affected section
+    for section_id, status in section_updates.items():
+        if status.is_complete:
+            # Add to completed if not already there
+            if section_id not in progress["completed_sections"]:
+                progress["completed_sections"].append(section_id)
+            # Record scores
+            if status.quiz_score is not None:
+                progress["quiz_scores"][section_id] = status.quiz_score
+            if status.recall_score is not None:
+                progress["recall_scores"][section_id] = status.recall_score
+        else:
+            # Remove from completed
+            if section_id in progress["completed_sections"]:
+                progress["completed_sections"].remove(section_id)
+            # Remove scores
+            progress["quiz_scores"].pop(section_id, None)
+            progress["recall_scores"].pop(section_id, None)
+
+    # Sort completed_sections for consistency
+    progress["completed_sections"] = sorted(progress["completed_sections"])
+
+    # Recalculate stats
+    progress["stats"] = _calculate_stats(progress)
+
+    # Write back
+    with open(progress_file, "w") as f:
+        yaml.dump(progress, f, default_flow_style=False, sort_keys=False)
+
+
+def _calculate_stats(progress: dict) -> dict:
+    """Calculate derived stats from progress data."""
+    completed = progress.get("completed_sections", [])
+    quiz_scores = progress.get("quiz_scores", {})
+    recall_scores = progress.get("recall_scores", {})
+
+    stats = {
+        "total_sections_completed": len(completed),
+        "average_quiz_score": None,
+        "average_recall_score": None,
+    }
+
+    if quiz_scores:
+        stats["average_quiz_score"] = round(
+            sum(quiz_scores.values()) / len(quiz_scores), 1
+        )
+
+    if recall_scores:
+        stats["average_recall_score"] = round(
+            sum(recall_scores.values()) / len(recall_scores), 1
+        )
+
+    return stats
