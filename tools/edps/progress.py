@@ -19,6 +19,14 @@ class QuizResult:
     score: Optional[int]
 
 
+@dataclass
+class SectionStatus:
+    """Result of checking section completion."""
+    is_complete: bool
+    recall_score: Optional[int]
+    quiz_score: Optional[int]
+
+
 def check_recall_completion(recall_path: Path) -> RecallResult:
     """
     Check if a recall.md file is complete.
@@ -93,3 +101,26 @@ def check_quiz_completion(quiz_path: Path) -> QuizResult:
     is_complete = all_answers_filled and score is not None
 
     return QuizResult(is_complete=is_complete, score=score)
+
+
+def check_section_completion(section_path: Path) -> SectionStatus:
+    """
+    Check if a section is complete.
+
+    A section is complete when BOTH recall.md and quiz.md pass their checks.
+
+    Returns SectionStatus with completion status and both scores.
+    """
+    recall_path = section_path / "recall.md"
+    quiz_path = section_path / "quiz.md"
+
+    recall_result = check_recall_completion(recall_path)
+    quiz_result = check_quiz_completion(quiz_path)
+
+    is_complete = recall_result.is_complete and quiz_result.is_complete
+
+    return SectionStatus(
+        is_complete=is_complete,
+        recall_score=recall_result.score,
+        quiz_score=quiz_result.score,
+    )

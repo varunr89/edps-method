@@ -3,10 +3,11 @@ from pathlib import Path
 
 import pytest
 
-from edps.progress import check_recall_completion, check_quiz_completion, QuizResult
+from edps.progress import check_recall_completion, check_quiz_completion, QuizResult, check_section_completion, SectionStatus
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
+SECTIONS_FIXTURES = FIXTURES / "sections"
 
 
 class TestCheckRecallCompletion:
@@ -51,3 +52,28 @@ class TestCheckQuizCompletion:
         result = check_quiz_completion(FIXTURES / "quiz_partial.md")
         assert result.is_complete is False
         assert result.score is None  # No total filled in
+
+
+class TestCheckSectionCompletion:
+    """Tests for check_section_completion function."""
+
+    def test_complete_section(self):
+        """Section with both recall and quiz complete is complete."""
+        result = check_section_completion(SECTIONS_FIXTURES / "complete")
+        assert result.is_complete is True
+        assert result.recall_score == 4
+        assert result.quiz_score == 7
+
+    def test_incomplete_section(self):
+        """Section with incomplete quiz is not complete."""
+        result = check_section_completion(SECTIONS_FIXTURES / "incomplete")
+        assert result.is_complete is False
+        assert result.recall_score == 4  # Recall is complete
+        assert result.quiz_score is None  # Quiz has no total
+
+    def test_missing_files(self):
+        """Section with missing files is not complete."""
+        result = check_section_completion(FIXTURES / "nonexistent")
+        assert result.is_complete is False
+        assert result.recall_score is None
+        assert result.quiz_score is None
