@@ -254,3 +254,51 @@ class TestRunHook:
         # Assert: not marked complete
         progress = yaml.safe_load((book_dir / "progress.yaml").read_text())
         assert "001" not in progress["completed_sections"]
+
+
+class TestIntegration:
+    """Integration tests for the full workflow."""
+
+    def test_full_workflow(self, tmp_path):
+        """Test complete flow: files -> sync -> progress updated."""
+        # Setup: create realistic book structure
+        book_dir = tmp_path / "books" / "test-book"
+
+        for section_id in ["001", "002", "003"]:
+            section_dir = book_dir / "sections" / section_id
+            section_dir.mkdir(parents=True)
+
+            # 001: complete
+            if section_id == "001":
+                shutil.copy(FIXTURES / "recall_complete.md", section_dir / "recall.md")
+                shutil.copy(FIXTURES / "quiz_complete.md", section_dir / "quiz.md")
+            # 002: partial (recall done, quiz not)
+            elif section_id == "002":
+                shutil.copy(FIXTURES / "recall_complete.md", section_dir / "recall.md")
+                shutil.copy(FIXTURES / "quiz_partial.md", section_dir / "quiz.md")
+            # 003: not started
+            else:
+                shutil.copy(FIXTURES / "recall_template.md", section_dir / "recall.md")
+                shutil.copy(FIXTURES / "quiz_template.md", section_dir / "quiz.md")
+
+        # Create initial progress
+        shutil.copy(FIXTURES / "progress_initial.yaml", book_dir / "progress.yaml")
+
+        # Act: simulate hook run for all sections
+        staged = [
+            "books/test-book/sections/001/recall.md",
+            "books/test-book/sections/002/recall.md",
+            "books/test-book/sections/003/recall.md",
+        ]
+        run_hook(staged, base_path=tmp_path)
+
+        # Assert
+        progress = yaml.safe_load((book_dir / "progress.yaml").read_text())
+
+        # Only 001 should be complete
+        assert progress["completed_sections"] == ["001"]
+        assert progress["quiz_scores"] == {"001": 7}
+        assert progress["recall_scores"] == {"001": 4}
+        assert progress["stats"]["total_sections_completed"] == 1
+        assert progress["stats"]["average_quiz_score"] == 7.0
+        assert progress["stats"]["average_recall_score"] == 4.0
