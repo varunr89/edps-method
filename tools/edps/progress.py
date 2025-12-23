@@ -233,3 +233,50 @@ def _calculate_stats(progress: dict) -> dict:
         )
 
     return stats
+
+
+def run_hook(staged_files: list[str], base_path: Path = None) -> list[Path]:
+    """
+    Main hook entry point.
+
+    1. Parse staged files to find affected (book, section) pairs
+    2. Check each affected section for completion
+    3. Update progress.yaml for each affected book
+
+    Args:
+        staged_files: List of staged file paths (relative to repo root)
+        base_path: Base path of repository (default: current directory)
+
+    Returns:
+        List of modified progress.yaml paths (for auto-staging)
+    """
+    if base_path is None:
+        base_path = Path.cwd()
+
+    # Parse staged files
+    affected = parse_staged_files(staged_files)
+
+    if not affected:
+        return []
+
+    modified_files = []
+
+    for book_slug, section_ids in affected.items():
+        book_path = base_path / "books" / book_slug
+
+        if not book_path.exists():
+            continue
+
+        # Check each affected section
+        section_updates = {}
+        for section_id in section_ids:
+            section_path = book_path / "sections" / section_id
+            if section_path.exists():
+                status = check_section_completion(section_path)
+                section_updates[section_id] = status
+
+        if section_updates:
+            update_progress(book_path, section_updates)
+            modified_files.append(book_path / "progress.yaml")
+
+    return modified_files

@@ -5,7 +5,7 @@ import yaml
 
 import pytest
 
-from edps.progress import check_recall_completion, check_quiz_completion, QuizResult, check_section_completion, SectionStatus, parse_staged_files, update_progress
+from edps.progress import check_recall_completion, check_quiz_completion, QuizResult, check_section_completion, SectionStatus, parse_staged_files, update_progress, run_hook
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -205,3 +205,52 @@ class TestUpdateProgress:
         assert result["quiz_scores"]["001"] == 7
         assert result["quiz_scores"]["002"] == 8
         assert result["stats"]["total_sections_completed"] == 2
+
+
+class TestRunHook:
+    """Tests for run_hook function (main entry point)."""
+
+    def test_updates_progress_for_staged_files(self, tmp_path):
+        """Should detect completion and update progress.yaml."""
+        # Setup: create book structure
+        book_dir = tmp_path / "books" / "test-book"
+        section_dir = book_dir / "sections" / "001"
+        section_dir.mkdir(parents=True)
+
+        # Copy complete fixtures
+        shutil.copy(FIXTURES / "recall_complete.md", section_dir / "recall.md")
+        shutil.copy(FIXTURES / "quiz_complete.md", section_dir / "quiz.md")
+
+        # Create initial progress.yaml
+        shutil.copy(FIXTURES / "progress_initial.yaml", book_dir / "progress.yaml")
+
+        # Act: run hook with staged files
+        staged = ["books/test-book/sections/001/recall.md"]
+        modified = run_hook(staged, base_path=tmp_path)
+
+        # Assert: progress was updated
+        assert len(modified) == 1
+        assert modified[0] == book_dir / "progress.yaml"
+
+        progress = yaml.safe_load((book_dir / "progress.yaml").read_text())
+        assert "001" in progress["completed_sections"]
+        assert progress["quiz_scores"]["001"] == 7
+
+    def test_no_update_for_incomplete_section(self, tmp_path):
+        """Should not add to completed_sections if section incomplete."""
+        # Setup: create book structure with incomplete quiz
+        book_dir = tmp_path / "books" / "test-book"
+        section_dir = book_dir / "sections" / "001"
+        section_dir.mkdir(parents=True)
+
+        shutil.copy(FIXTURES / "recall_complete.md", section_dir / "recall.md")
+        shutil.copy(FIXTURES / "quiz_partial.md", section_dir / "quiz.md")
+        shutil.copy(FIXTURES / "progress_initial.yaml", book_dir / "progress.yaml")
+
+        # Act
+        staged = ["books/test-book/sections/001/recall.md"]
+        run_hook(staged, base_path=tmp_path)
+
+        # Assert: not marked complete
+        progress = yaml.safe_load((book_dir / "progress.yaml").read_text())
+        assert "001" not in progress["completed_sections"]
