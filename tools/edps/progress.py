@@ -124,3 +124,30 @@ def check_section_completion(section_path: Path) -> SectionStatus:
         recall_score=recall_result.score,
         quiz_score=quiz_result.score,
     )
+
+
+def parse_staged_files(staged_files: list[str]) -> dict[str, set[str]]:
+    """
+    Parse staged file paths to extract affected (book, section) pairs.
+
+    Only considers files matching:
+        books/{book-slug}/sections/{section-id}/recall.md
+        books/{book-slug}/sections/{section-id}/quiz.md
+
+    Returns dict mapping book_slug to set of section_ids.
+    """
+    pattern = re.compile(r"^books/([^/]+)/sections/([^/]+)/(recall|quiz)\.md$")
+
+    result: dict[str, set[str]] = {}
+
+    for path in staged_files:
+        match = pattern.match(path)
+        if match:
+            book_slug = match.group(1)
+            section_id = match.group(2)
+
+            if book_slug not in result:
+                result[book_slug] = set()
+            result[book_slug].add(section_id)
+
+    return result

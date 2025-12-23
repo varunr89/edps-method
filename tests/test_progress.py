@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from edps.progress import check_recall_completion, check_quiz_completion, QuizResult, check_section_completion, SectionStatus
+from edps.progress import check_recall_completion, check_quiz_completion, QuizResult, check_section_completion, SectionStatus, parse_staged_files
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -77,3 +77,45 @@ class TestCheckSectionCompletion:
         assert result.is_complete is False
         assert result.recall_score is None
         assert result.quiz_score is None
+
+
+class TestParseStagedFiles:
+    """Tests for parse_staged_files function."""
+
+    def test_parses_recall_and_quiz_paths(self):
+        """Should extract book and section from valid paths."""
+        staged = [
+            "books/wealth-of-nations/sections/005/recall.md",
+            "books/wealth-of-nations/sections/005/quiz.md",
+        ]
+        result = parse_staged_files(staged)
+        assert result == {"wealth-of-nations": {"005"}}
+
+    def test_handles_multiple_sections(self):
+        """Should group multiple sections by book."""
+        staged = [
+            "books/wealth-of-nations/sections/001/recall.md",
+            "books/wealth-of-nations/sections/002/quiz.md",
+            "books/capital-vol-1/sections/003/recall.md",
+        ]
+        result = parse_staged_files(staged)
+        assert result == {
+            "wealth-of-nations": {"001", "002"},
+            "capital-vol-1": {"003"},
+        }
+
+    def test_ignores_non_homework_files(self):
+        """Should ignore files that aren't recall.md or quiz.md."""
+        staged = [
+            "books/wealth-of-nations/sections/001/summary.md",
+            "books/wealth-of-nations/sections/001/podcast.md",
+            "books/wealth-of-nations/progress.yaml",
+            "README.md",
+        ]
+        result = parse_staged_files(staged)
+        assert result == {}
+
+    def test_handles_empty_list(self):
+        """Should return empty dict for empty input."""
+        result = parse_staged_files([])
+        assert result == {}
