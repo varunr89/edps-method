@@ -1,9 +1,10 @@
 """Progress detection and sync module."""
 import re
-import yaml
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+
+from ruamel.yaml import YAML
 
 
 @dataclass
@@ -175,6 +176,7 @@ def update_progress(book_path: Path, section_updates: dict[str, SectionStatus]) 
     - Adds/removes sections from completed_sections based on is_complete
     - Updates quiz_scores and recall_scores
     - Recalculates stats
+    - Preserves comments and formatting
 
     Args:
         book_path: Path to the book directory (contains progress.yaml)
@@ -182,17 +184,26 @@ def update_progress(book_path: Path, section_updates: dict[str, SectionStatus]) 
     """
     progress_file = book_path / "progress.yaml"
 
+    # Use ruamel.yaml to preserve comments
+    yaml = YAML()
+    yaml.preserve_quotes = True
+
     # Load existing or create default
     if progress_file.exists():
-        progress = yaml.safe_load(progress_file.read_text()) or {}
+        with open(progress_file) as f:
+            progress = yaml.load(f) or {}
     else:
         progress = {}
 
     # Ensure required keys exist
-    progress.setdefault("completed_sections", [])
-    progress.setdefault("quiz_scores", {})
-    progress.setdefault("recall_scores", {})
-    progress.setdefault("stats", {})
+    if "completed_sections" not in progress:
+        progress["completed_sections"] = []
+    if "quiz_scores" not in progress:
+        progress["quiz_scores"] = {}
+    if "recall_scores" not in progress:
+        progress["recall_scores"] = {}
+    if "stats" not in progress:
+        progress["stats"] = {}
 
     # Update each affected section
     for section_id, status in section_updates.items():
@@ -210,18 +221,22 @@ def update_progress(book_path: Path, section_updates: dict[str, SectionStatus]) 
             if section_id in progress["completed_sections"]:
                 progress["completed_sections"].remove(section_id)
             # Remove scores
-            progress["quiz_scores"].pop(section_id, None)
-            progress["recall_scores"].pop(section_id, None)
+            if section_id in progress["quiz_scores"]:
+                del progress["quiz_scores"][section_id]
+            if section_id in progress["recall_scores"]:
+                del progress["recall_scores"][section_id]
 
     # Sort completed_sections for consistency
     progress["completed_sections"] = sorted(progress["completed_sections"])
 
-    # Recalculate stats
-    progress["stats"] = _calculate_stats(progress)
+    # Recalculate stats (update in place to preserve structure)
+    new_stats = _calculate_stats(progress)
+    for key, value in new_stats.items():
+        progress["stats"][key] = value
 
-    # Write back
+    # Write back preserving comments
     with open(progress_file, "w") as f:
-        yaml.dump(progress, f, default_flow_style=False, sort_keys=False)
+        yaml.dump(progress, f)
 
 
 def _calculate_stats(progress: dict) -> dict:
