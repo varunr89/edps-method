@@ -34,7 +34,9 @@ def check_recall_completion(recall_path: Path) -> RecallResult:
 
     Complete when:
     - No [Your answer] placeholders remain
-    - Score line matches: **My score**: [X] / 5
+    - Score line matches one of:
+      - **My score**: [X] / 5 (current template)
+      - - Recall accuracy: [X] (legacy format)
 
     Returns RecallResult with completion status and extracted score.
     """
@@ -46,11 +48,23 @@ def check_recall_completion(recall_path: Path) -> RecallResult:
     # Check for remaining placeholders
     has_placeholders = "[Your answer]" in text
 
-    # Extract score: **My score**: [X] / 5
+    # Extract score - support multiple formats:
+    # 1. Current template: **My score**: [X] / 5
+    # 2. Legacy format: - Recall accuracy: [X]
+    score = None
+
+    # Try current template format first
     score_pattern = r"\*\*My score\*\*:\s*\[(\d+)\]\s*/\s*5"
     score_match = re.search(score_pattern, text)
 
-    score = int(score_match.group(1)) if score_match else None
+    if score_match:
+        score = int(score_match.group(1))
+    else:
+        # Try legacy format
+        legacy_pattern = r"-\s*Recall accuracy:\s*\[(\d+)\]"
+        legacy_match = re.search(legacy_pattern, text)
+        if legacy_match:
+            score = int(legacy_match.group(1))
 
     # Complete only if no placeholders AND score is present
     is_complete = not has_placeholders and score is not None

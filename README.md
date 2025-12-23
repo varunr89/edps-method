@@ -99,23 +99,31 @@ For each section, follow this loop:
 | **4. Quiz** | Answer questions from memory. Score yourself. | `sections/<id>/quiz.md` |
 | **5. Track** | Update progress and commit | `progress.yaml` |
 
-### Updating progress
+### Updating progress (automatic)
 
-```yaml
-# progress.yaml
-completed_sections:
-  - "001"
-  - "002"  # <- add completed section
-
-quiz_scores:
-  "001": 8
-  "002": 7  # <- record your score
-```
+Progress is tracked automatically via a git pre-commit hook. When you commit filled recall and quiz files, `progress.yaml` updates itself:
 
 ```bash
-git add books/<slug>/progress.yaml
-git commit -m "Complete section 002"
-git push
+# One-time setup: install the pre-commit hook
+edps init-hooks
+
+# Then just commit your homework as usual
+git add books/<slug>/sections/001/recall.md books/<slug>/sections/001/quiz.md
+git commit -m "Complete section 001"
+# progress.yaml updates automatically!
+```
+
+A section is marked complete when:
+- All `[Your answer]` placeholders are filled in `recall.md`
+- A score line exists (e.g., `**My score**: [4] / 5`)
+- All `**Answer:**` sections are filled in `quiz.md`
+- A total line exists (e.g., `**Total: 7 / 8**`)
+
+**Manual sync** (if needed):
+
+```bash
+edps sync wealth-of-nations      # Sync one book
+edps sync --all                  # Sync all books
 ```
 
 ---

@@ -33,6 +33,12 @@ class TestCheckRecallCompletion:
         assert result.is_complete is False
         assert result.score == 3  # Score still extractable even if incomplete
 
+    def test_legacy_format_is_complete(self):
+        """Legacy format with '- Recall accuracy: [X]' should be detected."""
+        result = check_recall_completion(FIXTURES / "recall_legacy.md")
+        assert result.is_complete is True
+        assert result.score == 5
+
 
 class TestCheckQuizCompletion:
     """Tests for check_quiz_completion function."""
