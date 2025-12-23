@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from edps.progress import check_recall_completion
+from edps.progress import check_recall_completion, check_quiz_completion, QuizResult
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -29,3 +29,25 @@ class TestCheckRecallCompletion:
         result = check_recall_completion(FIXTURES / "recall_partial.md")
         assert result.is_complete is False
         assert result.score == 3  # Score still extractable even if incomplete
+
+
+class TestCheckQuizCompletion:
+    """Tests for check_quiz_completion function."""
+
+    def test_template_is_incomplete(self):
+        """Unfilled template should be incomplete."""
+        result = check_quiz_completion(FIXTURES / "quiz_template.md")
+        assert result.is_complete is False
+        assert result.score is None
+
+    def test_filled_quiz_is_complete(self):
+        """Properly filled quiz should be complete with score."""
+        result = check_quiz_completion(FIXTURES / "quiz_complete.md")
+        assert result.is_complete is True
+        assert result.score == 7
+
+    def test_partial_quiz_is_incomplete(self):
+        """Quiz with empty answers or no total should be incomplete."""
+        result = check_quiz_completion(FIXTURES / "quiz_partial.md")
+        assert result.is_complete is False
+        assert result.score is None  # No total filled in
