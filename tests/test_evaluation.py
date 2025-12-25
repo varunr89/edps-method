@@ -398,3 +398,78 @@ class TestEvaluateSection:
             # Should only have one instance of "## AI Feedback"
             assert recall_content.count("## AI Feedback") == 1
             assert quiz_content.count("## AI Feedback") == 1
+
+
+class TestIntegration:
+    """Integration tests for full evaluation flow."""
+
+    def test_full_evaluation_flow(self, tmp_path):
+        """Test complete flow from files to feedback."""
+        from edps.evaluation import evaluate_section
+
+        book_path = tmp_path / "books" / "test-book"
+        section_path = book_path / "sections" / "001"
+        section_path.mkdir(parents=True)
+
+        (section_path / "EDPS-test-book-001.txt").write_text(
+            "Division of labor increases productivity through three causes: "
+            "dexterity, time savings, and machinery invention."
+        )
+        (section_path / "recall.md").write_text('''# Recall
+
+## From Memory (before re-reading)
+
+1. Division of labor increases productivity
+2. Three causes explain this improvement
+
+## One Sentence I'd Tell Someone
+
+Division of labor is key to productivity.
+''')
+        (section_path / "quiz.md").write_text('''# Quiz
+
+### 1. Main Claim
+
+What increases productivity?
+
+**Answer:** Division of labor
+''')
+        (book_path / "progress.yaml").write_text("completed_sections: []\nquiz_scores: {}\nrecall_scores: {}\nstats: {}")
+
+        with patch("edps.core.llm.LLMClient") as mock_client:
+            mock_instance = MagicMock()
+            mock_instance.complete.return_value.content = '''```json
+{
+  "recall": {
+    "points": [
+      {"label": "Productivity claim", "correct": true, "note": "Correct"},
+      {"label": "Three causes", "correct": true, "note": "Correct"}
+    ],
+    "one_sentence_ok": true,
+    "one_sentence_note": "Good summary",
+    "score": 5,
+    "reasoning": "Excellent recall"
+  },
+  "quiz": {
+    "answers": [
+      {"label": "Q1", "correct": true, "score": 1.0, "note": "Correct"}
+    ],
+    "total_score": 8,
+    "reasoning": "Perfect"
+  }
+}
+```'''
+            mock_client.return_value = mock_instance
+
+            result = evaluate_section(section_path, "test-book", "001")
+
+            assert result.recall_score == 5
+            assert result.quiz_score == 8
+
+            recall_content = (section_path / "recall.md").read_text()
+            quiz_content = (section_path / "quiz.md").read_text()
+
+            assert "## AI Feedback" in recall_content
+            assert "**Overall Score:** 5/5" in recall_content
+            assert "## AI Feedback" in quiz_content
+            assert "**Total Score:** 8/8" in quiz_content
