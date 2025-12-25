@@ -18,7 +18,7 @@ if [ -z "$STAGED" ]; then
 fi
 
 # Run progress sync on staged files
-MODIFIED=$(python -m edps.progress --hook <<< "$STAGED" 2>/dev/null || true)
+MODIFIED=$(python -m edps.progress --hook --eval <<< "$STAGED" 2>/dev/null || true)
 
 # Auto-stage any modified progress files
 if [ -n "$MODIFIED" ]; then

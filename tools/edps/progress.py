@@ -264,17 +264,19 @@ def _calculate_stats(progress: dict) -> dict:
     return stats
 
 
-def run_hook(staged_files: list[str], base_path: Path = None) -> list[Path]:
+def run_hook(staged_files: list[str], base_path: Path = None, do_eval: bool = False) -> list[Path]:
     """
     Main hook entry point.
 
     1. Parse staged files to find affected (book, section) pairs
     2. Check each affected section for completion
-    3. Update progress.yaml for each affected book
+    3. Optionally run AI evaluation on complete sections
+    4. Update progress.yaml for each affected book
 
     Args:
         staged_files: List of staged file paths (relative to repo root)
         base_path: Base path of repository (default: current directory)
+        do_eval: If True, run AI evaluation on complete sections
 
     Returns:
         List of modified progress.yaml paths (for auto-staging)
@@ -302,6 +304,24 @@ def run_hook(staged_files: list[str], base_path: Path = None) -> list[Path]:
             section_path = book_path / "sections" / section_id
             if section_path.exists():
                 status = check_section_completion(section_path)
+
+                # If evaluation is enabled and section is complete, run AI evaluation
+                if do_eval and status.is_complete:
+                    try:
+                        from edps.config import load_config
+                        from edps.evaluation import evaluate_section
+                        config = load_config()
+                        result = evaluate_section(section_path, book_slug, section_id, config)
+                        # Update status with evaluation scores
+                        status = SectionStatus(
+                            is_complete=True,
+                            recall_score=result.recall_score,
+                            quiz_score=result.quiz_score
+                        )
+                    except Exception:
+                        # If evaluation fails, keep original status
+                        pass
+
                 section_updates[section_id] = status
 
         if section_updates:
@@ -316,11 +336,12 @@ def main():
     import sys
 
     if "--hook" in sys.argv:
+        do_eval = "--eval" in sys.argv
         # Read staged files from stdin
         staged = sys.stdin.read().strip().split("\n")
         staged = [f for f in staged if f]  # Remove empty lines
 
-        modified = run_hook(staged)
+        modified = run_hook(staged, do_eval=do_eval)
 
         # Print modified files for the hook to stage
         for path in modified:
