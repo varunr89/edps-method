@@ -63,3 +63,25 @@ def parse_recall_content(content: str) -> dict:
         result["one_sentence"] = sentence_match.group(1).strip()
 
     return result
+
+
+def parse_quiz_content(content: str) -> dict:
+    """Parse quiz.md content into structured data.
+
+    Args:
+        content: Raw markdown content of quiz.md
+
+    Returns:
+        Dict with qa_pairs list, each containing number, title, question, and answer
+    """
+    result = {"qa_pairs": []}
+    pattern = r"### (\d+)\. (.+?)\n\n(.+?)\n\n\*\*Answer:\*\*\s*(.+?)(?=\n---|\n###|\Z)"
+    matches = re.findall(pattern, content, re.DOTALL)
+    for match in matches:
+        result["qa_pairs"].append({
+            "number": match[0],
+            "title": match[1].strip(),
+            "question": match[2].strip(),
+            "answer": match[3].strip(),
+        })
+    return result

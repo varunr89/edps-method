@@ -1,5 +1,5 @@
 """Tests for AI evaluation module."""
-from edps.evaluation import RecallFeedback, QuizFeedback, AnswerFeedback, parse_recall_content
+from edps.evaluation import RecallFeedback, QuizFeedback, AnswerFeedback, parse_recall_content, parse_quiz_content
 
 
 class TestDataclasses:
@@ -67,3 +67,45 @@ Division of labor drives economic growth.
         result = parse_recall_content(content)
         assert result["memory_points"] == []
         assert result["one_sentence"] == ""
+
+
+class TestParseQuizContent:
+    """Tests for parsing quiz.md content."""
+
+    def test_extracts_questions_and_answers(self):
+        """Should extract all Q&A pairs with metadata."""
+        content = '''### 1. Main Claim
+
+What is the primary cause?
+
+**Answer:** Division of labor.
+
+---
+
+### 2. Mechanism
+
+What are the three causes?
+
+**Answer:** Dexterity, time savings, machinery.
+'''
+        result = parse_quiz_content(content)
+        assert len(result["qa_pairs"]) == 2
+        assert result["qa_pairs"][0]["number"] == "1"
+        assert result["qa_pairs"][0]["title"] == "Main Claim"
+        assert "Division of labor" in result["qa_pairs"][0]["answer"]
+
+    def test_handles_multiline_answers(self):
+        """Should handle answers spanning multiple lines."""
+        content = '''### 8. Modern Connection
+
+How does this connect?
+
+**Answer:** This connects because of X.
+And also Y.
+Furthermore Z.
+
+---
+'''
+        result = parse_quiz_content(content)
+        assert "X" in result["qa_pairs"][0]["answer"]
+        assert "Z" in result["qa_pairs"][0]["answer"]
