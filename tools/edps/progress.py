@@ -26,7 +26,7 @@ class SectionStatus:
     """Result of checking section completion."""
     is_complete: bool
     recall_score: Optional[int]
-    quiz_score: Optional[int]
+    quiz_score: Optional[float]
 
 
 def check_recall_completion(recall_path: Path) -> RecallResult:
