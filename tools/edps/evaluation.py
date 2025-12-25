@@ -1,5 +1,7 @@
 """AI-powered evaluation of recall and quiz answers."""
 from dataclasses import dataclass, field
+from datetime import date
+from pathlib import Path
 from typing import Optional
 import re
 import json
@@ -30,6 +32,15 @@ class QuizFeedback:
     answers: list[AnswerFeedback]
     total_score: float  # 0-8
     reasoning: str
+
+
+@dataclass
+class EvaluationResult:
+    """Result of evaluating a section's recall and quiz."""
+    recall_score: int
+    quiz_score: float
+    recall_feedback: RecallFeedback
+    quiz_feedback: QuizFeedback
 
 
 def parse_recall_content(content: str) -> dict:
@@ -306,3 +317,74 @@ def format_quiz_feedback(feedback: QuizFeedback, eval_date: str, source_file: st
     ])
 
     return "\n".join(lines)
+
+
+def evaluate_section(
+    section_path: Path,
+    book_slug: str,
+    section_id: str,
+    config: Optional["EdpsConfig"] = None,
+) -> EvaluationResult:
+    """Evaluate a section's recall and quiz answers.
+
+    Args:
+        section_path: Path to the section directory
+        book_slug: Book slug identifier (e.g., "wealth-of-nations")
+        section_id: Section ID (e.g., "001")
+        config: Optional EDPS configuration
+
+    Returns:
+        EvaluationResult with scores and feedback
+
+    Raises:
+        FileNotFoundError: If source file doesn't exist
+    """
+    if config is None:
+        from edps.config import load_config
+        config = load_config()
+
+    # Find source file
+    source_file = section_path / f"EDPS-{book_slug}-{section_id}.txt"
+    if not source_file.exists():
+        raise FileNotFoundError(f"Source file not found: {source_file}")
+    source_text = source_file.read_text()
+
+    # Read and parse recall/quiz
+    recall_path = section_path / "recall.md"
+    recall_raw = recall_path.read_text()
+    recall_content = parse_recall_content(recall_raw)
+
+    quiz_path = section_path / "quiz.md"
+    quiz_raw = quiz_path.read_text()
+    quiz_content = parse_quiz_content(quiz_raw)
+
+    # Build prompt and call LLM
+    prompt = build_evaluation_prompt(source_text, recall_raw, quiz_raw)
+
+    from edps.core.llm import LLMClient
+    client = LLMClient(config)
+    response = client.complete(prompt, max_tokens=2000)
+
+    # Parse response
+    recall_feedback, quiz_feedback = parse_evaluation_response(response.content)
+
+    # Format and append feedback
+    eval_date = date.today().isoformat()
+    recall_md = format_recall_feedback(recall_feedback, eval_date, source_file.name)
+    quiz_md = format_quiz_feedback(quiz_feedback, eval_date, source_file.name)
+
+    # Append to files (avoid duplicate)
+    if "## AI Feedback" not in recall_raw:
+        with open(recall_path, "a") as f:
+            f.write(recall_md)
+
+    if "## AI Feedback" not in quiz_raw:
+        with open(quiz_path, "a") as f:
+            f.write(quiz_md)
+
+    return EvaluationResult(
+        recall_score=recall_feedback.score,
+        quiz_score=quiz_feedback.total_score,
+        recall_feedback=recall_feedback,
+        quiz_feedback=quiz_feedback,
+    )

@@ -1,4 +1,5 @@
 """Tests for AI evaluation module."""
+from unittest.mock import MagicMock, patch
 from edps.evaluation import RecallFeedback, QuizFeedback, AnswerFeedback, parse_recall_content, parse_quiz_content
 
 
@@ -298,3 +299,102 @@ class TestFormatFeedback:
         assert "Q1" in markdown or "Main claim" in markdown
         assert "Q2" in markdown or "Mechanism" in markdown
         assert "7.5" in markdown or "total" in markdown.lower()
+
+
+class TestEvaluateSection:
+    """Tests for evaluate_section main function."""
+
+    def test_reads_required_files(self, tmp_path):
+        """Should read source, recall, and quiz files."""
+        from edps.evaluation import evaluate_section
+
+        section = tmp_path / "sections" / "001"
+        section.mkdir(parents=True)
+        (section / "EDPS-test-001.txt").write_text("Source content")
+        (section / "recall.md").write_text("## From Memory\n\n1. Point one\n\n## One Sentence\n\nSummary")
+        (section / "quiz.md").write_text("### 1. Q1\n\nQuestion?\n\n**Answer:** Answer here")
+
+        with patch("edps.core.llm.LLMClient") as mock_client:
+            mock_instance = MagicMock()
+            mock_instance.complete.return_value.content = '{"recall": {"points": [], "one_sentence_ok": true, "one_sentence_note": "", "score": 4, "reasoning": ""}, "quiz": {"answers": [], "total_score": 7, "reasoning": ""}}'
+            mock_client.return_value = mock_instance
+            result = evaluate_section(section, "test", "001")
+            assert result is not None
+            assert mock_instance.complete.called
+
+    def test_appends_feedback_to_files(self, tmp_path):
+        """Should append AI feedback to recall.md and quiz.md."""
+        from edps.evaluation import evaluate_section
+
+        section = tmp_path / "sections" / "001"
+        section.mkdir(parents=True)
+        (section / "EDPS-test-001.txt").write_text("Source")
+        (section / "recall.md").write_text("# Recall\n\n## From Memory\n\n1. Point\n\n## One Sentence\n\nSum")
+        (section / "quiz.md").write_text("### 1. Q1\n\nQ?\n\n**Answer:** A")
+
+        with patch("edps.core.llm.LLMClient") as mock_client:
+            mock_instance = MagicMock()
+            mock_instance.complete.return_value.content = '{"recall": {"points": [{"label": "P1", "correct": true, "note": "OK"}], "one_sentence_ok": true, "one_sentence_note": "Good", "score": 4, "reasoning": "Good"}, "quiz": {"answers": [{"label": "Q1", "correct": true, "score": 1.0, "note": "OK"}], "total_score": 7, "reasoning": "Good"}}'
+            mock_client.return_value = mock_instance
+            evaluate_section(section, "test", "001")
+            recall_content = (section / "recall.md").read_text()
+            quiz_content = (section / "quiz.md").read_text()
+            assert "## AI Feedback" in recall_content
+            assert "## AI Feedback" in quiz_content
+
+    def test_raises_error_if_source_missing(self, tmp_path):
+        """Should raise FileNotFoundError if source file doesn't exist."""
+        from edps.evaluation import evaluate_section
+        import pytest
+
+        section = tmp_path / "sections" / "001"
+        section.mkdir(parents=True)
+        (section / "recall.md").write_text("## From Memory\n\n1. Point\n\n## One Sentence\n\nSum")
+        (section / "quiz.md").write_text("### 1. Q1\n\nQ?\n\n**Answer:** A")
+
+        with pytest.raises(FileNotFoundError):
+            evaluate_section(section, "test", "001")
+
+    def test_returns_evaluation_result(self, tmp_path):
+        """Should return EvaluationResult with scores and feedback."""
+        from edps.evaluation import evaluate_section
+
+        section = tmp_path / "sections" / "001"
+        section.mkdir(parents=True)
+        (section / "EDPS-test-001.txt").write_text("Source")
+        (section / "recall.md").write_text("## From Memory\n\n1. Point\n\n## One Sentence\n\nSum")
+        (section / "quiz.md").write_text("### 1. Q1\n\nQ?\n\n**Answer:** A")
+
+        with patch("edps.core.llm.LLMClient") as mock_client:
+            mock_instance = MagicMock()
+            mock_instance.complete.return_value.content = '{"recall": {"points": [], "one_sentence_ok": true, "one_sentence_note": "", "score": 4, "reasoning": ""}, "quiz": {"answers": [], "total_score": 7.5, "reasoning": ""}}'
+            mock_client.return_value = mock_instance
+            result = evaluate_section(section, "test", "001")
+
+            assert result.recall_score == 4
+            assert result.quiz_score == 7.5
+            assert result.recall_feedback is not None
+            assert result.quiz_feedback is not None
+
+    def test_does_not_duplicate_feedback(self, tmp_path):
+        """Should not append feedback if it already exists."""
+        from edps.evaluation import evaluate_section
+
+        section = tmp_path / "sections" / "001"
+        section.mkdir(parents=True)
+        (section / "EDPS-test-001.txt").write_text("Source")
+        (section / "recall.md").write_text("# Recall\n\n## From Memory\n\n1. Point\n\n## One Sentence\n\nSum\n\n---\n\n## AI Feedback\n\nExisting feedback")
+        (section / "quiz.md").write_text("### 1. Q1\n\nQ?\n\n**Answer:** A\n\n---\n\n## AI Feedback\n\nExisting feedback")
+
+        with patch("edps.core.llm.LLMClient") as mock_client:
+            mock_instance = MagicMock()
+            mock_instance.complete.return_value.content = '{"recall": {"points": [], "one_sentence_ok": true, "one_sentence_note": "", "score": 4, "reasoning": ""}, "quiz": {"answers": [], "total_score": 7, "reasoning": ""}}'
+            mock_client.return_value = mock_instance
+            evaluate_section(section, "test", "001")
+
+            recall_content = (section / "recall.md").read_text()
+            quiz_content = (section / "quiz.md").read_text()
+
+            # Should only have one instance of "## AI Feedback"
+            assert recall_content.count("## AI Feedback") == 1
+            assert quiz_content.count("## AI Feedback") == 1
