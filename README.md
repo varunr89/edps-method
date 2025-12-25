@@ -96,12 +96,16 @@ For each section, follow this loop:
 | **1. Listen** | Upload the source file to [NotebookLM](https://notebooklm.google.com/) and generate an audio overview | `sections/<id>/EDPS-<slug>-<id>.txt` |
 | **2. Recall** | Write what you remember — **without looking** — in the recall template | `sections/<id>/recall.md` |
 | **3. Read** | Consult the summary. Fill in gaps in your recall notes. | `sections/<id>/summary.md` |
-| **4. Quiz** | Answer questions from memory. Score yourself. | `sections/<id>/quiz.md` |
-| **5. Track** | Update progress and commit | `progress.yaml` |
+| **4. Quiz** | Answer questions from memory. | `sections/<id>/quiz.md` |
+| **5. Commit** | Commit your work — AI evaluates and scores automatically | `progress.yaml` |
 
-### Updating progress (automatic)
+### AI Evaluation (automatic on commit)
 
-Progress is tracked automatically via a git pre-commit hook. When you commit filled recall and quiz files, `progress.yaml` updates itself:
+When you commit filled recall and quiz files, the pre-commit hook:
+1. Detects completed homework files
+2. Runs AI evaluation against the source text (~15 seconds)
+3. Appends detailed feedback to `recall.md` and `quiz.md`
+4. Updates `progress.yaml` with AI-generated scores
 
 ```bash
 # One-time setup: install the pre-commit hook
@@ -110,16 +114,25 @@ edps init-hooks
 # Then just commit your homework as usual
 git add books/<slug>/sections/001/recall.md books/<slug>/sections/001/quiz.md
 git commit -m "Complete section 001"
-# progress.yaml updates automatically!
+# AI evaluates, appends feedback, updates progress.yaml automatically!
 ```
 
 A section is marked complete when:
 - All `[Your answer]` placeholders are filled in `recall.md`
-- A score line exists (e.g., `**My score**: [4] / 5`)
 - All `**Answer:**` sections are filled in `quiz.md`
-- A total line exists (e.g., `**Total: 7 / 8**`)
 
-**Manual sync** (if needed):
+The AI evaluates your answers against the source text with generous scoring:
+- Credits directionally correct answers even if wording differs
+- Accepts modern parallels and applications (expected in recall point 4)
+- Provides specific feedback on what you got right and what you missed
+
+**Manual evaluation** (if needed):
+
+```bash
+edps eval wealth-of-nations 001  # Evaluate a specific section
+```
+
+**Manual sync** (without AI evaluation):
 
 ```bash
 edps sync wealth-of-nations      # Sync one book
