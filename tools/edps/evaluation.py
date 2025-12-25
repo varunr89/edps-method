@@ -363,7 +363,7 @@ def evaluate_section(
 
     from edps.core.llm import LLMClient
     client = LLMClient(config)
-    response = client.complete(prompt, max_tokens=2000)
+    response = client.complete(prompt, model=config.models.evaluation, max_tokens=2000)
 
     # Parse response
     recall_feedback, quiz_feedback = parse_evaluation_response(response.content)

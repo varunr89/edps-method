@@ -23,6 +23,7 @@ class ModelsConfig:
     podcast: str = "claude-sonnet-4-20250514"
     quiz: str = "claude-haiku-3-5"
     claims_synthesis: str = "claude-sonnet-4-20250514"
+    evaluation: str = "claude-sonnet-4-20250514"
 
 
 @dataclass
@@ -78,6 +79,7 @@ def load_config(config_path: Optional[Path] = None) -> EdpsConfig:
                 podcast=models_data.get("podcast", config.models.podcast),
                 quiz=models_data.get("quiz", config.models.quiz),
                 claims_synthesis=models_data.get("claims_synthesis", config.models.claims_synthesis),
+                evaluation=models_data.get("evaluation", config.models.evaluation),
             )
 
         # Load defaults
