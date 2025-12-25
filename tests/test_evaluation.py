@@ -109,3 +109,45 @@ Furthermore Z.
         result = parse_quiz_content(content)
         assert "X" in result["qa_pairs"][0]["answer"]
         assert "Z" in result["qa_pairs"][0]["answer"]
+
+
+class TestBuildEvaluationPrompt:
+    """Tests for building evaluation prompts."""
+
+    def test_includes_source_text(self):
+        """Prompt should include the source text."""
+        from edps.evaluation import build_evaluation_prompt
+
+        source = "Division of labor increases productivity through specialization."
+        recall = "## From Memory\n\n1. Specialization helps.\n\n## One Sentence\n\nLabor division is key."
+        quiz = "### 1. Main\n\nWhat helps?\n\n**Answer:** Specialization"
+
+        prompt = build_evaluation_prompt(source, recall, quiz)
+        assert "Division of labor" in prompt
+        assert source in prompt
+
+    def test_includes_user_answers(self):
+        """Prompt should include recall points, summary, and quiz answers."""
+        from edps.evaluation import build_evaluation_prompt
+
+        source = "Source text here"
+        recall = "## From Memory (before re-reading)\n\n*Instructions*\n\n1. Point one.\n2. Point two.\n\n## One Sentence\n\nMy summary."
+        quiz = "### 1. Q1\n\nQuestion?\n\n**Answer:** My answer"
+
+        prompt = build_evaluation_prompt(source, recall, quiz)
+        assert "Point one" in prompt
+        assert "Point two" in prompt
+        assert "My summary" in prompt
+        assert "My answer" in prompt
+
+    def test_requests_json_output(self):
+        """Prompt should request JSON formatted response."""
+        from edps.evaluation import build_evaluation_prompt
+
+        source = "Test"
+        recall = "## From Memory\n\n1. Test\n\n## One Sentence\n\nTest"
+        quiz = "### 1. T\n\nT?\n\n**Answer:** T"
+
+        prompt = build_evaluation_prompt(source, recall, quiz)
+        assert "json" in prompt.lower() or "JSON" in prompt
+        assert "{" in prompt or "schema" in prompt.lower()

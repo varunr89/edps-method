@@ -85,3 +85,75 @@ def parse_quiz_content(content: str) -> dict:
             "answer": match[3].strip(),
         })
     return result
+
+
+def build_evaluation_prompt(source_text: str, recall_content: str, quiz_content: str) -> str:
+    """Build a prompt for Claude to evaluate recall and quiz answers.
+
+    Args:
+        source_text: The original source material
+        recall_content: Raw markdown content of recall.md
+        quiz_content: Raw markdown content of quiz.md
+
+    Returns:
+        A prompt string that requests JSON-formatted evaluation
+    """
+    recall_data = parse_recall_content(recall_content)
+    quiz_data = parse_quiz_content(quiz_content)
+
+    prompt = f"""You are evaluating a student's understanding of a text using the EDPS Method (spaced repetition + active recall).
+
+# Source Text
+{source_text}
+
+# Student's Recall (from memory, before re-reading)
+
+## Memory Points
+{chr(10).join(f'{i+1}. {point}' for i, point in enumerate(recall_data['memory_points']))}
+
+## One Sentence Summary
+{recall_data['one_sentence']}
+
+# Student's Quiz Answers
+
+"""
+
+    for qa in quiz_data['qa_pairs']:
+        prompt += f"**Q{qa['number']}: {qa['title']}**\n"
+        prompt += f"Question: {qa['question']}\n"
+        prompt += f"Answer: {qa['answer']}\n\n"
+
+    prompt += """
+# Evaluation Task
+
+Please evaluate the student's recall and quiz performance. Return your evaluation in JSON format:
+
+```json
+{
+  "recall": {
+    "points": [
+      {"label": "Point description", "correct": true/false, "note": "Feedback"}
+    ],
+    "one_sentence_ok": true/false,
+    "one_sentence_note": "Feedback on summary",
+    "score": 0-5,
+    "reasoning": "Overall assessment"
+  },
+  "quiz": {
+    "answers": [
+      {"label": "Q1: Title", "correct": true/false, "score": 0-1, "note": "Feedback"}
+    ],
+    "total_score": 0-8,
+    "reasoning": "Overall assessment"
+  }
+}
+```
+
+Scoring rubric:
+- Recall score (0-5): Based on accuracy and completeness of memory points
+- Quiz scores: Each question worth 1 point (8 total questions)
+- Mark partial credit as 0.5 when applicable
+
+Respond ONLY with the JSON object, no other text."""
+
+    return prompt
