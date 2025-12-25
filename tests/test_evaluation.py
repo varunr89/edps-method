@@ -151,3 +151,79 @@ class TestBuildEvaluationPrompt:
         prompt = build_evaluation_prompt(source, recall, quiz)
         assert "json" in prompt.lower() or "JSON" in prompt
         assert "{" in prompt or "schema" in prompt.lower()
+
+
+class TestParseEvaluationResponse:
+    """Tests for parsing LLM evaluation responses."""
+
+    def test_parses_valid_json(self):
+        """Should parse clean JSON response into feedback objects."""
+        from edps.evaluation import parse_evaluation_response
+
+        response = """{
+  "recall": {
+    "points": [
+      {"label": "Division of labor", "correct": true, "note": "Good"},
+      {"label": "Pin factory", "correct": false, "note": "Missed details"}
+    ],
+    "one_sentence_ok": true,
+    "one_sentence_note": "Clear summary",
+    "score": 4,
+    "reasoning": "Strong recall"
+  },
+  "quiz": {
+    "answers": [
+      {"label": "Q1: Main claim", "correct": true, "score": 1.0, "note": "Perfect"},
+      {"label": "Q2: Mechanism", "correct": false, "score": 0.5, "note": "Partial"}
+    ],
+    "total_score": 6.5,
+    "reasoning": "Good understanding"
+  }
+}"""
+
+        recall_fb, quiz_fb = parse_evaluation_response(response)
+
+        assert recall_fb.score == 4
+        assert len(recall_fb.points) == 2
+        assert recall_fb.points[0].correct is True
+        assert recall_fb.points[1].correct is False
+        assert recall_fb.one_sentence_ok is True
+
+        assert quiz_fb.total_score == 6.5
+        assert len(quiz_fb.answers) == 2
+        assert quiz_fb.answers[0].score == 1.0
+        assert quiz_fb.answers[1].score == 0.5
+
+    def test_handles_json_in_markdown(self):
+        """Should extract JSON from markdown code blocks."""
+        from edps.evaluation import parse_evaluation_response
+
+        response = """Here is the evaluation:
+
+```json
+{
+  "recall": {
+    "points": [
+      {"label": "Test", "correct": true, "note": "OK"}
+    ],
+    "one_sentence_ok": true,
+    "one_sentence_note": "Good",
+    "score": 5,
+    "reasoning": "Perfect"
+  },
+  "quiz": {
+    "answers": [
+      {"label": "Q1", "correct": true, "score": 1.0, "note": "Correct"}
+    ],
+    "total_score": 8.0,
+    "reasoning": "Perfect score"
+  }
+}
+```
+
+Additional commentary here."""
+
+        recall_fb, quiz_fb = parse_evaluation_response(response)
+
+        assert recall_fb.score == 5
+        assert quiz_fb.total_score == 8.0

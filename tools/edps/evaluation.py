@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 from typing import Optional
 import re
+import json
 
 
 @dataclass
@@ -157,3 +158,65 @@ Scoring rubric:
 Respond ONLY with the JSON object, no other text."""
 
     return prompt
+
+
+def parse_evaluation_response(response: str) -> tuple[RecallFeedback, QuizFeedback]:
+    """Parse JSON from LLM evaluation response.
+
+    Args:
+        response: Raw response from Claude (may include markdown code blocks)
+
+    Returns:
+        Tuple of (RecallFeedback, QuizFeedback) objects
+    """
+    # Extract JSON from markdown code block if present
+    json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response, re.DOTALL)
+    if json_match:
+        json_str = json_match.group(1)
+    else:
+        # Try to find raw JSON
+        json_match = re.search(r'(\{.*\})', response, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(1)
+        else:
+            json_str = response
+
+    # Parse JSON
+    data = json.loads(json_str)
+
+    # Build RecallFeedback
+    recall_data = data["recall"]
+    recall_points = [
+        AnswerFeedback(
+            label=p["label"],
+            correct=p["correct"],
+            note=p["note"]
+        )
+        for p in recall_data["points"]
+    ]
+    recall_feedback = RecallFeedback(
+        points=recall_points,
+        one_sentence_ok=recall_data["one_sentence_ok"],
+        one_sentence_note=recall_data["one_sentence_note"],
+        score=recall_data["score"],
+        reasoning=recall_data["reasoning"]
+    )
+
+    # Build QuizFeedback
+    quiz_data = data["quiz"]
+    quiz_answers = [
+        AnswerFeedback(
+            label=a["label"],
+            correct=a["correct"],
+            note=a["note"],
+            score=a["score"]
+        )
+        for a in quiz_data["answers"]
+    ]
+    quiz_feedback = QuizFeedback(
+        answers=quiz_answers,
+        total_score=quiz_data["total_score"],
+        reasoning=quiz_data["reasoning"]
+    )
+
+    return recall_feedback, quiz_feedback
