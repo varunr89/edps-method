@@ -99,6 +99,16 @@ def parse_quiz_content(content: str) -> dict:
     return result
 
 
+# Recall section labels from the EDPS template
+RECALL_SECTION_LABELS = [
+    ("Main Claim", "What was the core argument? (should match source)"),
+    ("Key Mechanism", "What process or cause-effect was described? (should match source)"),
+    ("Example", "What example stuck with them? (should match source)"),
+    ("Modern Parallel", "What connection to today came to mind? (EXTERNAL connections expected and correct)"),
+    ("Uncertainty", "What are they unsure about? (questions/confusion expected)"),
+]
+
+
 def build_evaluation_prompt(source_text: str, recall_content: str, quiz_content: str) -> str:
     """Build a prompt for Claude to evaluate recall and quiz answers.
 
@@ -113,6 +123,15 @@ def build_evaluation_prompt(source_text: str, recall_content: str, quiz_content:
     recall_data = parse_recall_content(recall_content)
     quiz_data = parse_quiz_content(quiz_content)
 
+    # Build recall points with section labels
+    recall_points_formatted = []
+    for i, point in enumerate(recall_data['memory_points']):
+        if i < len(RECALL_SECTION_LABELS):
+            label, guidance = RECALL_SECTION_LABELS[i]
+            recall_points_formatted.append(f"{i+1}. **{label}**: {point}\n   _{guidance}_")
+        else:
+            recall_points_formatted.append(f"{i+1}. {point}")
+
     prompt = f"""You are evaluating a student's understanding of a text using the EDPS Method (spaced repetition + active recall).
 
 # Source Text
@@ -121,7 +140,7 @@ def build_evaluation_prompt(source_text: str, recall_content: str, quiz_content:
 # Student's Recall (from memory, before re-reading)
 
 ## Memory Points
-{chr(10).join(f'{i+1}. {point}' for i, point in enumerate(recall_data['memory_points']))}
+{chr(10).join(recall_points_formatted)}
 
 ## One Sentence Summary
 {recall_data['one_sentence']}
@@ -163,6 +182,9 @@ Please evaluate the student's recall and quiz performance. Return your evaluatio
 
 Scoring rubric:
 - Recall score (0-5): Based on accuracy and completeness of memory points
+  - Points 1-3 (Main Claim, Key Mechanism, Example): Evaluate against source text
+  - Point 4 (Modern Parallel): External connections are EXPECTED and CORRECT - evaluate thoughtfulness, not source accuracy
+  - Point 5 (Uncertainty): Questions/confusion are EXPECTED - evaluate self-awareness, not source accuracy
 - Quiz scores: Each question worth 1 point (8 total questions)
 - Mark partial credit as 0.5 when applicable
 

@@ -2,22 +2,23 @@
 # Update this file as you complete sections
 
 # Completed sections (add section IDs as you finish)
-completed_sections: []
-
-# Quiz scores (section_id: score out of 8)
-quiz_scores: {}
+completed_sections:
+- '001'
+quiz_scores:
+  '001': 7.5
 
 # Recall scores (section_id: self-rating 0-5)
-recall_scores: {}
+recall_scores:
+  '001': 4
 
 # Streaks and stats
 stats:
   current_streak: 0
   longest_streak: 0
-  total_sections_completed: 0
+  total_sections_completed: 1
   total_time_spent_minutes: 0
-  average_quiz_score: null
-  average_recall_score: null
+  average_quiz_score: 7.5
+  average_recall_score: 4.0
 
 # Weekly synthesis tracking
 weekly_syntheses: []
@@ -28,6 +29,6 @@ weekly_syntheses: []
 
 # Notes and reflections
 notes:
-  last_updated: null
-  current_focus: null
+  last_updated:
+  current_focus:
   blockers: []
