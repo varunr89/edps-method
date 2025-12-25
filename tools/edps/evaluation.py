@@ -220,3 +220,89 @@ def parse_evaluation_response(response: str) -> tuple[RecallFeedback, QuizFeedba
     )
 
     return recall_feedback, quiz_feedback
+
+
+def format_recall_feedback(feedback: RecallFeedback, eval_date: str, source_file: str) -> str:
+    """Format recall feedback as markdown.
+
+    Args:
+        feedback: RecallFeedback object with evaluation results
+        eval_date: Date of evaluation (YYYY-MM-DD format)
+        source_file: Path to source file being evaluated
+
+    Returns:
+        Markdown-formatted feedback with table and metadata
+    """
+    lines = [
+        "---",
+        "",
+        "## AI Feedback",
+        "",
+        f"**Evaluation Date:** {eval_date}",
+        f"**Source:** {source_file}",
+        f"**Overall Score:** {feedback.score}/5",
+        "",
+        "### Memory Points",
+        "",
+        "| Point | Status | Feedback |",
+        "|-------|--------|----------|"
+    ]
+
+    for point in feedback.points:
+        status = "✓" if point.correct else "⚠️"
+        lines.append(f"| {point.label} | {status} | {point.note} |")
+
+    lines.extend([
+        "",
+        "### One Sentence Summary",
+        "",
+        f"**Status:** {'✓ Accurate' if feedback.one_sentence_ok else '⚠️ Needs work'}",
+        f"**Feedback:** {feedback.one_sentence_note}",
+        "",
+        "### Overall Assessment",
+        "",
+        feedback.reasoning
+    ])
+
+    return "\n".join(lines)
+
+
+def format_quiz_feedback(feedback: QuizFeedback, eval_date: str, source_file: str) -> str:
+    """Format quiz feedback as markdown.
+
+    Args:
+        feedback: QuizFeedback object with evaluation results
+        eval_date: Date of evaluation (YYYY-MM-DD format)
+        source_file: Path to source file being evaluated
+
+    Returns:
+        Markdown-formatted feedback with table and metadata
+    """
+    lines = [
+        "---",
+        "",
+        "## AI Feedback",
+        "",
+        f"**Evaluation Date:** {eval_date}",
+        f"**Source:** {source_file}",
+        f"**Total Score:** {feedback.total_score}/8",
+        "",
+        "### Answers",
+        "",
+        "| Question | Status | Score | Feedback |",
+        "|----------|--------|-------|----------|"
+    ]
+
+    for answer in feedback.answers:
+        status = "✓" if answer.correct else "⚠️"
+        score_str = f"{answer.score:.1f}/1.0"
+        lines.append(f"| {answer.label} | {status} | {score_str} | {answer.note} |")
+
+    lines.extend([
+        "",
+        "### Overall Assessment",
+        "",
+        feedback.reasoning
+    ])
+
+    return "\n".join(lines)

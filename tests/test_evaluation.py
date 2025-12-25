@@ -227,3 +227,74 @@ Additional commentary here."""
 
         assert recall_fb.score == 5
         assert quiz_fb.total_score == 8.0
+
+
+class TestFormatFeedback:
+    """Tests for formatting feedback as markdown."""
+
+    def test_recall_feedback_format(self):
+        """Should format recall feedback as markdown table."""
+        from edps.evaluation import format_recall_feedback, RecallFeedback, AnswerFeedback
+
+        feedback = RecallFeedback(
+            points=[
+                AnswerFeedback(label="Labor division", correct=True, note="Accurate"),
+                AnswerFeedback(label="Pin factory", correct=False, note="Missing detail"),
+            ],
+            one_sentence_ok=True,
+            one_sentence_note="Clear and concise",
+            score=4,
+            reasoning="Good overall"
+        )
+
+        markdown = format_recall_feedback(feedback, "2024-01-15", "section-001/source.md")
+
+        # Should have header
+        assert "## AI Feedback" in markdown
+        assert "2024-01-15" in markdown
+        assert "section-001/source.md" in markdown
+
+        # Should have table
+        assert "| Point | Status | Feedback |" in markdown or "Point" in markdown and "Status" in markdown
+
+        # Should have checkmarks/warnings
+        assert "✓" in markdown or "✅" in markdown
+        assert "⚠" in markdown or "⚠️" in markdown
+
+        # Should have content
+        assert "Labor division" in markdown
+        assert "Accurate" in markdown
+        assert "Pin factory" in markdown
+        assert "score" in markdown.lower() or "4" in markdown
+
+    def test_quiz_feedback_format(self):
+        """Should format quiz feedback as markdown table."""
+        from edps.evaluation import format_quiz_feedback, QuizFeedback, AnswerFeedback
+
+        feedback = QuizFeedback(
+            answers=[
+                AnswerFeedback(label="Q1: Main claim", correct=True, score=1.0, note="Perfect"),
+                AnswerFeedback(label="Q2: Mechanism", correct=False, score=0.5, note="Partial credit"),
+            ],
+            total_score=7.5,
+            reasoning="Strong comprehension"
+        )
+
+        markdown = format_quiz_feedback(feedback, "2024-01-15", "section-001/source.md")
+
+        # Should have header
+        assert "## AI Feedback" in markdown
+        assert "2024-01-15" in markdown
+        assert "section-001/source.md" in markdown
+
+        # Should have table
+        assert "| Question | Status | Score | Feedback |" in markdown or ("Question" in markdown and "Score" in markdown)
+
+        # Should have checkmarks/warnings
+        assert "✓" in markdown or "✅" in markdown
+        assert "⚠" in markdown or "⚠️" in markdown
+
+        # Should have content
+        assert "Q1" in markdown or "Main claim" in markdown
+        assert "Q2" in markdown or "Mechanism" in markdown
+        assert "7.5" in markdown or "total" in markdown.lower()
