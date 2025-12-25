@@ -1,5 +1,5 @@
 """Tests for AI evaluation module."""
-from edps.evaluation import RecallFeedback, QuizFeedback, AnswerFeedback
+from edps.evaluation import RecallFeedback, QuizFeedback, AnswerFeedback, parse_recall_content
 
 
 class TestDataclasses:
@@ -33,3 +33,37 @@ class TestDataclasses:
         )
         assert feedback.total_score == 7.5
         assert feedback.answers[1].score == 0.5
+
+
+class TestParseRecallContent:
+    """Tests for parsing recall.md content."""
+
+    def test_extracts_memory_points(self):
+        """Should extract numbered points from memory section."""
+        content = '''## From Memory (before re-reading)
+
+*Write these BEFORE looking at source or summary:*
+
+1. Division of labor is critical.
+2. Three causes of productivity.
+3. Pin factory example.
+'''
+        result = parse_recall_content(content)
+        assert len(result["memory_points"]) == 3
+        assert "Division of labor" in result["memory_points"][0]
+
+    def test_extracts_one_sentence(self):
+        """Should extract one sentence summary."""
+        content = '''## One Sentence I'd Tell Someone
+
+Division of labor drives economic growth.
+'''
+        result = parse_recall_content(content)
+        assert "Division of labor" in result["one_sentence"]
+
+    def test_handles_missing_sections(self):
+        """Should handle missing sections gracefully."""
+        content = "# Recall\n\nSome content"
+        result = parse_recall_content(content)
+        assert result["memory_points"] == []
+        assert result["one_sentence"] == ""

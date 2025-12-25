@@ -1,6 +1,7 @@
 """AI-powered evaluation of recall and quiz answers."""
 from dataclasses import dataclass, field
 from typing import Optional
+import re
 
 
 @dataclass
@@ -28,3 +29,37 @@ class QuizFeedback:
     answers: list[AnswerFeedback]
     total_score: float  # 0-8
     reasoning: str
+
+
+def parse_recall_content(content: str) -> dict:
+    """Parse recall.md content into structured data.
+
+    Args:
+        content: Raw markdown content of recall.md
+
+    Returns:
+        Dict with memory_points (list[str]) and one_sentence (str)
+    """
+    result = {"memory_points": [], "one_sentence": ""}
+
+    # Extract numbered points from "From Memory" section
+    memory_match = re.search(
+        r"## From Memory.*?\n\n.*?\n\n((?:\d+\..*?\n)+)",
+        content,
+        re.DOTALL
+    )
+    if memory_match:
+        points_text = memory_match.group(1)
+        points = re.findall(r"\d+\.\s*(.+?)(?=\n\d+\.|\n\n|\Z)", points_text, re.DOTALL)
+        result["memory_points"] = [p.strip() for p in points]
+
+    # Extract one sentence summary
+    sentence_match = re.search(
+        r"## One Sentence.*?\n\n(.+?)(?=\n---|\n##|\Z)",
+        content,
+        re.DOTALL
+    )
+    if sentence_match:
+        result["one_sentence"] = sentence_match.group(1).strip()
+
+    return result
