@@ -5,7 +5,6 @@ __pycache__/
 *.so
 .Python
 *.egg-info/
-dist/
 build/
 
 # Virtual Environment
@@ -27,3 +26,9 @@ htmlcov/
 
 # Book data (large files, generated content)
 books_raw/
+books/.obsidian/
+
+# VS Code Extension build artifacts
+edps-llm-bridge/node_modules/
+edps-llm-bridge/out/
+# Keep edps-llm-bridge/dist/*.vsix for distribution
