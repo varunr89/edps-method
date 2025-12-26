@@ -442,7 +442,8 @@ This placeholder exists to preserve the workflow structure for future podcast ge
     output_path = section_dir / f"{gen_type}.md"
     output_path.write_text(response.content, encoding="utf-8")
 
-    console.print(f"[dim]Tokens: {response.input_tokens} in, {response.output_tokens} out. Cost: ${response.cost:.4f}[/dim]")
+    provider_label = f"[{response.provider.upper()}]" if hasattr(response, 'provider') else "[AZURE]"
+    console.print(f"[dim]{provider_label} Tokens: {response.input_tokens} in, {response.output_tokens} out. Cost: ${response.cost:.4f}[/dim]")
 
     return "done"
 
@@ -573,4 +574,5 @@ def _generate_ai_book_content(
     output_path.write_text(response.content, encoding="utf-8")
 
     console.print(f"[green]✓[/green] Created {output_path.parent.name}/{output_path.name}")
-    console.print(f"[dim]Tokens: {response.input_tokens} in, {response.output_tokens} out. Cost: ${response.cost:.4f}[/dim]")
+    provider_label = f"[{response.provider.upper()}]" if hasattr(response, 'provider') else "[AZURE]"
+    console.print(f"[dim]{provider_label} Tokens: {response.input_tokens} in, {response.output_tokens} out. Cost: ${response.cost:.4f}[/dim]")
