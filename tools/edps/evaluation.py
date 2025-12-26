@@ -385,10 +385,23 @@ def evaluate_section(
 
     from edps.core.llm import LLMClient
     client = LLMClient(config)
-    response = client.complete(prompt, model=config.models.evaluation, max_tokens=2000)
+
+    # Check if council is enabled for evaluation
+    if config.council.enabled and "evaluation" in config.council.tasks:
+        from edps.core.council import Council
+        council = Council(
+            models=config.council.models,
+            chair=config.council.chair,
+            stages=config.council.stages,
+        )
+        council_result = council.run(prompt, client)
+        response_content = council_result.final_answer
+    else:
+        response = client.complete(prompt, model=config.models.evaluation, max_tokens=2000)
+        response_content = response.content
 
     # Parse response
-    recall_feedback, quiz_feedback = parse_evaluation_response(response.content)
+    recall_feedback, quiz_feedback = parse_evaluation_response(response_content)
 
     # Format and append feedback
     eval_date = date.today().isoformat()
