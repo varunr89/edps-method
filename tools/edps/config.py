@@ -35,12 +35,12 @@ class CouncilConfig:
 @dataclass
 class ModelsConfig:
     """Per-task model overrides."""
-    chunking: str = "claude-sonnet-4-20250514"
-    summary: str = "claude-sonnet-4-20250514"
-    podcast: str = "claude-sonnet-4-20250514"
-    quiz: str = "claude-haiku-3-5"
-    claims_synthesis: str = "claude-sonnet-4-20250514"
-    evaluation: str = "claude-sonnet-4-20250514"
+    chunking: str = "gpt-5"  # Not LLM-based currently
+    summary: str = "gemini-3-pro"  # Large context
+    podcast: str = "gpt-5"  # Placeholder
+    quiz: str = "claude-sonnet-4.5"  # Quality questions
+    claims_synthesis: str = "gpt-5"  # Analytical
+    evaluation: str = "gpt-5"  # Used as fallback if council disabled
 
 
 @dataclass
