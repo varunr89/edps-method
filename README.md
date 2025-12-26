@@ -45,7 +45,7 @@ The CLI (`edps`) automates ingestion, content generation, and progress tracking.
 code --install-extension edps-llm-bridge/dist/edps-llm-bridge.vsix
 ```
 
-This extension creates a local HTTP bridge between the CLI and VS Code's Language Model API (Copilot). It provides access to GPT-4o, Claude Sonnet, and Gemini with large context windows (128K-1M tokens).
+This extension creates a local HTTP bridge between the CLI and VS Code's Language Model API (Copilot). It provides access to GPT-5, Claude Sonnet 4.5, and Gemini 3 Flash with large context windows (128K-1M tokens).
 
 **Verify installation:** Open VS Code, press `Cmd+Shift+P`, type "EDPS: LLM Bridge Status". You should see the server running.
 
@@ -61,9 +61,9 @@ vscode:
   timeout: 30
 
 models:
-  summary: "gemini-2.0-flash"
-  quiz: "claude-sonnet-4"
-  evaluation: "gpt-4o"
+  summary: "gemini-3-flash"
+  quiz: "claude-sonnet-4.5"
+  evaluation: "gpt-5"
 
 defaults:
   temperature: 0.3
@@ -191,27 +191,36 @@ For fair evaluation, the system uses a 3-stage council with diverse models:
 
 ```
 Stage 1: Independent Evaluation
-  GPT-4o ──────────────▶ Answer A
-  Claude Sonnet ───────▶ Answer B
-  Gemini ──────────────▶ Answer C
+  GPT-5 ───────────────▶ Answer A
+  Claude Sonnet 4.5 ───▶ Answer B
+  Gemini 3 Flash ──────▶ Answer C
 
 Stage 2: Cross-Review
   Each model reviews the other two answers
 
 Stage 3: Chair Synthesis
-  GPT-4o (chair) synthesizes all answers + reviews → Final Score
+  GPT-5 (chair) synthesizes all answers + reviews → Final Score
 ```
 
 Configure the council in `~/.edps/config.yaml`:
 
 ```yaml
+# Task-specific model assignments
+models:
+  summary: gemini-3-flash         # Large context window, fast
+  quiz: claude-sonnet-4.5         # High quality question generation
+  evaluation: gpt-5               # Strong analytical reasoning
+
+# Council references task roles (no duplicate model lists!)
 council:
   enabled: true
   tasks: ["evaluation"]
-  models: ["gpt-4o", "claude-sonnet-4", "gemini-2.0-flash"]
-  chair: "gpt-4o"
+  member_roles: ["summary", "quiz", "evaluation"]  # Resolves to models above
+  chair_role: "evaluation"                          # Chair uses evaluation model
   stages: 3  # Use 1 to disable council
 ```
+
+The council automatically resolves `member_roles` to actual model names from your `models:` config, avoiding redundancy.
 
 ### Manual evaluation
 
@@ -307,10 +316,10 @@ Configure which model handles each task:
 
 ```yaml
 models:
-  summary: "gemini-2.0-flash"    # Large context window for long sections
-  quiz: "claude-sonnet-4"        # High quality question generation
-  evaluation: "gpt-4o"           # Strong analytical reasoning
-  claims_synthesis: "gpt-4o"     # Cross-section analysis
+  summary: "gemini-3-flash"      # Large context window for long sections
+  quiz: "claude-sonnet-4.5"      # High quality question generation
+  evaluation: "gpt-5"            # Strong analytical reasoning
+  claims_synthesis: "gpt-5"      # Cross-section analysis
 ```
 
 ---
@@ -372,7 +381,7 @@ edps-method/
           ▼
 ┌─────────────────────┐
 │  vscode.lm API      │
-│  GPT-4o, Claude,    │
+│  GPT-5, Claude,     │
 │  Gemini (via        │
 │  Copilot)           │
 └─────────────────────┘
