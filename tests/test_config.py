@@ -65,3 +65,45 @@ def test_save_config_creates_file():
         assert config_path.exists()
         loaded = yaml.safe_load(config_path.read_text())
         assert loaded["azure"]["endpoint"] == "https://my-endpoint.azure.com"
+
+
+def test_council_resolves_models_from_roles():
+    """Council resolves member_roles to actual model names."""
+    from edps.config import CouncilConfig, ModelsConfig
+
+    models = ModelsConfig(
+        summary="gemini-3-pro",
+        quiz="claude-sonnet-4.5",
+        evaluation="gpt-5",
+    )
+    council = CouncilConfig(
+        member_roles=["summary", "quiz", "evaluation"],
+        chair_role="evaluation",
+    )
+
+    resolved = council.resolve_models(models)
+    chair = council.resolve_chair(models)
+
+    assert resolved == ["gemini-3-pro", "claude-sonnet-4.5", "gpt-5"]
+    assert chair == "gpt-5"
+
+
+def test_council_deduplicates_models():
+    """Council deduplicates when multiple roles use same model."""
+    from edps.config import CouncilConfig, ModelsConfig
+
+    # All roles use the same model
+    models = ModelsConfig(
+        summary="claude-opus-4-5",
+        quiz="claude-opus-4-5",
+        evaluation="claude-opus-4-5",
+    )
+    council = CouncilConfig(
+        member_roles=["summary", "quiz", "evaluation"],
+        chair_role="evaluation",
+    )
+
+    resolved = council.resolve_models(models)
+
+    # Should dedupe to single model
+    assert resolved == ["claude-opus-4-5"]

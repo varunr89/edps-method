@@ -389,9 +389,12 @@ def evaluate_section(
     # Check if council is enabled for evaluation
     if config.council.enabled and "evaluation" in config.council.tasks:
         from edps.core.council import Council
+        # Resolve role names to actual model names from models config
+        resolved_models = config.council.resolve_models(config.models)
+        resolved_chair = config.council.resolve_chair(config.models)
         council = Council(
-            models=config.council.models,
-            chair=config.council.chair,
+            models=resolved_models,
+            chair=resolved_chair,
             stages=config.council.stages,
         )
         council_result = council.run(prompt, client)

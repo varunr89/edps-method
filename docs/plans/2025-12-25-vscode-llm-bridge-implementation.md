@@ -976,12 +976,31 @@ class VSCodeConfig:
 
 @dataclass
 class CouncilConfig:
-    """LLM Council configuration."""
+    """LLM Council configuration.
+
+    Instead of specifying model names directly, the council references
+    task roles from ModelsConfig. This avoids redundancy.
+    """
     enabled: bool = True
     tasks: list = field(default_factory=lambda: ["evaluation"])
-    models: list = field(default_factory=lambda: ["gpt-5", "claude-sonnet-4.5", "gemini-3-pro"])
-    chair: str = "gpt-5"
+    member_roles: list = field(default_factory=lambda: ["summary", "quiz", "evaluation"])
+    chair_role: str = "evaluation"
     stages: int = 3
+
+    def resolve_models(self, models_config: "ModelsConfig") -> list[str]:
+        """Resolve member_roles to actual model names, deduplicating."""
+        seen = set()
+        resolved = []
+        for role in self.member_roles:
+            model = getattr(models_config, role, None)
+            if model and model not in seen:
+                seen.add(model)
+                resolved.append(model)
+        return resolved
+
+    def resolve_chair(self, models_config: "ModelsConfig") -> str:
+        """Resolve chair_role to actual model name."""
+        return getattr(models_config, self.chair_role, models_config.evaluation)
 ```
 
 Update `EdpsConfig`:
@@ -1582,9 +1601,12 @@ def evaluate_section(...):
 
     # Check if council is enabled for evaluation
     if config.council.enabled and "evaluation" in config.council.tasks:
+        # Resolve role names to actual model names from models config
+        resolved_models = config.council.resolve_models(config.models)
+        resolved_chair = config.council.resolve_chair(config.models)
         council = Council(
-            models=config.council.models,
-            chair=config.council.chair,
+            models=resolved_models,
+            chair=resolved_chair,
             stages=config.council.stages,
         )
         council_result = council.run(prompt, client)

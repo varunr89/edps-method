@@ -24,12 +24,38 @@ class VSCodeConfig:
 
 @dataclass
 class CouncilConfig:
-    """LLM Council configuration."""
+    """LLM Council configuration.
+
+    Instead of specifying model names directly, the council references
+    task roles from ModelsConfig. This avoids redundancy and ensures
+    the council uses the same models configured for individual tasks.
+
+    Example:
+        member_roles: ["summary", "quiz", "evaluation"]
+        chair_role: "evaluation"
+
+    These resolve to actual model names via ModelsConfig.
+    """
     enabled: bool = True
     tasks: list = field(default_factory=lambda: ["evaluation"])
-    models: list = field(default_factory=lambda: ["gpt-5", "claude-sonnet-4.5", "gemini-3-pro"])
-    chair: str = "gpt-5"
+    member_roles: list = field(default_factory=lambda: ["summary", "quiz", "evaluation"])
+    chair_role: str = "evaluation"
     stages: int = 3
+
+    def resolve_models(self, models_config: "ModelsConfig") -> list[str]:
+        """Resolve member_roles to actual model names, deduplicating."""
+        seen = set()
+        resolved = []
+        for role in self.member_roles:
+            model = getattr(models_config, role, None)
+            if model and model not in seen:
+                seen.add(model)
+                resolved.append(model)
+        return resolved
+
+    def resolve_chair(self, models_config: "ModelsConfig") -> str:
+        """Resolve chair_role to actual model name."""
+        return getattr(models_config, self.chair_role, models_config.evaluation)
 
 
 @dataclass
@@ -108,8 +134,8 @@ def load_config(config_path: Optional[Path] = None) -> EdpsConfig:
             config.council = CouncilConfig(
                 enabled=council_data.get("enabled", config.council.enabled),
                 tasks=council_data.get("tasks", config.council.tasks),
-                models=council_data.get("models", config.council.models),
-                chair=council_data.get("chair", config.council.chair),
+                member_roles=council_data.get("member_roles", config.council.member_roles),
+                chair_role=council_data.get("chair_role", config.council.chair_role),
                 stages=council_data.get("stages", config.council.stages),
             )
 
