@@ -11,7 +11,7 @@
 
 *Write these BEFORE looking at source or summary:*
 
-1. [Main claim as I remember it]
+1. The desire to barter
 2. [Key mechanism or process]
 3. [Example I remember]
 4. [Modern parallel that came to mind]
