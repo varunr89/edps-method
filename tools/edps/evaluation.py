@@ -227,36 +227,85 @@ def build_evaluation_prompt(source_text: str, recall_content: str, quiz_content:
     prompt += """
 # Evaluation Task
 
-Please evaluate the student's recall and quiz performance. Return your evaluation in JSON format:
+Provide comprehensive feedback on the student's work. Return as JSON:
 
 ```json
 {
   "recall": {
     "points": [
-      {"label": "Point description", "correct": true/false, "note": "Feedback"}
+      {
+        "label": "Point description",
+        "correct": true,
+        "note": "Brief note (legacy)",
+        "accuracy": "What they got right/wrong factually",
+        "reasoning": "How their logic holds up",
+        "writing": "Prose quality feedback with specific suggestions"
+      }
     ],
-    "one_sentence_ok": true/false,
+    "one_sentence_ok": true,
     "one_sentence_note": "Feedback on summary",
-    "score": 0-5,
+    "score": 0,
     "reasoning": "Overall assessment"
   },
   "quiz": {
     "answers": [
-      {"label": "Q1: Title", "correct": true/false, "score": 0-1, "note": "Feedback"}
+      {
+        "label": "Q1: Title",
+        "correct": true,
+        "score": 1,
+        "note": "Brief note (legacy)",
+        "accuracy": "Factual correctness analysis",
+        "reasoning": "Logic and argument analysis",
+        "writing": "Prose quality: precision, clarity, economy"
+      }
     ],
-    "total_score": 0-8,
-    "reasoning": "Overall assessment"
+    "total_score": 8,
+    "reasoning": "Legacy overall assessment",
+    "thematic_insights": {
+      "source_mastery": "Patterns across answers—what they consistently get/miss. Cite specific examples.",
+      "reasoning_quality": "How they build arguments. Logical gaps. Strengths. Edges to develop.",
+      "writing_craft": {
+        "precision": 4,
+        "clarity": 4,
+        "economy": 3,
+        "suggestion": "One concrete fix to practice"
+      }
+    },
+    "tutors_note": "Narrative synthesis (3-4 paragraphs): What they're doing well, 2-3 things to carry forward with depth, prompt for next section."
   }
 }
 ```
 
-Scoring rubric:
+## Scoring & Feedback Guidelines
+
+**Scoring Rubric:**
 - Recall score (0-5): Based on accuracy and completeness of memory points
   - Points 1-3 (Main Claim, Key Mechanism, Example): Evaluate against source text
   - Point 4 (Modern Parallel): External connections are EXPECTED and CORRECT - evaluate thoughtfulness, not source accuracy
   - Point 5 (Uncertainty): Questions/confusion are EXPECTED - evaluate self-awareness, not source accuracy
 - Quiz scores: Each question worth 1 point (8 total questions)
 - Mark partial credit as 0.5 when applicable
+- Use booleans as true/false, no trailing commas
+
+**Per-Answer Analysis:**
+- **Accuracy:** Did they capture what the source actually says? Quote specifics.
+- **Reasoning:** Is their causal logic sound? Do they identify correct relationships?
+- **Writing:**
+  - Precision: Do they use the author's key terms correctly?
+  - Clarity: Do they lead with main points? Is structure clear?
+  - Economy: Can they say it in fewer words without losing meaning?
+
+Keep per-answer explanations to 1-3 sentences; depth goes in thematic_insights and tutors_note.
+
+**Thematic Insights:**
+- Identify PATTERNS across all answers, not just per-question issues
+- Be specific: "You wrote X but Smith says Y" not "some inaccuracies"
+- writing_craft scores are 1-5 each
+
+**Tutor's Note:**
+- Open with genuine praise backed by evidence
+- Give 2-3 actionable insights with depth (why it matters, how to apply)
+- Close with what to watch for in the next section
 
 Respond ONLY with the JSON object, no other text."""
 

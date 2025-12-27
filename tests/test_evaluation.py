@@ -539,6 +539,48 @@ What increases productivity?
             assert "**Total Score:** 8/8" in quiz_content
 
 
+class TestExpandedEvaluationPrompt:
+    """Tests for expanded evaluation prompt."""
+
+    def test_prompt_requests_per_answer_analysis(self):
+        """Prompt should request accuracy/reasoning/writing for each answer."""
+        from edps.evaluation import build_evaluation_prompt
+
+        source = "Division of labor increases productivity."
+        recall = "## From Memory\n\n1. Specialization helps.\n\n## One Sentence\n\nLabor division is key."
+        quiz = "### 1. Main\n\nWhat helps?\n\n**Answer:** Specialization"
+
+        prompt = build_evaluation_prompt(source, recall, quiz)
+        assert "accuracy" in prompt.lower()
+        assert "reasoning" in prompt.lower()
+        assert "writing" in prompt.lower()
+
+    def test_prompt_requests_thematic_insights(self):
+        """Prompt should request thematic insights section."""
+        from edps.evaluation import build_evaluation_prompt
+
+        source = "Test"
+        recall = "## From Memory\n\n1. Test\n\n## One Sentence\n\nTest"
+        quiz = "### 1. T\n\nT?\n\n**Answer:** T"
+
+        prompt = build_evaluation_prompt(source, recall, quiz)
+        assert "source_mastery" in prompt or "thematic" in prompt.lower()
+        assert "precision" in prompt.lower()
+        assert "clarity" in prompt.lower()
+        assert "economy" in prompt.lower()
+
+    def test_prompt_requests_tutors_note(self):
+        """Prompt should request narrative tutor's note."""
+        from edps.evaluation import build_evaluation_prompt
+
+        source = "Test"
+        recall = "## From Memory\n\n1. Test\n\n## One Sentence\n\nTest"
+        quiz = "### 1. T\n\nT?\n\n**Answer:** T"
+
+        prompt = build_evaluation_prompt(source, recall, quiz)
+        assert "tutor" in prompt.lower() or "narrative" in prompt.lower()
+
+
 class TestSchemaMigration:
     """Tests for v0 -> v1 schema migration."""
 
