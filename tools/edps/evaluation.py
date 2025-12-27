@@ -336,13 +336,16 @@ def parse_evaluation_response(response: str) -> tuple[RecallFeedback, QuizFeedba
     # Parse JSON
     data = json.loads(json_str)
 
-    # Build RecallFeedback
+    # Build RecallFeedback with optional new fields
     recall_data = data["recall"]
     recall_points = [
         AnswerFeedback(
             label=p["label"],
             correct=p["correct"],
-            note=p["note"]
+            note=p.get("note"),
+            accuracy=p.get("accuracy"),
+            reasoning=p.get("reasoning"),
+            writing=p.get("writing"),
         )
         for p in recall_data["points"]
     ]
@@ -351,24 +354,46 @@ def parse_evaluation_response(response: str) -> tuple[RecallFeedback, QuizFeedba
         one_sentence_ok=recall_data["one_sentence_ok"],
         one_sentence_note=recall_data["one_sentence_note"],
         score=recall_data["score"],
-        reasoning=recall_data["reasoning"]
+        reasoning=recall_data["reasoning"],
     )
 
-    # Build QuizFeedback
+    # Build QuizFeedback with optional new fields
     quiz_data = data["quiz"]
     quiz_answers = [
         AnswerFeedback(
             label=a["label"],
             correct=a["correct"],
-            note=a["note"],
-            score=a["score"]
+            note=a.get("note"),
+            score=a.get("score"),
+            accuracy=a.get("accuracy"),
+            reasoning=a.get("reasoning"),
+            writing=a.get("writing"),
         )
         for a in quiz_data["answers"]
     ]
+
+    # Parse thematic insights if present
+    thematic_insights = None
+    if "thematic_insights" in quiz_data:
+        ti = quiz_data["thematic_insights"]
+        wc = ti["writing_craft"]
+        thematic_insights = ThematicInsights(
+            source_mastery=ti["source_mastery"],
+            reasoning_quality=ti["reasoning_quality"],
+            writing_craft=WritingScores(
+                precision=wc["precision"],
+                clarity=wc["clarity"],
+                economy=wc["economy"],
+                suggestion=wc["suggestion"],
+            ),
+        )
+
     quiz_feedback = QuizFeedback(
         answers=quiz_answers,
         total_score=quiz_data["total_score"],
-        reasoning=quiz_data["reasoning"]
+        reasoning=quiz_data["reasoning"],
+        thematic_insights=thematic_insights,
+        tutors_note=quiz_data.get("tutors_note"),
     )
 
     return recall_feedback, quiz_feedback

@@ -581,6 +581,48 @@ class TestExpandedEvaluationPrompt:
         assert "tutor" in prompt.lower() or "narrative" in prompt.lower()
 
 
+class TestExpandedResponseParsing:
+    """Tests for parsing expanded evaluation responses."""
+
+    def test_parses_per_answer_details(self):
+        """Should parse accuracy/reasoning/writing from response."""
+        from edps.evaluation import parse_evaluation_response
+
+        response = '''{
+  "recall": {
+    "points": [
+      {"label": "Main claim", "correct": true, "note": "Good", "accuracy": "Correct on origin.", "reasoning": "Sound logic.", "writing": "Use 'propensity' not 'innate'."}
+    ],
+    "one_sentence_ok": true,
+    "one_sentence_note": "Clear",
+    "score": 4,
+    "reasoning": "Strong"
+  },
+  "quiz": {
+    "answers": [
+      {"label": "Q1", "correct": true, "score": 1.0, "note": "OK", "accuracy": "Right.", "reasoning": "Good.", "writing": "Concise."}
+    ],
+    "total_score": 7.5,
+    "reasoning": "Good",
+    "thematic_insights": {
+      "source_mastery": "You grasp the core.",
+      "reasoning_quality": "Sound arguments.",
+      "writing_craft": {"precision": 4, "clarity": 4, "economy": 3, "suggestion": "Cut filler."}
+    },
+    "tutors_note": "You're building understanding. Carry forward: honor the hedges."
+  }
+}'''
+
+        recall_fb, quiz_fb = parse_evaluation_response(response)
+
+        assert recall_fb.points[0].accuracy == "Correct on origin."
+        assert recall_fb.points[0].reasoning == "Sound logic."
+        assert recall_fb.points[0].writing == "Use 'propensity' not 'innate'."
+
+        assert quiz_fb.thematic_insights.writing_craft.precision == 4
+        assert quiz_fb.tutors_note == "You're building understanding. Carry forward: honor the hedges."
+
+
 class TestSchemaMigration:
     """Tests for v0 -> v1 schema migration."""
 
