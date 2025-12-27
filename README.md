@@ -154,6 +154,90 @@ Or evaluate manually without committing:
 edps eval wealth-of-nations 001
 ```
 
+**What you get back:**
+
+Each recall point and quiz answer receives three feedback dimensions:
+- **Accuracy:** Did you capture what the source says?
+- **Reasoning:** Is your logic sound?
+- **Writing:** Is it clear and precise?
+
+Plus overall thematic insights (source mastery, reasoning patterns, writing craft scores 1-5) and a tutor's note with actionable next steps.
+
+<details>
+<summary>Example evaluation output</summary>
+
+```markdown
+## AI Feedback
+
+**Evaluated:** 2025-12-27 | **Source:** EDPS-wealth-of-nations-001.txt
+**Total Score:** 6.5/8
+
+---
+
+### Per-Answer Analysis
+
+#### Q1: Division of Labor (1.0/1.0) ✓
+
+**Accuracy:** Correctly identifies that specialization increases output.
+**Reasoning:** Causal chain is sound—less context switching means more throughput.
+**Writing:** "240x productivity gain" is precise and memorable.
+
+#### Q2: Market Limits (0.5/1.0) ⚠️
+
+**Accuracy:** Partial—mentions market size but misses transportation costs.
+**Reasoning:** The connection between market extent and specialization is incomplete.
+**Writing:** Could be more concise; 42 words for a simple point.
+
+---
+
+### Thematic Insights
+
+#### Source Mastery
+You consistently nail the core mechanisms but miss qualifying conditions.
+Smith's argument depends on transportation costs, which you haven't addressed.
+
+#### Reasoning Quality
+Your causal chains are sound when you build them. The gap is completeness—you
+stop one step short of Smith's full argument.
+
+#### Writing Craft
+**Precision:** 4/5 | **Clarity:** 4/5 | **Economy:** 3/5
+
+**Practice:** Cut "it is important to note that" from your vocabulary.
+
+---
+
+### Tutor's Note
+
+Strong grasp of the division of labor argument—your pin factory example
+shows you understand why specialization works, not just that it does.
+
+Two things to carry forward: (1) Look for the author's qualifying conditions,
+not just the main claim. Smith rarely argues absolutes. (2) Your prose is
+accurate but wordy. Try rewriting each answer in half the words.
+
+Next section covers exchange and money. Watch for how Smith connects
+specialization to the need for currency—it's the logical next step from
+what you've learned here.
+```
+
+</details>
+
+### Quiz format
+
+Quizzes have two parts:
+
+**Part A: Multiple Choice** with three answer types:
+- `one` — exactly one correct answer
+- `multiple` — two or more correct (scored via F1 for partial credit)
+- `none` — all options are incorrect
+
+**Part B: Prose Questions** with four types:
+- Adversarial: Challenge a claim's weakest point
+- Comparative: Connect ideas across sections
+- Socratic: Probe "what if" scenarios
+- Synthesis: Apply concepts to modern cases
+
 ---
 
 ## Commands
