@@ -7,14 +7,9 @@ export class BridgeServer {
   private port: number = 0;
   private startTime: number = Date.now();
   private lmClient: LMClient | null = null;
-  private onActivity: (() => void) | null = null;
 
   setLMClient(client: LMClient): void {
     this.lmClient = client;
-  }
-
-  setOnActivity(callback: () => void): void {
-    this.onActivity = callback;
   }
 
   async start(port: number = 0): Promise<void> {
@@ -51,11 +46,6 @@ export class BridgeServer {
   }
 
   private handleRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
-    // Signal activity for idle timeout
-    if (this.onActivity) {
-      this.onActivity();
-    }
-
     const url = req.url || '/';
 
     if (url === '/health' && req.method === 'GET') {

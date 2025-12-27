@@ -3,14 +3,10 @@ import * as vscode from 'vscode';
 import { BridgeServer } from './server';
 import { LMClient } from './lmClient';
 import { DiscoveryManager } from './discovery';
-import { IdleManager } from './idleManager';
-
-const IDLE_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 
 let server: BridgeServer | null = null;
 let lmClient: LMClient | null = null;
 let discovery: DiscoveryManager | null = null;
-let idleManager: IdleManager | null = null;
 let outputChannel: vscode.OutputChannel | null = null;
 
 function log(message: string): void {
@@ -36,16 +32,6 @@ async function startServer(): Promise<void> {
 
   discovery = new DiscoveryManager();
 
-  // Setup idle timeout
-  idleManager = new IdleManager(IDLE_TIMEOUT_MS, () => {
-    log('Idle timeout reached, shutting down server');
-    stopServer();
-  });
-
-  server.setOnActivity(() => {
-    idleManager?.activity();
-  });
-
   // Start server on dynamic port
   await server.start(0);
   const port = server.getPort();
@@ -58,8 +44,6 @@ async function startServer(): Promise<void> {
     models
   });
 
-  idleManager.start();
-
   log(`Server started on port ${port}`);
   log(`Discovery file: ${discovery.getPath()}`);
 
@@ -68,9 +52,6 @@ async function startServer(): Promise<void> {
 
 async function stopServer(): Promise<void> {
   log('Stopping EDPS LLM Bridge server...');
-
-  idleManager?.stop();
-  idleManager = null;
 
   await server?.stop();
   server = null;

@@ -19,7 +19,7 @@ class AzureConfig:
 class VSCodeConfig:
     """VS Code LLM Bridge configuration."""
     discovery_file: str = "~/.edps/server.json"
-    timeout: int = 30  # Request timeout in seconds
+    timeout: int = 120  # Request timeout in seconds (evaluation prompts can be slow)
 
 
 @dataclass

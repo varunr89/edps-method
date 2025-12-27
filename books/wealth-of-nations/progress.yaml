@@ -9,6 +9,7 @@ quiz_scores:
   '001': 7.5
 
 # Recall scores (section_id: self-rating 0-5)
+  '002': 6
 recall_scores:
   '001': 4
 
@@ -19,7 +20,7 @@ stats:
   longest_streak: 0
   total_sections_completed: 2
   total_time_spent_minutes: 0
-  average_quiz_score: 7.5
+  average_quiz_score: 6.8
   average_recall_score: 3.5
 
 # Weekly synthesis tracking
