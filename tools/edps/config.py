@@ -73,7 +73,7 @@ class ModelsConfig:
 class DefaultsConfig:
     """Default settings."""
     temperature: float = 0.3
-    max_tokens: int = 4096
+    max_tokens: int = 8192  # Increased from 4096 for expanded evaluation feedback
     confirm_before_call: bool = True
     cost_warning_threshold: float = 0.50
 
