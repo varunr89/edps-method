@@ -423,6 +423,23 @@ class TestExpandedAnswerFeedback:
         assert feedback.writing == "Consider 'propensity' over 'innate need'."
 
 
+class TestThematicInsights:
+    """Tests for thematic insights dataclass."""
+
+    def test_thematic_insights_creation(self):
+        """ThematicInsights should hold cross-answer patterns."""
+        from edps.evaluation import ThematicInsights, WritingScores
+
+        writing = WritingScores(precision=3, clarity=4, economy=3, suggestion="Cut 30% without losing meaning.")
+        insights = ThematicInsights(
+            source_mastery="You grasp the core thesis. Pattern: you sharpen Smith's hedges into certainties.",
+            reasoning_quality="Arguments are structurally sound. Push the 'so what' further.",
+            writing_craft=writing,
+        )
+        assert insights.writing_craft.precision == 3
+        assert "hedges" in insights.source_mastery
+
+
 class TestIntegration:
     """Integration tests for full evaluation flow."""
 

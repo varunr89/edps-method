@@ -41,6 +41,23 @@ class QuizFeedback:
 
 
 @dataclass
+class WritingScores:
+    """Writing craft scores (1-5 each)."""
+    precision: int
+    clarity: int
+    economy: int
+    suggestion: str  # One concrete fix to practice
+
+
+@dataclass
+class ThematicInsights:
+    """Cross-answer thematic patterns."""
+    source_mastery: str
+    reasoning_quality: str
+    writing_craft: WritingScores
+
+
+@dataclass
 class EvaluationResult:
     """Result of evaluating a section's recall and quiz."""
     recall_score: int
