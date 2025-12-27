@@ -40,27 +40,57 @@
 
 Division of labor or Job Specialization is one of the strongest drivers for growth of a nation's economy and critical for prosperity across all levels of the nation. The root cause of increased productivity (trifecta), results is more good available for trade at lower cost.---
 
-## AI Feedback
+---
 
-**Evaluation Date:** 2025-12-25
-**Source:** EDPS-wealth-of-nations-001.txt
-**Overall Score:** 4/5
+## AI Feedback on Recall
 
-### Memory Points
+**Evaluated:** 2025-12-27 | **Source:** EDPS-wealth-of-nations-001.txt
+**Score:** 4.5/5
 
-| Point | Status | Feedback |
-|-------|--------|----------|
-| Main Claim | ✓ | Correctly identifies that division of labour is the primary driver of improvements in productive powers and wealth. |
-| Key Mechanism | ✓ | Accurately captures all three causes: increased dexterity through specialization, reduced time lost switching tasks (context switching), and machinery/automation improvements. |
-| Example | ⚠️ | The multiplier is incorrect. The text states 48,000 pins for 10 workers (4,800 each) vs. less than 20 pins individually - this is 240x improvement, not 480x. Also, the specific roles mentioned (pin head maker, pin roller, pin painter) don't match the text's examples (wire drawer, straightener, cutter, pointer, etc.). |
-| Modern Parallel | ✓ | Thoughtful external connection linking AI/LLM specialization to Smith's principles. Andrew Ng reference adds credibility to the parallel. |
-| Uncertainty | ✓ | Good self-awareness about the agriculture limitation. The student correctly identifies the seasonality argument from the text and appropriately questions whether this fully explains the limitation. |
+---
+
+### Recall Points
+
+#### Main Claim ✓
+
+**Accuracy:** Matches Smith’s claim that the 'greatest improvements in the productive powers of labour' arise from division of labour in a well-governed society.
+**Reasoning:** Correct link from work organization → higher productive power → wider prosperity.
+**Writing:** Prefer Smith’s term 'productive powers of labour' over 'wealth' for precision.
+
+#### Key Mechanism ✓
+
+**Accuracy:** Correct: increased dexterity, saving of time, and invention/use of machinery.
+**Reasoning:** Causal chain aligns with the text; specialization focuses attention, spurring invention.
+**Writing:** Use 'saving of time' (Smith’s phrasing) instead of 'context switching' when citing the text.
+
+#### Example ⚠️
+
+**Accuracy:** Smith: ten workers ≈ 48,000 pins/day; ≈ 4,800 per worker. A lone generalist 'could scarce... make one, and certainly not twenty.' Your '480x' and team total are incorrect.
+**Reasoning:** Understands role subdivision; misstates magnitudes and steps (e.g., whitening vs 'pin painter').
+**Writing:** Cite Smith’s operations and figures exactly to avoid ratio errors.
+
+#### Modern Parallel ✓
+
+**Accuracy:** External link is sound; modern LLM training mirrors Smith’s specialized trades and 'philosophers.'
+**Reasoning:** Correct insight: deeper specialization yields tools/process improvements.
+**Writing:** Add how specialization births 'machines' (frameworks/tooling) to mirror Smith’s third cause.
+
+#### Uncertainty ✓
+
+**Accuracy:** Smith: agriculture 'does not admit of so many subdivisions' and tasks return with seasons, preventing full separation.
+**Reasoning:** Valid doubt about sufficiency of causes; recognizes the constraint source.
+**Writing:** Anchor with Smith’s line about 'impossibility of making so complete and entire a separation.'
+
+---
 
 ### One Sentence Summary
 
-**Status:** ✓ Accurate
-**Feedback:** Captures the main thesis well - division of labour drives economic growth and prosperity through increased productivity, leading to more affordable goods. The 'trifecta' reference to the three causes is accurate.
+**Status:** ✓ Approved
+
+**Feedback:** Captures thesis and the trifecta mechanism; fix grammar ('results is') and note Smith’s 'well-governed society' and exchange surplus spreading opulence.
+
+---
 
 ### Overall Assessment
 
-Strong recall overall. Main claim and mechanism are accurate. The example has numerical errors (480x vs 240x) and imprecise role descriptions. Modern parallel and uncertainty sections show good critical thinking. One sentence summary effectively captures the core argument.
+Strong conceptual recall with a single significant numerical slip in the pin example; modern transfer and self-aware uncertainty are strengths.

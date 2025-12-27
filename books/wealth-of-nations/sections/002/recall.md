@@ -39,30 +39,57 @@
 
 ## One Sentence I'd Tell Someone
 
-Self-interest is the root of progress in society. Any exchange driven by not self-interest is bound to not result is a meaningful progress or is wasteful.
+Self-interest is the root of progress in society. Any exchange driven by not self-interest is bound to not result is a meaningful progress or is wasteful.---
+
+## AI Feedback on Recall
+
+**Evaluated:** 2025-12-27 | **Source:** EDPS-wealth-of-nations-002.txt
+**Score:** 4/5
+
 ---
 
-## AI Feedback
+### Recall Points
 
-**Evaluation Date:** 2025-12-26
-**Source:** EDPS-wealth-of-nations-002.txt
-**Overall Score:** 4/5
+#### Main Claim ✓
 
-### Memory Points
+**Accuracy:** Correctly states that the division of labor arises from the human propensity to truck, barter, and exchange, not deliberate planning.
+**Reasoning:** Identifies the emergent, bottom-up origin Smith emphasizes.
+**Writing:** Clear paraphrase; consider contrasting it explicitly with 'not originally the effect of any human wisdom' for precision.
 
-| Point | Status | Feedback |
-|-------|--------|----------|
-| Main Claim | ✓ | Correct: division of labor arises from the human propensity to truck, barter, and exchange, not deliberate planning. |
-| Key Mechanism | ✓ | Captures the surplus–exchange–specialization loop; minor overemphasis on 'genius needs demand' but overall consistent with Smith. |
-| Example | ✓ | Accurately recalls the dog breeds analogy about animals not pooling talents; the 'useful only to human master' add-on is extra and not in the text. |
-| Modern Parallel | ✓ | Thoughtful and relevant AI specialization link to exchange and demand. |
-| Uncertainty | ✓ | Good critical engagement with self-interest vs. benevolence; aligns with expected reflection. |
+#### Key Mechanism ✓
+
+**Accuracy:** Recognizes that exchange and surplus relate to specialization; however, Smith stresses that the certainty of exchange induces specialization.
+**Reasoning:** Causal arrow is partly inverted; better: certainty of exchange → specialization → higher productivity/surplus.
+**Writing:** Break into short steps to avoid compressing the causal chain.
+
+#### Example (animals vs humans) ✓
+
+**Accuracy:** Correctly recalls that animal talents don't benefit the species without exchange; adding that talents 'only help their human master' goes beyond the text.
+**Reasoning:** Correct contrast: without exchange there is no 'common stock' of talents among animals.
+**Writing:** Stay within the text's claim to keep it tight.
+
+#### Modern Parallel (AI specialization) ✓
+
+**Accuracy:** External link is appropriate and plausible.
+**Reasoning:** Maps Smith’s mechanism to contemporary markets effectively.
+**Writing:** Could mention platforms lowering search/transaction costs to make the link crisper.
+
+#### Uncertainty/Reflection ✓
+
+**Accuracy:** N/A (reflection).
+**Reasoning:** Right to note Smith’s focus on material coordination via self-love; ethical concerns are outside his descriptive scope.
+**Writing:** Tighten by explicitly separating Smith’s descriptive claim from your normative critique.
+
+---
 
 ### One Sentence Summary
 
-**Status:** ⚠️ Needs work
-**Feedback:** Overstates Smith: he emphasizes the propensity to exchange and appeals to self-interest as reliable, not that non-self-interested exchange is wasteful.
+**Status:** ⚠️ Needs Work
+
+**Feedback:** Overstates Smith: he does not say exchanges not driven by self-interest are wasteful; he argues self-interest is the reliable basis for coordination at scale.
+
+---
 
 ### Overall Assessment
 
-Strong grasp of core claims and mechanism; minor drift in the animal example and a one-sentence summary that mischaracterizes the text.
+Strong grasp of the thesis and examples; minor causal inversion and one inference beyond the text; modern mapping and reflective questioning are solid.

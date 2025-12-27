@@ -95,27 +95,87 @@ How does Smith's comparison between humans and different breeds of dogs (mastiff
 - Recall (1-5): __ / 5
 - Explain (6-7): __ / 2
 - Apply (8): __ / 1
-- **Total: __ / 8**---
+- **Total: __ / 8**
+---
 
 ## AI Feedback
 
-**Evaluation Date:** 2025-12-27
-**Source:** EDPS-wealth-of-nations-002.txt
-**Total Score:** 6/8
+**Evaluated:** 2025-12-27 | **Source:** EDPS-wealth-of-nations-002.txt
+**Total Score:** 6.5/8
 
-### Answers
+---
 
-| Question | Status | Score | Feedback |
-|----------|--------|-------|----------|
-| Q1: Main Claim | ✓ | 1.0/1.0 | Correct: origin is the propensity to exchange, not deliberate human wisdom. |
-| Q2: Mechanism | ✓ | 0.5/1.0 | Partially correct: should emphasize the certainty of exchanging surplus as what encourages specialization. |
-| Q3: Example | ⚠️ | 0.5/1.0 | Identifies the bow-maker, but misremembers exchanges (it’s cattle/venison) and omits 'bows and arrows.' |
-| Q4: Define: Propensity to truck, barter, and exchange | ✓ | 0.5/1.0 | Meaning and significance are right; calling it 'innate' ignores Smith’s hedge about reason and speech. |
-| Q5: Define: Common stock | ✓ | 0.5/1.0 | Captures the idea of accessible goods via exchange but misses the pooling of diverse talents/products into a shared stock. |
-| Q6: Teach It Back | ✓ | 1.0/1.0 | Clear: we appeal to self-interest for reliable cooperation rather than benevolence. |
-| Q7: Counterfactual | ✓ | 1.0/1.0 | Accurate: without exchange, no division of labour and minimal talent differentiation. |
-| Q8: Modern Connection | ✓ | 1.0/1.0 | Good linkage: platforms enable exchange, turning diverse talents into economic value. |
+### Per-Answer Analysis
 
-### Overall Assessment
+#### Q1: Main Claim (1.0/1.0) ✓
 
-Solid understanding of the core thesis and applications; some imprecision on textual details (mechanism nuance, example specifics, and 'common stock' definition).
+**Accuracy:** Correctly identifies the propensity to exchange as the origin.
+**Reasoning:** Properly contrasts with deliberate planning.
+**Writing:** Succinct and precise.
+
+#### Q2: Mechanism (1.0/1.0) ✓
+
+**Accuracy:** Notes that without exchange there’s no motive to produce excess.
+**Reasoning:** Recognizes the incentive role of exchange; minor order ambiguity.
+**Writing:** Trim repetition ('division labor'); lead with exchange → specialization.
+
+#### Q3: Example (0.5/1.0) ⚠️
+
+**Accuracy:** He makes bows and arrows and trades for cattle/venison; not bows for arrows or generic 'food.'
+**Reasoning:** Underplays the comparative advantage insight (he gets more by specializing).
+**Writing:** Name 'bows and arrows,' 'cattle/venison,' and that he becomes 'a sort of armourer.'
+
+#### Q4: Propensity to exchange (1.0/1.0) ✓
+
+**Accuracy:** Captures human universality and tie to division of labor.
+**Reasoning:** Correct causal link to progress via specialization.
+**Writing:** Could add Smith’s 'faculties of reason and speech' as a possible source.
+
+#### Q5: Common stock (0.5/1.0) ⚠️
+
+**Accuracy:** Smith’s 'common stock' is the pooled outputs of talents made mutually accessible by exchange.
+**Reasoning:** Weed example distracts; focus on pooling via exchange.
+**Writing:** Define as 'pool of exchangeable outputs' and illustrate with butcher/brewer/baker.
+
+#### Q6: Teach It Back (1.0/1.0) ✓
+
+**Accuracy:** We appeal to self-love, not benevolence.
+**Reasoning:** Shows why mutual benefit is more reliable than emotion.
+**Writing:** Replace 'guarantees' with 'makes more likely' to match Smith.
+
+#### Q7: Counterfactual (1.0/1.0) ✓
+
+**Accuracy:** No exchange → no division of labor → minimal talent differences.
+**Reasoning:** Aligns with 'talents as effect' of specialization.
+**Writing:** Drop the 'cave man' aside for economy.
+
+#### Q8: Modern Connection (0.5/1.0) ⚠️
+
+**Accuracy:** Correct that platforms enable exchange of niche talents; dog-breed tangent drifts.
+**Reasoning:** Link between exchange infrastructure and realized value is sound.
+**Writing:** Focus on 'platforms create common stock by enabling global exchange of specialized outputs.'
+
+---
+
+### Thematic Insights
+
+#### Source Mastery
+Consistently grasps Smith’s thesis (propensity to exchange; appeal to self-love) and the counterfactual about talent formation. Tends to add extra-textual claims (dogs 'useful to masters') and miss details (bows and arrows; cattle/venison; 'armourer').
+
+#### Reasoning Quality
+Good causal chains and counterfactuals; occasional inversion (specialization before exchange) and overstatement ('wasteful'). Anchor claims to the text and prefer 'more likely' over necessity.
+
+#### Writing Craft
+**Precision:** 4/5 | **Clarity:** 4/5 | **Economy:** 3/5
+
+**Practice:** Lead with Smith’s exact claim in one sentence, then add one example and one implication; avoid extra inferences not in the passage.
+
+---
+
+### Tutor's Note
+
+You show solid command of Smith’s core idea: everyday cooperation rests on a human propensity to exchange and an appeal to self-interest, not central planning or pure benevolence. Your explanations of why exchange creates reliable provision and how platforms enable specialization demonstrate good mechanism thinking.
+
+Two upgrades will raise accuracy. First, track causal direction precisely: in Smith, the ability and certainty of exchange induce specialization; your answers occasionally start with specialization and then add exchange. Second, stick to the passage’s specifics when asked for examples and definitions: the hunter makes bows and arrows and trades for cattle/venison; 'common stock' is the pooled outputs of talents accessible through exchange.
+
+Keep your thoughtful normative reflections distinct from Smith’s descriptive claims. He does not say non–self-interested exchanges are wasteful; he says benevolence alone is unreliable at scale. In the next section, watch how the 'extent of the market' limits or amplifies specialization, and apply your strengthened habit: lead with the text’s claim, then add one precise illustration.

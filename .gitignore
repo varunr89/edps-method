@@ -32,3 +32,6 @@ books/.obsidian/
 edps-llm-bridge/node_modules/
 edps-llm-bridge/out/
 # Keep edps-llm-bridge/dist/*.vsix for distribution
+.hypothesis/
+uv.lock
+*.bak

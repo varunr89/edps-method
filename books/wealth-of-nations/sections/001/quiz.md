@@ -97,25 +97,82 @@ Smith describes how a boy working on a steam engine invented a way to automate h
 - Apply (8): __ / 1
 - **Total: __ / 8**---
 
+---
+
 ## AI Feedback
 
-**Evaluation Date:** 2025-12-25
-**Source:** EDPS-wealth-of-nations-001.txt
-**Total Score:** 7.5/8
+**Evaluated:** 2025-12-27 | **Source:** EDPS-wealth-of-nations-001.txt
+**Total Score:** 7/8
 
-### Answers
+---
 
-| Question | Status | Score | Feedback |
-|----------|--------|-------|----------|
-| Q1: Main Claim | ✓ | 1.0/1.0 | Correctly identifies division of labour as the primary cause and provides appropriate explanation with pin factory example. |
-| Q2: Mechanism | ✓ | 1.0/1.0 | All three causes correctly identified: dexterity, time savings (context switching), and machinery/automation. |
-| Q3: Example | ⚠️ | 0.5/1.0 | Partially correct. Individual estimate of 20 pins is accurate (text says 'not twenty, perhaps not one'). However, the specialized output is wrong: text says 48,000 pins total (4,800 per worker), not 4,800 total. The improvement is 240x minimum, which student stated correctly. |
-| Q4: Define: Dexterity | ✓ | 1.0/1.0 | Correctly defines dexterity as skill in executing tasks. The neuroscience extension about neural coordination is a valid modern interpretation that aligns with Smith's concept. |
-| Q5: Define: Universal Opulence | ✓ | 1.0/1.0 | Correctly explains universal opulence as widespread prosperity. The African king vs. European peasant comparison directly mirrors Smith's concluding example. |
-| Q6: Teach It Back | ✓ | 1.0/1.0 | Excellent explanation of seasonality preventing specialization in agriculture. Clear, age-appropriate language with concrete examples of seasonal farming tasks. |
-| Q7: Counterfactual | ✓ | 1.0/1.0 | Correctly applies Smith's logic that dispersed attention prevents workers from noticing opportunities for improvement and innovation. |
-| Q8: Modern Connection | ✓ | 1.0/1.0 | Thoughtful response connecting the steam engine boy's adaptation to modern AI concerns. Shows nuanced understanding that technology changes rather than eliminates work, requiring human adaptation. |
+### Per-Answer Analysis
 
-### Overall Assessment
+#### Q1: Main Claim (1.0/1.0) ✓
 
-Excellent quiz performance demonstrating strong comprehension of Smith's arguments. Minor error on the pin factory numbers (confused total vs. per-worker output), but correctly understood the magnitude of improvement. Definitions, explanations, and modern connections all show deep engagement with the material.
+**Accuracy:** Division of labour is the primary cause of improved productive powers.
+**Reasoning:** Defines DoL as subdividing output into tasks enabling specialization.
+**Writing:** Concise and faithful.
+
+#### Q2: Mechanism (1.0/1.0) ✓
+
+**Accuracy:** Matches 'dexterity, saving of time, invention of machines.'
+**Reasoning:** Correct causal links to productivity.
+**Writing:** Precise; minor terminology tweak to match Smith.
+
+#### Q3: Example (0.5/1.0) ⚠️
+
+**Accuracy:** Ten specialized workers ≈ 48,000/day; ≈ 4,800 each. Individual 'certainly not twenty.' Your team figure is 4,800 (incorrect), but $4{,}800/20 = 240\times$ is right.
+**Reasoning:** Understands the magnitude concept; misreads team vs per-person.
+**Writing:** State both per-person and team totals explicitly.
+
+#### Q4: Dexterity (1.0/1.0) ✓
+
+**Accuracy:** Skill/speed gained by repeating a simple operation as one’s sole employment.
+**Reasoning:** Repetition → coordination → faster, better execution.
+**Writing:** Neuroscience aside is fine; keep focus on Smith’s definition.
+
+#### Q5: Universal Opulence (0.5/1.0) ✓
+
+**Accuracy:** Arises from multiplied productions and exchange of surpluses; Smith compares European peasant vs many African kings. Your 'minister vs clerk' deviates.
+**Reasoning:** Connects productivity to affordability; add surplus exchange and 'well-governed society.'
+**Writing:** Tighten to Smith’s example and mechanism.
+
+#### Q6: Agriculture vs Manufacturing (1.0/1.0) ✓
+
+**Accuracy:** Tasks return with seasons; same person often performs multiple tasks; fewer subdivisions possible.
+**Reasoning:** Accurate causal account of limited gains.
+**Writing:** Well-structured walkthrough.
+
+#### Q7: Counterfactual (1.0/1.0) ✓
+
+**Accuracy:** Less specialization → dissipated attention → fewer machine inventions.
+**Reasoning:** Sound causal logic.
+**Writing:** Direct and economical.
+
+#### Q8: Modern Connection (1.0/1.0) ✓
+
+**Accuracy:** Analogy fits: task automation shifts work rather than purely eliminates it; reallocation occurs.
+**Reasoning:** Recognizes adaptation and frontier-seeking behaviors.
+**Writing:** Add note on short-run displacement vs long-run role creation.
+
+---
+
+### Thematic Insights
+
+#### Source Mastery
+Consistently grasps the trifecta (dexterity, time saving, machinery) and agriculture’s limits. Precision slips on pin-factory totals and the opulence mechanism; be exact with figures and Smith’s examples.
+
+#### Reasoning Quality
+Causal chains are robust: specialization → focused attention → innovation; seasonality → limited subdivision → slower gains. Good counterfactual and modern transfer.
+
+#### Writing Craft
+**Precision:** 4/5 | **Clarity:** 4/5 | **Economy:** 4/5
+
+**Practice:** When citing examples, always state both per-person and team totals and anchor with Smith’s phrasing (e.g., 'could scarce... make one, certainly not twenty') to prevent ratio confusion.
+
+---
+
+### Tutor's Note
+
+Strong grasp of Smith’s thesis and the three causes; your agriculture explanation is faithful and clear. The modern AI parallel shows effective transfer of the specialization principle. Tighten numerical and textual fidelity in the pin example: team ≈ 48,000/day, ≈ 4,800 per worker; a lone generalist 'certainly could not make twenty.' This matters because Smith uses magnitude to dramatize DoL’s impact. For 'universal opulence,' highlight surplus-and-exchange and the 'well-governed society' qualifier, and use Smith’s peasant vs king comparison. As you proceed, watch how exchange and market size determine the extent of DoL; keep anchoring claims in exact figures/phrases, then add concise modern bridges.
