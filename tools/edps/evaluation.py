@@ -10,10 +10,16 @@ import json
 @dataclass
 class AnswerFeedback:
     """Feedback for a single answer or recall point."""
-    label: str
+    label: str  # Display label (e.g., "Q1: Main Claim")
     correct: bool
-    note: str
+    note: Optional[str] = None  # Keep for backward compat
     score: Optional[float] = None  # For quiz questions
+    # New fields for v1 schema:
+    question_id: Optional[str] = None  # Stable identifier (e.g., "q1", "recall_main")
+    explanation: Optional[str] = None  # Clearer name (will replace note in v1)
+    accuracy: Optional[str] = None  # Factual correctness analysis
+    reasoning: Optional[str] = None  # Logic and argument analysis
+    writing: Optional[str] = None  # Prose quality analysis
 
 
 @dataclass

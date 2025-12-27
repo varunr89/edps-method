@@ -400,6 +400,29 @@ class TestEvaluateSection:
             assert quiz_content.count("## AI Feedback") == 1
 
 
+class TestExpandedAnswerFeedback:
+    """Tests for expanded answer feedback with accuracy/reasoning/writing."""
+
+    def test_answer_feedback_has_accuracy_field(self):
+        """AnswerFeedback should have accuracy analysis."""
+        from edps.evaluation import AnswerFeedback
+        feedback = AnswerFeedback(
+            label="Q1: Main Claim",
+            correct=True,
+            note="Legacy note",  # keep backward compat
+            score=1.0,
+            question_id="q1",
+            explanation="Legacy note",
+            accuracy="Correct—identified propensity to exchange as origin.",
+            reasoning="Causal chain is sound.",
+            writing="Consider 'propensity' over 'innate need'.",
+        )
+        assert feedback.question_id == "q1"
+        assert feedback.accuracy == "Correct—identified propensity to exchange as origin."
+        assert feedback.reasoning == "Causal chain is sound."
+        assert feedback.writing == "Consider 'propensity' over 'innate need'."
+
+
 class TestIntegration:
     """Integration tests for full evaluation flow."""
 
