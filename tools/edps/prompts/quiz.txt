@@ -1,4 +1,4 @@
-You are creating retrieval practice questions for a section from "{book_title}" by {author}.
+You are generating a quiz to test understanding of a section from "{book_title}" by {author}.
 
 ## Section Details
 - Section: {section_id}
@@ -11,106 +11,97 @@ You are creating retrieval practice questions for a section from "{book_title}" 
 ## Source Text
 {source_text}
 
-## Task
-Create exactly 8 questions following this format. Each question should have an **Answer:** section where the user can write their response.
+## Instructions
+
+Generate a challenging quiz with two parts:
 
 ---
 
 # Quiz: Section {section_id}
 
-> Generator: 🤖 AI-generated
-> Total questions: 8
-> Time estimate: 10-15 minutes
+> Generator: AI-generated
+> Total questions: 6-7
+> Time estimate: 15-20 minutes
 
 ---
 
 ## Instructions
 
-1. Answer all questions **from memory** — no peeking at notes or source
-2. Write your answers directly in the **Answer:** sections below
-3. Score yourself after completing all questions
+1. Answer all questions **from memory** - no peeking at notes or source
+2. For MCQs, note the answer type before answering
+3. For prose questions, write within the suggested sentence range
+4. Score yourself after completing all questions
 
 ---
 
-## Recall Questions
+## Part A: Quick Recall (MCQ)
 
-*Answer each in 1-2 sentences.*
+Create 3-4 multiple choice questions. For each question:
+1. Specify the answer type: "one" (exactly one correct), "multiple" (2-3 correct), or "none" (none of the above is correct)
+2. Include 4 options (A, B, C, D)
+3. For "multiple" type: test which ASSUMPTIONS the argument depends on
+4. For "none" type: test what would DISPROVE the argument (where none of the options actually would)
+5. Make distractors plausible but distinguishable from correct answers
 
-### 1. Main Claim
-[Ask about the central argument]
+Format each MCQ as:
 
-**Answer:**
+### [number].
 
+[Question text]
 
----
+- A) [Option A]
+- B) [Option B]
+- C) [Option C]
+- D) [Option D]
 
-### 2. Mechanism
-[Ask about a process or cause-effect relationship]
+**Type:** [one/multiple/none]
 
-**Answer:**
-
-
----
-
-### 3. Example
-[Ask about an example from the text]
-
-**Answer:**
+**Your Answer:**
 
 
----
-
-### 4. Define: [Key Term 1]
-[Ask for definition of first key term]
-
-**Answer:**
-
+**Correct Answer(s):** [correct letters, e.g., "A" or "A, C, D" or "None"]
 
 ---
 
-### 5. Define: [Key Term 2]
-[Ask for definition of second key term]
+## Part B: Depth Questions (Prose)
 
-**Answer:**
+Create 2-3 prose questions. Vary the types:
+
+1. **Adversarial** (1-2 sentences): "A critic might argue [X]. How would Smith respond?"
+2. **Comparative** (2-3 sentences): "How does this argument compare to [related concept]?"
+3. **Socratic** (1-2 sentences): "If [assumption] were false, what would follow?"
+4. **Synthesis** (2-3 sentences): "Connect this section's main claim to [earlier concept]."
+
+Format each prose question as:
+
+### [number]. [Type: Adversarial/Comparative/Socratic/Synthesis]
+
+[Question text]
+
+**Length:** [X-Y sentences]
+
+**Your Answer:**
 
 
----
+**Model Answer:**
 
-## Explain Questions
-
-*Answer each in 3-5 sentences.*
-
-### 6. Teach It Back
-[Ask to explain a concept to a smart 15-year-old]
-
-**Answer:**
-
-
----
-
-### 7. Counterfactual
-[Ask what would happen if a key condition were different]
-
-**Answer:**
-
+[Provide a brief model answer for self-checking]
 
 ---
 
-## Apply Question
+## Quality Standards
 
-*Answer in 3-5 sentences.*
-
-### 8. Modern Connection
-[Ask to connect a concept to a specific modern phenomenon]
-
-**Answer:**
-
+- Questions should require understanding, not just recall
+- Distractors should be genuinely tempting (common misconceptions)
+- MCQs with "multiple" answers should have 2-3 correct options
+- "None" type MCQs should have all options be genuine but insufficient to disprove
+- Prose questions should push beyond simple restatement
+- Include at least 2 different prose question types
 
 ---
 
 ## Score
 
-- Recall (1-5): __ / 5
-- Explain (6-7): __ / 2
-- Apply (8): __ / 1
-- **Total: __ / 8**
+- Part A (MCQ): __ / [number of MCQs]
+- Part B (Prose): __ / [number of prose questions]
+- **Total: __ / [total]**
