@@ -710,6 +710,123 @@ class TestExpandedRecallFormat:
         assert "**Score:** 4/5" in markdown
 
 
+class TestExpandedEvaluationIntegration:
+    """Integration test for full expanded evaluation."""
+
+    def test_full_expanded_evaluation_flow(self, tmp_path):
+        """Test complete flow produces expanded feedback structure."""
+        from edps.evaluation import (
+            build_evaluation_prompt, parse_evaluation_response,
+            format_quiz_feedback, format_recall_feedback,
+            QuizFeedback, RecallFeedback, AnswerFeedback,
+            ThematicInsights, WritingScores
+        )
+
+        # Create mock expanded response (what the LLM would return)
+        mock_response = '''{
+  "recall": {
+    "points": [
+      {
+        "label": "Division of labor origin",
+        "correct": true,
+        "note": "Good understanding of propensity to exchange",
+        "accuracy": "Correctly identified propensity to exchange as the origin.",
+        "reasoning": "Causal chain is complete - exchange enables specialization.",
+        "writing": "Consider using 'propensity' over 'innate tendency'."
+      },
+      {
+        "label": "Productivity gains",
+        "correct": true,
+        "note": "Solid grasp of three causes",
+        "accuracy": "All three causes mentioned: dexterity, time saving, machinery.",
+        "reasoning": "Good logical flow from cause to effect.",
+        "writing": "Lead with the mechanism before the examples."
+      }
+    ],
+    "one_sentence_ok": true,
+    "one_sentence_note": "Clear and accurate summary that captures the core thesis.",
+    "score": 4,
+    "reasoning": "Strong recall of key concepts with good accuracy."
+  },
+  "quiz": {
+    "answers": [
+      {
+        "label": "Q1: Origin of Division of Labor",
+        "correct": true,
+        "score": 1.0,
+        "note": "Excellent",
+        "accuracy": "Correctly identified propensity to exchange.",
+        "reasoning": "Sound causal logic.",
+        "writing": "Concise and precise."
+      },
+      {
+        "label": "Q2: Three Causes of Productivity",
+        "correct": true,
+        "score": 0.8,
+        "note": "Mostly correct",
+        "accuracy": "Two of three causes identified correctly.",
+        "reasoning": "Good but missing machinery innovation aspect.",
+        "writing": "Structure could be clearer."
+      }
+    ],
+    "total_score": 6.8,
+    "reasoning": "Strong understanding with minor gaps.",
+    "thematic_insights": {
+      "source_mastery": "You grasp Smith's core thesis well. Pattern: you tend to sharpen his hedges into certainties.",
+      "reasoning_quality": "Arguments are structurally sound. Push the 'so what' further in applications.",
+      "writing_craft": {
+        "precision": 4,
+        "clarity": 4,
+        "economy": 3,
+        "suggestion": "Cut 20% of words without losing meaning - practice the 'one-sentence version' first."
+      }
+    },
+    "tutors_note": "You're building real understanding here. Three things to carry forward: (1) Honor Smith's hedges - he says 'propensity' not 'innate need' for a reason. (2) When listing causes, lead with the mechanism before examples. (3) Your synthesis is getting stronger - keep connecting back to the core thesis."
+  }
+}'''
+
+        # Parse the response
+        recall_fb, quiz_fb = parse_evaluation_response(mock_response)
+
+        # Verify recall feedback has expanded fields
+        assert len(recall_fb.points) == 2
+        assert recall_fb.points[0].accuracy is not None
+        assert recall_fb.points[0].reasoning is not None
+        assert recall_fb.points[0].writing is not None
+        assert recall_fb.score == 4
+
+        # Verify quiz feedback has thematic insights
+        assert quiz_fb.thematic_insights is not None
+        assert quiz_fb.thematic_insights.source_mastery is not None
+        assert quiz_fb.thematic_insights.writing_craft.precision == 4
+        assert quiz_fb.thematic_insights.writing_craft.suggestion is not None
+
+        # Verify tutor's note
+        assert quiz_fb.tutors_note is not None
+        assert "Honor Smith's hedges" in quiz_fb.tutors_note
+
+        # Format and verify output structure
+        quiz_md = format_quiz_feedback(quiz_fb, "2025-12-27", "wealth-of-nations/001")
+        recall_md = format_recall_feedback(recall_fb, "2025-12-27", "wealth-of-nations/001")
+
+        # Verify quiz markdown has expected sections
+        assert "### Per-Answer Analysis" in quiz_md
+        assert "**Accuracy:**" in quiz_md
+        assert "### Thematic Insights" in quiz_md
+        assert "#### Source Mastery" in quiz_md
+        assert "**Precision:** 4/5" in quiz_md
+        assert "### Tutor's Note" in quiz_md
+
+        # Verify recall markdown has expected sections
+        assert "### Recall Points" in recall_md
+        assert "**Accuracy:**" in recall_md
+        assert "### One Sentence Summary" in recall_md
+
+        # Verify approximate output length (~800-1000 words for quiz)
+        quiz_word_count = len(quiz_md.split())
+        assert quiz_word_count > 100  # Should be substantial
+
+
 class TestSchemaMigration:
     """Tests for v0 -> v1 schema migration."""
 
