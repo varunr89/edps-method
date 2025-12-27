@@ -400,7 +400,7 @@ def parse_evaluation_response(response: str) -> tuple[RecallFeedback, QuizFeedba
 
 
 def format_recall_feedback(feedback: RecallFeedback, eval_date: str, source_file: str) -> str:
-    """Format recall feedback as markdown.
+    """Format recall feedback as expanded markdown.
 
     Args:
         feedback: RecallFeedback object with evaluation results
@@ -408,37 +408,56 @@ def format_recall_feedback(feedback: RecallFeedback, eval_date: str, source_file
         source_file: Path to source file being evaluated
 
     Returns:
-        Markdown-formatted feedback with table and metadata
+        Markdown-formatted feedback with per-point analysis and metadata
     """
     lines = [
         "---",
         "",
-        "## AI Feedback",
+        "## AI Feedback on Recall",
         "",
-        f"**Evaluation Date:** {eval_date}",
-        f"**Source:** {source_file}",
-        f"**Overall Score:** {feedback.score}/5",
+        f"**Evaluated:** {eval_date} | **Source:** {source_file}",
+        f"**Score:** {feedback.score}/5",
         "",
-        "### Memory Points",
+        "---",
         "",
-        "| Point | Status | Feedback |",
-        "|-------|--------|----------|"
+        "### Recall Points",
+        "",
     ]
 
     for point in feedback.points:
         status = "✓" if point.correct else "⚠️"
-        lines.append(f"| {point.label} | {status} | {point.note} |")
+        lines.append(f"#### {point.label} {status}")
+        lines.append("")
 
+        if point.accuracy:
+            lines.append(f"**Accuracy:** {point.accuracy}")
+        if point.reasoning:
+            lines.append(f"**Reasoning:** {point.reasoning}")
+        if point.writing:
+            lines.append(f"**Writing:** {point.writing}")
+
+        # Fallback to legacy note if no expanded fields
+        if not (point.accuracy or point.reasoning or point.writing):
+            if point.note:
+                lines.append(f"**Feedback:** {point.note}")
+
+        lines.append("")
+
+    # One sentence summary section
     lines.extend([
+        "---",
         "",
         "### One Sentence Summary",
         "",
-        f"**Status:** {'✓ Accurate' if feedback.one_sentence_ok else '⚠️ Needs work'}",
+        f"**Status:** {'✓ Approved' if feedback.one_sentence_ok else '⚠️ Needs Work'}",
+        "",
         f"**Feedback:** {feedback.one_sentence_note}",
+        "",
+        "---",
         "",
         "### Overall Assessment",
         "",
-        feedback.reasoning
+        feedback.reasoning,
     ])
 
     return "\n".join(lines)

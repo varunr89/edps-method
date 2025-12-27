@@ -536,7 +536,7 @@ What increases productivity?
             quiz_content = (section_path / "quiz.md").read_text()
 
             assert "## AI Feedback" in recall_content
-            assert "**Overall Score:** 5/5" in recall_content
+            assert "**Score:** 5/5" in recall_content
             assert "## AI Feedback" in quiz_content
             assert "**Total Score:** 8/8" in quiz_content
 
@@ -671,6 +671,43 @@ class TestExpandedMarkdownFormat:
         # Tutor's note
         assert "### Tutor's Note" in markdown
         assert "Honor the hedges" in markdown
+
+
+class TestExpandedRecallFormat:
+    """Tests for expanded recall feedback markdown output."""
+
+    def test_recall_feedback_includes_per_point_sections(self):
+        """Should format each recall point with Accuracy/Reasoning/Writing."""
+        from edps.evaluation import format_recall_feedback, RecallFeedback, AnswerFeedback
+
+        feedback = RecallFeedback(
+            points=[
+                AnswerFeedback(
+                    label="Division of labor",
+                    correct=True,
+                    note="Good understanding",
+                    accuracy="Correctly identified the main mechanism.",
+                    reasoning="Causal chain is complete.",
+                    writing="Consider using Smith's exact terminology."
+                ),
+            ],
+            one_sentence_ok=True,
+            one_sentence_note="Clear and accurate",
+            score=4,
+            reasoning="Strong recall of key concepts"
+        )
+
+        markdown = format_recall_feedback(feedback, "2025-12-27", "source.txt")
+
+        # Per-point sections
+        assert "#### Division of labor" in markdown
+        assert "**Accuracy:**" in markdown
+        assert "Correctly identified the main mechanism" in markdown
+        assert "**Reasoning:**" in markdown
+        assert "**Writing:**" in markdown
+
+        # Score and summary
+        assert "**Score:** 4/5" in markdown
 
 
 class TestSchemaMigration:
