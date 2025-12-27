@@ -445,7 +445,7 @@ def format_recall_feedback(feedback: RecallFeedback, eval_date: str, source_file
 
 
 def format_quiz_feedback(feedback: QuizFeedback, eval_date: str, source_file: str) -> str:
-    """Format quiz feedback as markdown.
+    """Format quiz feedback as expanded markdown.
 
     Args:
         feedback: QuizFeedback object with evaluation results
@@ -453,34 +453,73 @@ def format_quiz_feedback(feedback: QuizFeedback, eval_date: str, source_file: st
         source_file: Path to source file being evaluated
 
     Returns:
-        Markdown-formatted feedback with table and metadata
+        Markdown-formatted feedback with per-answer analysis, thematic insights,
+        and tutor's note
     """
     lines = [
         "---",
         "",
         "## AI Feedback",
         "",
-        f"**Evaluation Date:** {eval_date}",
-        f"**Source:** {source_file}",
+        f"**Evaluated:** {eval_date} | **Source:** {source_file}",
         f"**Total Score:** {feedback.total_score}/8",
         "",
-        "### Answers",
+        "---",
         "",
-        "| Question | Status | Score | Feedback |",
-        "|----------|--------|-------|----------|"
+        "### Per-Answer Analysis",
+        "",
     ]
 
     for answer in feedback.answers:
         status = "✓" if answer.correct else "⚠️"
-        score_str = f"{answer.score:.1f}/1.0"
-        lines.append(f"| {answer.label} | {status} | {score_str} | {answer.note} |")
+        score_str = f"{answer.score:.1f}/1.0" if answer.score is not None else ""
+        lines.append(f"#### {answer.label} ({score_str}) {status}")
+        lines.append("")
 
-    lines.extend([
-        "",
-        "### Overall Assessment",
-        "",
-        feedback.reasoning
-    ])
+        if answer.accuracy:
+            lines.append(f"**Accuracy:** {answer.accuracy}")
+        if answer.reasoning:
+            lines.append(f"**Reasoning:** {answer.reasoning}")
+        if answer.writing:
+            lines.append(f"**Writing:** {answer.writing}")
+
+        # Fallback to legacy note if no expanded fields
+        if not (answer.accuracy or answer.reasoning or answer.writing):
+            lines.append(f"**Feedback:** {answer.note}")
+
+        lines.append("")
+
+    # Thematic insights
+    if feedback.thematic_insights:
+        ti = feedback.thematic_insights
+        wc = ti.writing_craft
+        lines.extend([
+            "---",
+            "",
+            "### Thematic Insights",
+            "",
+            "#### Source Mastery",
+            ti.source_mastery,
+            "",
+            "#### Reasoning Quality",
+            ti.reasoning_quality,
+            "",
+            "#### Writing Craft",
+            f"**Precision:** {wc.precision}/5 | **Clarity:** {wc.clarity}/5 | **Economy:** {wc.economy}/5",
+            "",
+            f"**Practice:** {wc.suggestion}",
+            "",
+        ])
+
+    # Tutor's note
+    if feedback.tutors_note:
+        lines.extend([
+            "---",
+            "",
+            "### Tutor's Note",
+            "",
+            feedback.tutors_note,
+        ])
 
     return "\n".join(lines)
 

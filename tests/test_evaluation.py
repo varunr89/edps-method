@@ -269,7 +269,7 @@ class TestFormatFeedback:
         assert "score" in markdown.lower() or "4" in markdown
 
     def test_quiz_feedback_format(self):
-        """Should format quiz feedback as markdown table."""
+        """Should format quiz feedback with per-answer sections."""
         from edps.evaluation import format_quiz_feedback, QuizFeedback, AnswerFeedback
 
         feedback = QuizFeedback(
@@ -288,17 +288,19 @@ class TestFormatFeedback:
         assert "2024-01-15" in markdown
         assert "section-001/source.md" in markdown
 
-        # Should have table
-        assert "| Question | Status | Score | Feedback |" in markdown or ("Question" in markdown and "Score" in markdown)
+        # Should have per-answer sections (new expanded format)
+        assert "### Per-Answer Analysis" in markdown
+        assert "#### Q1: Main claim" in markdown
+        assert "#### Q2: Mechanism" in markdown
 
         # Should have checkmarks/warnings
         assert "✓" in markdown or "✅" in markdown
         assert "⚠" in markdown or "⚠️" in markdown
 
-        # Should have content
-        assert "Q1" in markdown or "Main claim" in markdown
-        assert "Q2" in markdown or "Mechanism" in markdown
-        assert "7.5" in markdown or "total" in markdown.lower()
+        # Should have content (fallback to legacy note field)
+        assert "Perfect" in markdown
+        assert "Partial credit" in markdown
+        assert "7.5" in markdown
 
 
 class TestEvaluateSection:
@@ -621,6 +623,54 @@ class TestExpandedResponseParsing:
 
         assert quiz_fb.thematic_insights.writing_craft.precision == 4
         assert quiz_fb.tutors_note == "You're building understanding. Carry forward: honor the hedges."
+
+
+class TestExpandedMarkdownFormat:
+    """Tests for expanded markdown output."""
+
+    def test_quiz_feedback_includes_per_answer_sections(self):
+        """Should format each answer with Accuracy/Reasoning/Writing."""
+        from edps.evaluation import (
+            format_quiz_feedback, QuizFeedback, AnswerFeedback,
+            ThematicInsights, WritingScores
+        )
+
+        writing = WritingScores(precision=4, clarity=4, economy=3, suggestion="Cut filler.")
+        insights = ThematicInsights(
+            source_mastery="Strong on core thesis.",
+            reasoning_quality="Sound logic throughout.",
+            writing_craft=writing,
+        )
+        feedback = QuizFeedback(
+            answers=[
+                AnswerFeedback(
+                    label="Q1: Main Claim", correct=True, note="Good", score=1.0,
+                    accuracy="Correct on origin.", reasoning="Sound chain.", writing="Use 'propensity'."
+                ),
+            ],
+            total_score=7.5,
+            reasoning="Good overall",
+            thematic_insights=insights,
+            tutors_note="You're building understanding. Honor the hedges.",
+        )
+
+        markdown = format_quiz_feedback(feedback, "2025-12-27", "source.txt")
+
+        # Per-answer sections
+        assert "#### Q1: Main Claim" in markdown
+        assert "**Accuracy:**" in markdown
+        assert "**Reasoning:**" in markdown
+        assert "**Writing:**" in markdown
+
+        # Thematic insights
+        assert "### Thematic Insights" in markdown
+        assert "#### Source Mastery" in markdown
+        assert "Strong on core thesis" in markdown
+        assert "**Precision:** 4/5" in markdown
+
+        # Tutor's note
+        assert "### Tutor's Note" in markdown
+        assert "Honor the hedges" in markdown
 
 
 class TestSchemaMigration:
