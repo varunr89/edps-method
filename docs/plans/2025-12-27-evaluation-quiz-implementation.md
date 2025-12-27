@@ -6,7 +6,23 @@
 
 **Architecture:** Extend existing dataclasses with new fields (accuracy, reasoning, writing per answer; thematic insights; tutor's note). Update prompts to request expanded JSON. Update formatters to output new markdown structure. Quiz generation becomes variable-format with MCQ support.
 
-**Tech Stack:** Python, pytest, ruamel.yaml, existing LLM client infrastructure
+**Tech Stack:** Python, pytest, hypothesis, ruamel.yaml, existing LLM client infrastructure
+
+---
+
+### Enhancements from Code Review (2025-12-27)
+
+This plan incorporates feedback from architectural review:
+
+| Enhancement | Task | Description |
+|-------------|------|-------------|
+| **Schema versioning** | 1.3, 1.4 | `schema_version: Literal["v0","v1"]` + `migrate_v0_to_v1()` |
+| **Field renaming** | 1.1 | `note` → `explanation`, add `question_id` |
+| **MCOption dataclass** | 4.1 | Replace brittle tuples with structured `MCOption` |
+| **Answer validation** | 4.1 | `__post_init__` validates `answer_type` matches correct options |
+| **F1 scoring** | 4.3 | Precision × Recall for fair partial credit |
+| **Two-pass prompting** | 2.1 | Architecture note for future enhancement |
+| **Property-based tests** | 5.2 | Hypothesis tests for scoring invariants |
 
 ---
 
@@ -30,14 +46,16 @@ class TestExpandedAnswerFeedback:
         """AnswerFeedback should have accuracy analysis."""
         from edps.evaluation import AnswerFeedback
         feedback = AnswerFeedback(
+            question_id="q1",
             label="Q1: Main Claim",
             correct=True,
-            note="Legacy note",
+            explanation="Legacy note",
             score=1.0,
             accuracy="Correct—identified propensity to exchange as origin.",
             reasoning="Causal chain is sound.",
             writing="Consider 'propensity' over 'innate need'.",
         )
+        assert feedback.question_id == "q1"
         assert feedback.accuracy == "Correct—identified propensity to exchange as origin."
         assert feedback.reasoning == "Causal chain is sound."
         assert feedback.writing == "Consider 'propensity' over 'innate need'."
@@ -56,14 +74,17 @@ In `tools/edps/evaluation.py`, update `AnswerFeedback`:
 @dataclass
 class AnswerFeedback:
     """Feedback for a single answer or recall point."""
-    label: str
+    question_id: str  # Stable identifier (e.g., "q1", "recall_main")
+    label: str  # Display label (e.g., "Q1: Main Claim")
     correct: bool
-    note: str
+    explanation: str  # Replaces ambiguous "note"
     score: Optional[float] = None  # For quiz questions
     accuracy: Optional[str] = None  # Factual correctness analysis
     reasoning: Optional[str] = None  # Logic and argument analysis
     writing: Optional[str] = None  # Prose quality analysis
 ```
+
+**Note:** `question_id` enables cross-references in thematic insights. `explanation` replaces `note` for clarity.
 
 **Step 4: Run test to verify it passes**
 
@@ -189,14 +210,19 @@ Expected: FAIL with "TypeError: unexpected keyword argument 'thematic_insights'"
 Update `QuizFeedback` in `tools/edps/evaluation.py`:
 
 ```python
+from typing import Literal
+
 @dataclass
 class QuizFeedback:
     """Complete feedback for quiz.md evaluation."""
+    schema_version: Literal["v0", "v1"] = "v1"  # Version for migration support
     answers: list[AnswerFeedback]
     total_score: float
     reasoning: str  # Legacy field, kept for backward compat
     thematic_insights: Optional[ThematicInsights] = None
     tutors_note: Optional[str] = None
+    model_id: Optional[str] = None  # Which LLM produced this evaluation
+    created_at: Optional[str] = None  # ISO timestamp
 ```
 
 **Step 4: Run test to verify it passes**
@@ -218,9 +244,138 @@ git commit -m "feat(eval): add thematic_insights and tutors_note to QuizFeedback
 
 ---
 
+### Task 1.4: Add Schema Migration Function
+
+**Files:**
+- Modify: `tools/edps/evaluation.py`
+- Test: `tests/test_evaluation.py`
+
+**Step 1: Write the failing test**
+
+```python
+class TestSchemaMigration:
+    """Tests for v0 -> v1 schema migration."""
+
+    def test_migrate_v0_to_v1_maps_note_to_explanation(self):
+        """Migration should map legacy 'note' field to 'explanation'."""
+        from edps.evaluation import migrate_v0_to_v1
+
+        v0_data = {
+            "quiz": {
+                "answers": [
+                    {"label": "Q1", "correct": True, "note": "Good answer", "score": 1.0}
+                ],
+                "total_score": 7.5,
+                "reasoning": "Overall good"
+            }
+        }
+
+        v1_data = migrate_v0_to_v1(v0_data)
+
+        assert v1_data["quiz"]["schema_version"] == "v1"
+        assert v1_data["quiz"]["answers"][0]["explanation"] == "Good answer"
+        assert v1_data["quiz"]["answers"][0]["question_id"] == "q1"
+
+    def test_migrate_v0_to_v1_preserves_existing_v1(self):
+        """Migration should pass through v1 data unchanged."""
+        from edps.evaluation import migrate_v0_to_v1
+
+        v1_data = {
+            "quiz": {
+                "schema_version": "v1",
+                "answers": [{"question_id": "q1", "explanation": "Good"}],
+                "total_score": 7.5,
+                "reasoning": "Overall good"
+            }
+        }
+
+        result = migrate_v0_to_v1(v1_data)
+        assert result == v1_data  # Unchanged
+```
+
+**Step 2: Run test to verify it fails**
+
+Run: `PYTHONPATH="$PWD/tools" python -m pytest tests/test_evaluation.py::TestSchemaMigration -v`
+Expected: FAIL with "cannot import name 'migrate_v0_to_v1'"
+
+**Step 3: Write minimal implementation**
+
+Add to `tools/edps/evaluation.py`:
+
+```python
+def migrate_v0_to_v1(data: dict) -> dict:
+    """Migrate v0 evaluation schema to v1.
+
+    Changes:
+    - Adds schema_version: "v1"
+    - Maps 'note' -> 'explanation'
+    - Adds question_id from label or index
+    """
+    # Check if already v1
+    if data.get("quiz", {}).get("schema_version") == "v1":
+        return data
+
+    result = {"recall": data.get("recall", {}), "quiz": {}}
+    quiz = data.get("quiz", {})
+
+    # Migrate answers
+    migrated_answers = []
+    for i, answer in enumerate(quiz.get("answers", [])):
+        migrated = {
+            "question_id": f"q{i+1}",
+            "label": answer.get("label", f"Q{i+1}"),
+            "correct": answer.get("correct", False),
+            "explanation": answer.get("note", ""),  # note -> explanation
+            "score": answer.get("score"),
+            "accuracy": answer.get("accuracy"),
+            "reasoning": answer.get("reasoning"),
+            "writing": answer.get("writing"),
+        }
+        migrated_answers.append(migrated)
+
+    result["quiz"] = {
+        "schema_version": "v1",
+        "answers": migrated_answers,
+        "total_score": quiz.get("total_score", 0),
+        "reasoning": quiz.get("reasoning", ""),
+        "thematic_insights": quiz.get("thematic_insights"),
+        "tutors_note": quiz.get("tutors_note"),
+    }
+
+    return result
+```
+
+**Step 4: Run test to verify it passes**
+
+Run: `PYTHONPATH="$PWD/tools" python -m pytest tests/test_evaluation.py::TestSchemaMigration -v`
+Expected: PASS
+
+**Step 5: Commit**
+
+```bash
+git add tools/edps/evaluation.py tests/test_evaluation.py
+git commit -m "feat(eval): add migrate_v0_to_v1 for schema versioning"
+```
+
+---
+
 ## Phase 2: Updated Evaluation Prompt
 
 ### Task 2.1: Create Expanded Prompt Builder
+
+**Architecture Note: Two-Pass Strategy (from code review)**
+
+For more reliable parsing, consider a two-pass approach:
+1. **Pass 1:** Request JSON-only response with structured scores and concise explanations
+2. **Pass 2:** If tutors_note needed, request narrative referencing the already-parsed JSON
+
+This reduces parse failures and keeps narratives separate from structured data. For initial implementation, we use single-pass with validation + repair loop (simpler). Future enhancement: split into two calls.
+
+**Prompt Design Principles:**
+- Embed compact JSON contract, not verbose schema
+- Include one minimal example + one edge case
+- Instruct: "return booleans as true/false, no trailing commas"
+- Keep per-answer explanations to 1-3 sentences; depth goes in tutors_note
 
 **Files:**
 - Modify: `tools/edps/evaluation.py:112-193`
@@ -714,39 +869,68 @@ class TestMCQTypes:
 
     def test_mcq_can_have_multiple_answers(self):
         """MCQ should support multiple correct answers."""
-        from edps.quiz_types import MCQuestion
+        from edps.quiz_types import MCQuestion, MCOption
 
         q = MCQuestion(
+            question_id="mcq1",
             number=1,
             question="Which assumptions does Smith's argument depend on?",
             options=[
-                ("A", "Humans are rational", True),
-                ("B", "Exchange is possible", True),
-                ("C", "Government enforces contracts", False),
-                ("D", "Surplus is feasible", True),
+                MCOption("A", "Humans are rational", True),
+                MCOption("B", "Exchange is possible", True),
+                MCOption("C", "Government enforces contracts", False),
+                MCOption("D", "Surplus is feasible", True),
             ],
             answer_type="multiple",
         )
         assert q.answer_type == "multiple"
         assert q.correct_count() == 3
+        assert q.correct_letters() == {"A", "B", "D"}
 
     def test_mcq_can_have_no_answer(self):
         """MCQ should support none-correct option."""
-        from edps.quiz_types import MCQuestion
+        from edps.quiz_types import MCQuestion, MCOption
 
         q = MCQuestion(
+            question_id="mcq2",
             number=2,
             question="Which would disprove Smith's thesis?",
             options=[
-                ("A", "Option that doesn't disprove", False),
-                ("B", "Another non-disproof", False),
-                ("C", "Still not a disproof", False),
-                ("D", "Nope", False),
+                MCOption("A", "Option that doesn't disprove", False),
+                MCOption("B", "Another non-disproof", False),
+                MCOption("C", "Still not a disproof", False),
+                MCOption("D", "Nope", False),
             ],
             answer_type="none",
         )
         assert q.answer_type == "none"
         assert q.correct_count() == 0
+
+    def test_mcoption_validates_letter(self):
+        """MCOption should validate letter is A-H."""
+        from edps.quiz_types import MCOption
+        import pytest
+
+        with pytest.raises(ValueError):
+            MCOption("Z", "Invalid letter", True)
+
+    def test_mcq_validates_answer_type(self):
+        """MCQuestion should validate answer_type matches options."""
+        from edps.quiz_types import MCQuestion, MCOption
+        import pytest
+
+        # answer_type="one" but 2 correct answers
+        with pytest.raises(ValueError):
+            MCQuestion(
+                question_id="mcq_bad",
+                number=1,
+                question="Bad question",
+                options=[
+                    MCOption("A", "Correct 1", True),
+                    MCOption("B", "Correct 2", True),
+                ],
+                answer_type="one",
+            )
 ```
 
 **Step 2: Run test to verify it fails**
@@ -765,20 +949,45 @@ from typing import Literal
 
 
 @dataclass
+class MCOption:
+    """Single option in a multiple choice question."""
+    letter: str  # A, B, C, D
+    text: str
+    is_correct: bool
+
+    def __post_init__(self):
+        if len(self.letter) != 1 or self.letter not in "ABCDEFGH":
+            raise ValueError(f"Invalid option letter: {self.letter}")
+
+
+@dataclass
 class MCQuestion:
     """Multiple choice question with variable answer types."""
-    number: int
+    question_id: str  # Stable identifier (e.g., "mcq1")
+    number: int  # Display number
     question: str
-    options: list[tuple[str, str, bool]]  # (letter, text, is_correct)
+    options: list[MCOption]  # Structured options (not tuples)
     answer_type: Literal["one", "multiple", "none"]
 
     def correct_count(self) -> int:
-        return sum(1 for _, _, correct in self.options if correct)
+        return sum(1 for opt in self.options if opt.is_correct)
+
+    def correct_letters(self) -> set[str]:
+        return {opt.letter for opt in self.options if opt.is_correct}
+
+    def __post_init__(self):
+        # Validate answer_type matches options
+        correct = self.correct_count()
+        if self.answer_type == "none" and correct != 0:
+            raise ValueError("answer_type='none' but has correct options")
+        if self.answer_type == "one" and correct != 1:
+            raise ValueError(f"answer_type='one' but has {correct} correct options")
 
 
 @dataclass
 class ProseQuestion:
     """Prose question with variable types."""
+    question_id: str  # Stable identifier
     number: int
     question: str
     question_type: Literal["adversarial", "comparative", "socratic", "synthesis"]
@@ -832,9 +1041,11 @@ git commit -m "feat(quiz): rewrite prompt for variable MCQ+prose format"
 
 **Files:**
 - Modify: `tools/edps/evaluation.py` (add `parse_mcq_answers`)
+- Modify: `tools/edps/quiz_types.py` (add `score_mcq_answer`)
 - Test: `tests/test_evaluation.py`
+- Test: `tests/test_quiz_types.py`
 
-**Step 1: Write the failing test**
+**Step 1: Write the failing test for parsing**
 
 ```python
 class TestMCQParsing:
@@ -861,7 +1072,126 @@ Smith's argument depends on which assumption(s)?
         assert result["mcq_answers"][0]["answer_type"] == "multiple"
 ```
 
-**Steps 2-5:** Implement parsing, test, commit.
+**Step 2: Write failing test for F1 scoring**
+
+Add to `tests/test_quiz_types.py`:
+
+```python
+class TestMCQScoring:
+    """Tests for MCQ F1-based partial credit scoring."""
+
+    def test_score_mcq_perfect_multiple(self):
+        """Perfect match on multiple-answer MCQ should score 1.0."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = {"A", "B", "D"}  # Correct answers
+        selected = {"A", "B", "D"}  # Student selected
+        score = score_mcq_answer(gold, selected)
+        assert score == 1.0
+
+    def test_score_mcq_partial_credit(self):
+        """Partial match should use F1 formula."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = {"A", "B", "D"}  # 3 correct
+        selected = {"A", "B"}  # 2 selected, both correct
+        # Precision = 2/2 = 1.0, Recall = 2/3 = 0.667
+        # F1 = 2 * 1.0 * 0.667 / (1.0 + 0.667) = 0.8
+        score = score_mcq_answer(gold, selected)
+        assert abs(score - 0.8) < 0.01
+
+    def test_score_mcq_with_wrong_selection(self):
+        """Wrong selections should reduce precision."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = {"A", "B"}  # 2 correct
+        selected = {"A", "C"}  # 1 right, 1 wrong
+        # Precision = 1/2 = 0.5, Recall = 1/2 = 0.5
+        # F1 = 2 * 0.5 * 0.5 / (0.5 + 0.5) = 0.5
+        score = score_mcq_answer(gold, selected)
+        assert abs(score - 0.5) < 0.01
+
+    def test_score_mcq_none_correct_type(self):
+        """'None of the above' case: selecting nothing is correct."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = set()  # No correct answers
+        selected = set()  # Student correctly selected none
+        score = score_mcq_answer(gold, selected)
+        assert score == 1.0
+
+    def test_score_mcq_none_but_selected(self):
+        """'None' type but student selected something: 0."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = set()  # No correct answers
+        selected = {"A"}  # Student wrongly selected A
+        score = score_mcq_answer(gold, selected)
+        assert score == 0.0
+
+    def test_score_mcq_single_answer(self):
+        """Single-answer MCQ: 1 if correct, 0 otherwise."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = {"B"}
+        assert score_mcq_answer(gold, {"B"}) == 1.0
+        assert score_mcq_answer(gold, {"A"}) == 0.0
+        assert score_mcq_answer(gold, {"A", "B"}) < 1.0  # Over-selected
+```
+
+**Step 3: Implement F1 scoring function**
+
+Add to `tools/edps/quiz_types.py`:
+
+```python
+def score_mcq_answer(gold: set[str], selected: set[str]) -> float:
+    """Score MCQ answer using F1-based partial credit.
+
+    Args:
+        gold: Set of correct answer letters (e.g., {"A", "B", "D"})
+        selected: Set of student's selected letters
+
+    Returns:
+        Score from 0.0 to 1.0 based on F1 formula.
+
+    Scoring rules:
+    - If both sets empty (none-of-the-above correct): 1.0
+    - If gold empty but student selected: 0.0
+    - Otherwise: F1 = 2*P*R / (P+R) where:
+      - Precision P = |gold ∩ selected| / |selected|
+      - Recall R = |gold ∩ selected| / |gold|
+    """
+    # Handle none-of-the-above case
+    if not gold and not selected:
+        return 1.0
+    if not gold and selected:
+        return 0.0
+    if gold and not selected:
+        return 0.0
+
+    # Calculate F1
+    intersection = gold & selected
+    precision = len(intersection) / len(selected)
+    recall = len(intersection) / len(gold)
+
+    if precision + recall == 0:
+        return 0.0
+
+    f1 = 2 * precision * recall / (precision + recall)
+    return round(f1, 3)
+```
+
+**Step 4: Run tests**
+
+Run: `PYTHONPATH="$PWD/tools" python -m pytest tests/test_quiz_types.py::TestMCQScoring -v`
+Expected: PASS
+
+**Step 5: Commit**
+
+```bash
+git add tools/edps/quiz_types.py tools/edps/evaluation.py tests/test_quiz_types.py tests/test_evaluation.py
+git commit -m "feat(quiz): add F1-based partial credit scoring for MCQs"
+```
 
 ---
 
@@ -907,7 +1237,123 @@ git commit -m "test(eval): add integration test for expanded evaluation"
 
 ---
 
-### Task 5.2: Update Config for Longer Outputs
+### Task 5.2: Add Property-Based Tests (from code review)
+
+**Rationale:** Property-based tests catch edge cases that unit tests miss. Use Hypothesis to generate random inputs and verify invariants.
+
+**Files:**
+- Create: `tests/test_properties.py`
+- Modify: `pyproject.toml` (add hypothesis dependency)
+
+**Step 1: Add Hypothesis dependency**
+
+```bash
+pip install hypothesis
+# Add to pyproject.toml: hypothesis>=6.0
+```
+
+**Step 2: Write property-based tests for scoring**
+
+```python
+"""Property-based tests for scoring and parsing."""
+from hypothesis import given, strategies as st, assume
+from edps.quiz_types import score_mcq_answer
+
+
+class TestMCQScoringProperties:
+    """Property-based tests for MCQ scoring invariants."""
+
+    @given(
+        gold=st.frozensets(st.sampled_from(list("ABCDEFGH")), min_size=0, max_size=4),
+        selected=st.frozensets(st.sampled_from(list("ABCDEFGH")), min_size=0, max_size=4),
+    )
+    def test_score_always_between_0_and_1(self, gold, selected):
+        """Score should always be in [0, 1] range."""
+        score = score_mcq_answer(set(gold), set(selected))
+        assert 0.0 <= score <= 1.0
+
+    @given(
+        gold=st.frozensets(st.sampled_from(list("ABCDEFGH")), min_size=1, max_size=4),
+    )
+    def test_perfect_match_scores_1(self, gold):
+        """Selecting exactly the correct answers should score 1.0."""
+        score = score_mcq_answer(set(gold), set(gold))
+        assert score == 1.0
+
+    @given(
+        gold=st.frozensets(st.sampled_from(list("ABCDEFGH")), min_size=1, max_size=4),
+        wrong=st.frozensets(st.sampled_from(list("ABCDEFGH")), min_size=1, max_size=4),
+    )
+    def test_no_overlap_scores_0(self, gold, wrong):
+        """Selecting only wrong answers should score 0."""
+        assume(not (gold & wrong))  # Ensure no overlap
+        score = score_mcq_answer(set(gold), set(wrong))
+        assert score == 0.0
+
+    @given(
+        gold=st.frozensets(st.sampled_from(list("ABCDEFGH")), min_size=2, max_size=4),
+    )
+    def test_partial_selection_less_than_perfect(self, gold):
+        """Selecting a subset of correct answers should score < 1.0."""
+        partial = set(list(gold)[:-1])  # Remove one
+        assume(len(partial) >= 1)
+        score = score_mcq_answer(set(gold), partial)
+        assert score < 1.0
+
+    @given(
+        gold=st.frozensets(st.sampled_from(list("ABCDEFGH")), min_size=1, max_size=3),
+    )
+    def test_adding_correct_increases_score(self, gold):
+        """Adding a correct answer should not decrease score."""
+        gold_list = list(gold)
+        for i in range(len(gold_list)):
+            partial = set(gold_list[:i+1])
+            next_partial = set(gold_list[:i+2]) if i+2 <= len(gold_list) else set(gold)
+            score1 = score_mcq_answer(set(gold), partial)
+            score2 = score_mcq_answer(set(gold), next_partial)
+            assert score2 >= score1 - 0.001  # Allow tiny float error
+```
+
+**Step 3: Write property tests for schema validation**
+
+```python
+@given(
+    version=st.sampled_from(["v0", "v1"]),
+    num_answers=st.integers(min_value=1, max_value=10),
+)
+def test_migration_preserves_answer_count(self, version, num_answers):
+    """Migration should preserve the number of answers."""
+    from edps.evaluation import migrate_v0_to_v1
+
+    v0_data = {
+        "quiz": {
+            "answers": [{"label": f"Q{i}", "correct": True, "note": "OK", "score": 1.0}
+                        for i in range(num_answers)],
+            "total_score": num_answers,
+            "reasoning": "Good"
+        }
+    }
+
+    v1_data = migrate_v0_to_v1(v0_data)
+    assert len(v1_data["quiz"]["answers"]) == num_answers
+```
+
+**Step 4: Run property tests**
+
+```bash
+PYTHONPATH="$PWD/tools" python -m pytest tests/test_properties.py -v
+```
+
+**Step 5: Commit**
+
+```bash
+git add tests/test_properties.py pyproject.toml
+git commit -m "test: add property-based tests for scoring and schema"
+```
+
+---
+
+### Task 5.3: Update Config for Longer Outputs
 
 **Files:**
 - Modify: `tools/edps/config.py`
@@ -931,7 +1377,7 @@ git commit -m "config: increase max_tokens for expanded evaluation output"
 
 ---
 
-### Task 5.3: Update README
+### Task 5.4: Update README
 
 **Files:**
 - Modify: `README.md`
@@ -955,3 +1401,7 @@ git commit -m "docs: document expanded evaluation and quiz format"
 - [ ] All existing tests pass (backward compat)
 - [ ] Quiz includes hard MCQs with multi/none-answer options
 - [ ] Prose questions vary by type
+- [ ] Schema versioning with `migrate_v0_to_v1()` works correctly
+- [ ] MCOption dataclass validates letter and answer_type consistency
+- [ ] F1 scoring gives fair partial credit for multi-answer MCQs
+- [ ] Property-based tests verify scoring invariants
