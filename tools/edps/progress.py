@@ -34,10 +34,11 @@ def check_recall_completion(recall_path: Path) -> RecallResult:
     Check if a recall.md file is complete.
 
     Complete when:
-    - No [Your answer] placeholders remain
-    - Score line matches one of:
-      - **My score**: [X] / 5 (current template)
-      - - Recall accuracy: [X] (legacy format)
+    - "From Memory" section has actual content (numbered points)
+    - No [Your answer] placeholders remain in content sections
+
+    Score is extracted if present but NOT required for completion
+    (AI evaluation will provide the score).
 
     Returns RecallResult with completion status and extracted score.
     """
@@ -46,29 +47,45 @@ def check_recall_completion(recall_path: Path) -> RecallResult:
 
     text = recall_path.read_text(encoding="utf-8")
 
-    # Check for remaining placeholders
-    has_placeholders = "[Your answer]" in text
+    # Check for content placeholders (not metadata like [X minutes])
+    has_answer_placeholders = "[Your answer]" in text
 
-    # Extract score - support multiple formats:
-    # 1. Current template: **My score**: [X] / 5
-    # 2. Legacy format: - Recall accuracy: [X]
+    # Check if "From Memory" section has actual content
+    # Look for content after "## From Memory" section header (with optional suffix)
+    memory_section = re.search(
+        r"## From Memory[^\n]*\n([\s\S]*?)(?=\n---|\n## |$)",
+        text
+    )
+    has_memory_content = False
+    if memory_section:
+        content = memory_section.group(1)
+        # Look for either:
+        # 1. Numbered list items: "1. actual content"
+        # 2. Numbered headers with content below: "### 1. Title\ncontent"
+        numbered_points = re.findall(r"^\d+\.\s+(.+)$", content, re.MULTILINE)
+        # For headers, look for ### N. Title followed by non-empty lines
+        header_content = re.findall(r"###\s+\d+\.[^\n]*\n([^\n#]+)", content)
+
+        # Filter out template placeholders
+        real_points = [p for p in numbered_points if not p.startswith("[")]
+        real_content = [h.strip() for h in header_content if h.strip() and not h.strip().startswith("[")]
+
+        has_memory_content = len(real_points) >= 1 or len(real_content) >= 1
+
+    # Extract score if present (for display, not required)
     score = None
-
-    # Try current template format first
     score_pattern = r"\*\*My score\*\*:\s*\[(\d+)\]\s*/\s*5"
     score_match = re.search(score_pattern, text)
-
     if score_match:
         score = int(score_match.group(1))
     else:
-        # Try legacy format
         legacy_pattern = r"-\s*Recall accuracy:\s*\[(\d+)\]"
         legacy_match = re.search(legacy_pattern, text)
         if legacy_match:
             score = int(legacy_match.group(1))
 
-    # Complete only if no placeholders AND score is present
-    is_complete = not has_placeholders and score is not None
+    # Complete if has memory content and no answer placeholders
+    is_complete = has_memory_content and not has_answer_placeholders
 
     return RecallResult(is_complete=is_complete, score=score)
 
@@ -79,7 +96,9 @@ def check_quiz_completion(quiz_path: Path) -> QuizResult:
 
     Complete when:
     - All **Answer:** sections have non-whitespace text
-    - Total line matches: **Total: X / 8**
+
+    Score is extracted if present but NOT required for completion
+    (AI evaluation will provide the score).
 
     Returns QuizResult with completion status and extracted score.
     """
@@ -88,33 +107,28 @@ def check_quiz_completion(quiz_path: Path) -> QuizResult:
 
     text = quiz_path.read_text(encoding="utf-8")
 
-    # Find all **Answer:** sections and check they have content
-    # Pattern: **Answer:** followed by content until next --- or ### or ## or end
-    answer_pattern = r"\*\*Answer:\*\*\s*\n\s*\n"
-    empty_answers = re.findall(answer_pattern, text)
-    has_empty_answers = len(empty_answers) > 0
-
-    # Also check for answers that are just whitespace before the next section
-    # Split by **Answer:** and check each following section
+    # Split by **Answer:** and check each following section has content
     parts = re.split(r"\*\*Answer:\*\*", text)
     all_answers_filled = True
+    answer_count = 0
+
     for part in parts[1:]:  # Skip content before first Answer
+        answer_count += 1
         # Get content before next section marker
         content_match = re.match(r"(.*?)(?=\n---|\n###|\n##|\Z)", part, re.DOTALL)
         if content_match:
             answer_content = content_match.group(1).strip()
-            if not answer_content:
+            if not answer_content or answer_content == "[Your answer]":
                 all_answers_filled = False
                 break
 
-    # Extract total score: **Total: X / 8**
-    total_pattern = r"\*\*Total:\s*(\d+)\s*/\s*8\*\*"
+    # Extract total score if present (for display, not required)
+    total_pattern = r"\*\*Total:\s*(\d+)\s*/\s*\d+\*\*"
     total_match = re.search(total_pattern, text)
-
     score = int(total_match.group(1)) if total_match else None
 
-    # Complete only if all answers filled AND total score present
-    is_complete = all_answers_filled and score is not None
+    # Complete if all answers are filled (score not required - AI will provide it)
+    is_complete = all_answers_filled and answer_count > 0
 
     return QuizResult(is_complete=is_complete, score=score)
 

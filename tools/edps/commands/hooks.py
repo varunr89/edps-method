@@ -7,7 +7,12 @@ from rich.console import Console
 
 console = Console()
 
-HOOK_SCRIPT = '''#!/bin/bash
+def get_hook_script() -> str:
+    """Generate hook script with correct Python path."""
+    # Get the venv Python path relative to repo root
+    venv_python = Path(__file__).parent.parent.parent / ".venv" / "bin" / "python"
+
+    return f'''#!/bin/bash
 set -e
 
 # Get staged files
@@ -17,8 +22,21 @@ if [ -z "$STAGED" ]; then
     exit 0
 fi
 
+# Get repo root
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+PYTHON="$REPO_ROOT/tools/.venv/bin/python"
+
+# Check if venv Python exists
+if [ ! -f "$PYTHON" ]; then
+    echo "EDPS hook: venv not found at $PYTHON, skipping evaluation"
+    exit 0
+fi
+
 # Run progress sync on staged files
-MODIFIED=$(python -m edps.progress --hook --eval <<< "$STAGED" 2>/dev/null || true)
+MODIFIED=$("$PYTHON" -m edps.progress --hook --eval <<< "$STAGED" 2>&1) || {{
+    echo "EDPS hook: evaluation failed: $MODIFIED"
+    exit 0  # Don't block commit on evaluation failure
+}}
 
 # Auto-stage any modified progress files
 if [ -n "$MODIFIED" ]; then
@@ -57,7 +75,7 @@ def init_hooks(
         raise typer.Exit(1)
 
     # Write hook
-    hook_path.write_text(HOOK_SCRIPT)
+    hook_path.write_text(get_hook_script())
 
     # Make executable
     hook_path.chmod(hook_path.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)

@@ -4,6 +4,7 @@
 # Completed sections (add section IDs as you finish)
 completed_sections:
 - '001'
+- '002'
 quiz_scores:
   '001': 7.5
 
@@ -12,13 +13,14 @@ recall_scores:
   '001': 4
 
 # Streaks and stats
+  '002': 3
 stats:
   current_streak: 0
   longest_streak: 0
-  total_sections_completed: 1
+  total_sections_completed: 2
   total_time_spent_minutes: 0
   average_quiz_score: 7.5
-  average_recall_score: 4.0
+  average_recall_score: 3.5
 
 # Weekly synthesis tracking
 weekly_syntheses: []
