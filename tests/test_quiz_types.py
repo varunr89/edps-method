@@ -67,3 +67,65 @@ class TestMCQTypes:
                 ],
                 answer_type="one",
             )
+
+
+class TestMCQScoring:
+    """Tests for MCQ F1-based partial credit scoring."""
+
+    def test_score_mcq_perfect_multiple(self):
+        """Perfect match on multiple-answer MCQ should score 1.0."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = {"A", "B", "D"}  # Correct answers
+        selected = {"A", "B", "D"}  # Student selected
+        score = score_mcq_answer(gold, selected)
+        assert score == 1.0
+
+    def test_score_mcq_partial_credit(self):
+        """Partial match should use F1 formula."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = {"A", "B", "D"}  # 3 correct
+        selected = {"A", "B"}  # 2 selected, both correct
+        # Precision = 2/2 = 1.0, Recall = 2/3 = 0.667
+        # F1 = 2 * 1.0 * 0.667 / (1.0 + 0.667) = 0.8
+        score = score_mcq_answer(gold, selected)
+        assert abs(score - 0.8) < 0.01
+
+    def test_score_mcq_with_wrong_selection(self):
+        """Wrong selections should reduce precision."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = {"A", "B"}  # 2 correct
+        selected = {"A", "C"}  # 1 right, 1 wrong
+        # Precision = 1/2 = 0.5, Recall = 1/2 = 0.5
+        # F1 = 2 * 0.5 * 0.5 / (0.5 + 0.5) = 0.5
+        score = score_mcq_answer(gold, selected)
+        assert abs(score - 0.5) < 0.01
+
+    def test_score_mcq_none_correct_type(self):
+        """'None of the above' case: selecting nothing is correct."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = set()  # No correct answers
+        selected = set()  # Student correctly selected none
+        score = score_mcq_answer(gold, selected)
+        assert score == 1.0
+
+    def test_score_mcq_none_but_selected(self):
+        """'None' type but student selected something: 0."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = set()  # No correct answers
+        selected = {"A"}  # Student wrongly selected A
+        score = score_mcq_answer(gold, selected)
+        assert score == 0.0
+
+    def test_score_mcq_single_answer(self):
+        """Single-answer MCQ: 1 if correct, 0 otherwise."""
+        from edps.quiz_types import score_mcq_answer
+
+        gold = {"B"}
+        assert score_mcq_answer(gold, {"B"}) == 1.0
+        assert score_mcq_answer(gold, {"A"}) == 0.0
+        assert score_mcq_answer(gold, {"A", "B"}) < 1.0  # Over-selected

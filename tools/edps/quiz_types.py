@@ -47,3 +47,40 @@ class ProseQuestion:
     question: str
     question_type: Literal["adversarial", "comparative", "socratic", "synthesis"]
     sentence_range: tuple[int, int]  # (min, max) sentences
+
+
+def score_mcq_answer(gold: set[str], selected: set[str]) -> float:
+    """Score MCQ answer using F1-based partial credit.
+
+    Args:
+        gold: Set of correct answer letters (e.g., {"A", "B", "D"})
+        selected: Set of student's selected letters
+
+    Returns:
+        Score from 0.0 to 1.0 based on F1 formula.
+
+    Scoring rules:
+    - If both sets empty (none-of-the-above correct): 1.0
+    - If gold empty but student selected: 0.0
+    - Otherwise: F1 = 2*P*R / (P+R) where:
+      - Precision P = |gold ∩ selected| / |selected|
+      - Recall R = |gold ∩ selected| / |gold|
+    """
+    # Handle none-of-the-above case
+    if not gold and not selected:
+        return 1.0
+    if not gold and selected:
+        return 0.0
+    if gold and not selected:
+        return 0.0
+
+    # Calculate F1
+    intersection = gold & selected
+    precision = len(intersection) / len(selected)
+    recall = len(intersection) / len(gold)
+
+    if precision + recall == 0:
+        return 0.0
+
+    f1 = 2 * precision * recall / (precision + recall)
+    return round(f1, 3)
