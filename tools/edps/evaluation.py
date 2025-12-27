@@ -71,6 +71,48 @@ class EvaluationResult:
     quiz_feedback: QuizFeedback
 
 
+def migrate_v0_to_v1(data: dict) -> dict:
+    """Migrate v0 evaluation schema to v1.
+
+    Changes:
+    - Adds schema_version: "v1"
+    - Maps 'note' -> 'explanation'
+    - Adds question_id from label or index
+    """
+    # Check if already v1
+    if data.get("quiz", {}).get("schema_version") == "v1":
+        return data
+
+    result = {"recall": data.get("recall", {}), "quiz": {}}
+    quiz = data.get("quiz", {})
+
+    # Migrate answers
+    migrated_answers = []
+    for i, answer in enumerate(quiz.get("answers", [])):
+        migrated = {
+            "question_id": f"q{i+1}",
+            "label": answer.get("label", f"Q{i+1}"),
+            "correct": answer.get("correct", False),
+            "explanation": answer.get("note", ""),  # note -> explanation
+            "score": answer.get("score"),
+            "accuracy": answer.get("accuracy"),
+            "reasoning": answer.get("reasoning"),
+            "writing": answer.get("writing"),
+        }
+        migrated_answers.append(migrated)
+
+    result["quiz"] = {
+        "schema_version": "v1",
+        "answers": migrated_answers,
+        "total_score": quiz.get("total_score", 0),
+        "reasoning": quiz.get("reasoning", ""),
+        "thematic_insights": quiz.get("thematic_insights"),
+        "tutors_note": quiz.get("tutors_note"),
+    }
+
+    return result
+
+
 def parse_recall_content(content: str) -> dict:
     """Parse recall.md content into structured data.
 

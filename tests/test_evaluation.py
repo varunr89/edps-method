@@ -537,3 +537,43 @@ What increases productivity?
             assert "**Overall Score:** 5/5" in recall_content
             assert "## AI Feedback" in quiz_content
             assert "**Total Score:** 8/8" in quiz_content
+
+
+class TestSchemaMigration:
+    """Tests for v0 -> v1 schema migration."""
+
+    def test_migrate_v0_to_v1_maps_note_to_explanation(self):
+        """Migration should map legacy 'note' field to 'explanation'."""
+        from edps.evaluation import migrate_v0_to_v1
+
+        v0_data = {
+            "quiz": {
+                "answers": [
+                    {"label": "Q1", "correct": True, "note": "Good answer", "score": 1.0}
+                ],
+                "total_score": 7.5,
+                "reasoning": "Overall good"
+            }
+        }
+
+        v1_data = migrate_v0_to_v1(v0_data)
+
+        assert v1_data["quiz"]["schema_version"] == "v1"
+        assert v1_data["quiz"]["answers"][0]["explanation"] == "Good answer"
+        assert v1_data["quiz"]["answers"][0]["question_id"] == "q1"
+
+    def test_migrate_v0_to_v1_preserves_existing_v1(self):
+        """Migration should pass through v1 data unchanged."""
+        from edps.evaluation import migrate_v0_to_v1
+
+        v1_data = {
+            "quiz": {
+                "schema_version": "v1",
+                "answers": [{"question_id": "q1", "explanation": "Good"}],
+                "total_score": 7.5,
+                "reasoning": "Overall good"
+            }
+        }
+
+        result = migrate_v0_to_v1(v1_data)
+        assert result == v1_data  # Unchanged
