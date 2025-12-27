@@ -440,6 +440,30 @@ class TestThematicInsights:
         assert "hedges" in insights.source_mastery
 
 
+class TestExpandedFeedback:
+    """Tests for expanded feedback classes."""
+
+    def test_quiz_feedback_has_thematic_and_tutor(self):
+        """QuizFeedback should include thematic insights and tutor's note."""
+        from edps.evaluation import QuizFeedback, AnswerFeedback, ThematicInsights, WritingScores
+
+        writing = WritingScores(precision=4, clarity=4, economy=3, suggestion="Lead with mechanism.")
+        insights = ThematicInsights(
+            source_mastery="Strong on core thesis.",
+            reasoning_quality="Sound logic.",
+            writing_craft=writing,
+        )
+        feedback = QuizFeedback(
+            answers=[AnswerFeedback(label="Q1", correct=True, note="Good", score=1.0)],
+            total_score=7.5,
+            reasoning="Legacy reasoning",
+            thematic_insights=insights,
+            tutors_note="You're building real understanding. Three things to carry forward...",
+        )
+        assert feedback.thematic_insights.writing_craft.precision == 4
+        assert "Three things" in feedback.tutors_note
+
+
 class TestIntegration:
     """Integration tests for full evaluation flow."""
 

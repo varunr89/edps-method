@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 import re
 import json
 
@@ -33,14 +33,6 @@ class RecallFeedback:
 
 
 @dataclass
-class QuizFeedback:
-    """Complete feedback for quiz.md evaluation."""
-    answers: list[AnswerFeedback]
-    total_score: float  # 0-8
-    reasoning: str
-
-
-@dataclass
 class WritingScores:
     """Writing craft scores (1-5 each)."""
     precision: int
@@ -55,6 +47,19 @@ class ThematicInsights:
     source_mastery: str
     reasoning_quality: str
     writing_craft: WritingScores
+
+
+@dataclass
+class QuizFeedback:
+    """Complete feedback for quiz.md evaluation."""
+    schema_version: Literal["v0", "v1"] = "v1"  # Version for migration support
+    answers: list[AnswerFeedback] = field(default_factory=list)
+    total_score: float = 0.0  # 0-8
+    reasoning: str = ""  # Legacy field, kept for backward compat
+    thematic_insights: Optional[ThematicInsights] = None
+    tutors_note: Optional[str] = None
+    model_id: Optional[str] = None  # Which LLM produced this evaluation
+    created_at: Optional[str] = None  # ISO timestamp
 
 
 @dataclass
