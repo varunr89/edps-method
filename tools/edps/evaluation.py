@@ -602,7 +602,7 @@ def evaluate_section(
         council_result = council.run(prompt, client)
         response_content = council_result.final_answer
     else:
-        response = client.complete(prompt, model=config.models.evaluation, max_tokens=2000)
+        response = client.complete(prompt, model=config.models.evaluation, max_tokens=config.defaults.max_tokens)
         response_content = response.content
 
     # Parse response
