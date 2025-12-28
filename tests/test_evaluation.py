@@ -975,6 +975,40 @@ class TestInjectError:
         assert result.count("<details>") == 1
 
 
+class TestInjectWritingNote:
+    """Tests for inject_writing_note function."""
+
+    def test_injects_at_end_of_answer(self):
+        """Should append writing note at end of answer text."""
+        from edps.evaluation import inject_writing_note
+
+        answer = "Division of labor results from exchange. This leads to surplus."
+        writing_note = 'Lead with causes. Example: "Exchange certainty motivates specialization."'
+
+        result = inject_writing_note(answer, writing_note)
+
+        assert "<details>" in result
+        assert "<summary>Writing</summary>" in result
+        assert "Lead with causes" in result
+        assert "Exchange certainty" in result
+
+    def test_returns_unchanged_if_no_note(self):
+        """Should return answer unchanged if writing_note is None."""
+        from edps.evaluation import inject_writing_note
+
+        answer = "Some answer text."
+        result = inject_writing_note(answer, None)
+        assert result == answer
+
+    def test_returns_unchanged_if_empty_note(self):
+        """Should return answer unchanged if writing_note is empty."""
+        from edps.evaluation import inject_writing_note
+
+        answer = "Some answer text."
+        result = inject_writing_note(answer, "")
+        assert result == answer
+
+
 class TestStripFeedback:
     """Tests for strip_feedback function."""
 

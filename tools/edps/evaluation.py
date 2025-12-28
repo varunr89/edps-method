@@ -155,6 +155,28 @@ def strip_feedback(content: str) -> str:
     return result
 
 
+def inject_writing_note(answer: str, writing_note: Optional[str]) -> str:
+    """Append writing feedback at end of an answer.
+
+    Args:
+        answer: The answer text
+        writing_note: Holistic writing feedback with rewrite example, or None
+
+    Returns:
+        Answer with writing note appended, or unchanged if no note
+    """
+    if not writing_note:
+        return answer
+
+    note_html = f'''
+<details>
+<summary>Writing</summary>
+{writing_note}
+</details>'''
+
+    return answer.rstrip() + note_html + "\n"
+
+
 def inject_error(content: str, error: "InlineError") -> str:
     """Inject a single error annotation after the quoted text.
 
