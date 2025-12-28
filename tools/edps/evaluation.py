@@ -244,6 +244,59 @@ def inject_inline_feedback(content: str, feedbacks: list["InlineAnswerFeedback"]
     return result
 
 
+def format_summary_feedback(feedback: QuizFeedback, assessment_date: str) -> str:
+    """Format slimmed-down summary section for end of quiz file.
+
+    Generates a collapsible summary section with thematic insights and
+    tutor's note, designed to be appended at the end of quiz.md.
+
+    Args:
+        feedback: QuizFeedback with thematic insights and tutor's note
+        assessment_date: Date string (YYYY-MM-DD)
+
+    Returns:
+        Markdown summary section with collapsible details
+    """
+    lines = [
+        "",
+        "---",
+        "",
+        "## Summary",
+        "",
+        f"**Score:** {feedback.total_score:.0f}/8 | **Assessed:** {assessment_date}",
+        "",
+    ]
+
+    if feedback.thematic_insights:
+        ti = feedback.thematic_insights
+        wc = ti.writing_craft
+        lines.extend([
+            "<details>",
+            "<summary>Thematic Insights</summary>",
+            "",
+            f"**Source Mastery:** {ti.source_mastery}",
+            "",
+            f"**Reasoning Quality:** {ti.reasoning_quality}",
+            "",
+            f"**Writing Craft:** Precision {wc.precision}/5 | Clarity {wc.clarity}/5 | Economy {wc.economy}/5",
+            "",
+            f"**Practice:** {wc.suggestion}",
+            "</details>",
+            "",
+        ])
+
+    if feedback.tutors_note:
+        lines.extend([
+            "<details>",
+            "<summary>Tutor's Note</summary>",
+            "",
+            feedback.tutors_note,
+            "</details>",
+        ])
+
+    return "\n".join(lines)
+
+
 def parse_recall_content(content: str) -> dict:
     """Parse recall.md content into structured data.
 

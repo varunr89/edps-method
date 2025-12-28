@@ -1147,3 +1147,55 @@ What is the origin?
 
         result = inject_inline_feedback(content, feedbacks)
         assert "<details>" not in result
+
+
+class TestFormatSummaryFeedback:
+    """Tests for format_summary_feedback function."""
+
+    def test_generates_collapsible_summary(self):
+        """Should generate slimmed-down summary with collapsible sections."""
+        from edps.evaluation import format_summary_feedback, QuizFeedback, ThematicInsights, WritingScores
+
+        writing = WritingScores(precision=4, clarity=4, economy=3, suggestion="Cut filler.")
+        insights = ThematicInsights(
+            source_mastery="Strong grasp of core thesis.",
+            reasoning_quality="Sound logic throughout.",
+            writing_craft=writing,
+        )
+        feedback = QuizFeedback(
+            answers=[],
+            total_score=6,
+            reasoning="",
+            thematic_insights=insights,
+            tutors_note="You're building understanding. Keep it up.",
+        )
+
+        result = format_summary_feedback(feedback, "2025-12-28")
+
+        assert "## Summary" in result
+        assert "**Score:** 6/8" in result
+        assert "2025-12-28" in result
+        assert "<details>" in result
+        assert "<summary>Thematic Insights</summary>" in result
+        assert "Strong grasp" in result
+        assert "<summary>Tutor's Note</summary>" in result
+        assert "building understanding" in result
+
+    def test_omits_sections_if_missing(self):
+        """Should omit thematic insights or tutor's note if not present."""
+        from edps.evaluation import format_summary_feedback, QuizFeedback
+
+        feedback = QuizFeedback(
+            answers=[],
+            total_score=7,
+            reasoning="",
+            thematic_insights=None,
+            tutors_note=None,
+        )
+
+        result = format_summary_feedback(feedback, "2025-12-28")
+
+        assert "## Summary" in result
+        assert "**Score:** 7/8" in result
+        assert "Thematic Insights" not in result
+        assert "Tutor's Note" not in result
