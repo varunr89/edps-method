@@ -404,6 +404,104 @@ def build_evaluation_prompt(source_text: str, recall_content: str, quiz_content:
     )
 
 
+def parse_inline_response(response: str) -> tuple[RecallFeedback, QuizFeedback, list[InlineAnswerFeedback]]:
+    """Parse JSON from LLM evaluation response with inline feedback schema.
+
+    Parses the new inline schema that includes errors[] with quoted_text
+    anchors and writing_note for each answer.
+
+    Args:
+        response: Raw response from Claude (may include markdown code blocks)
+
+    Returns:
+        Tuple of (RecallFeedback, QuizFeedback, list[InlineAnswerFeedback])
+    """
+    # Extract JSON from markdown code block if present
+    json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response, re.DOTALL)
+    if json_match:
+        json_str = json_match.group(1)
+    else:
+        # Try to find raw JSON
+        json_match = re.search(r'(\{.*\})', response, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(1)
+        else:
+            json_str = response
+
+    # Parse JSON
+    data = json.loads(json_str)
+
+    # Build RecallFeedback
+    recall_data = data["recall"]
+    recall_points = [
+        AnswerFeedback(
+            label=p["label"],
+            correct=p["correct"],
+            note=p.get("note"),
+            accuracy=p.get("accuracy"),
+            reasoning=p.get("reasoning"),
+            writing=p.get("writing"),
+        )
+        for p in recall_data["points"]
+    ]
+    recall_feedback = RecallFeedback(
+        points=recall_points,
+        one_sentence_ok=recall_data["one_sentence_ok"],
+        one_sentence_note=recall_data["one_sentence_note"],
+        score=recall_data["score"],
+        reasoning=recall_data["reasoning"],
+    )
+
+    # Build QuizFeedback and InlineAnswerFeedback list
+    quiz_data = data["quiz"]
+    inline_feedbacks = []
+
+    for answer in quiz_data["answers"]:
+        # Parse errors for inline feedback
+        errors = [
+            InlineError(
+                quoted_text=e["quoted_text"],
+                summary=e["summary"],
+                feedback=e["feedback"],
+            )
+            for e in answer.get("errors", [])
+        ]
+
+        inline_feedbacks.append(InlineAnswerFeedback(
+            question_id=answer.get("question_id", ""),
+            label=answer.get("label", ""),
+            score=answer.get("score", 0),
+            errors=errors,
+            writing_note=answer.get("writing_note"),
+        ))
+
+    # Parse thematic insights if present
+    thematic_insights = None
+    if quiz_data.get("thematic_insights"):
+        ti = quiz_data["thematic_insights"]
+        wc = ti["writing_craft"]
+        thematic_insights = ThematicInsights(
+            source_mastery=ti["source_mastery"],
+            reasoning_quality=ti["reasoning_quality"],
+            writing_craft=WritingScores(
+                precision=wc["precision"],
+                clarity=wc["clarity"],
+                economy=wc["economy"],
+                suggestion=wc["suggestion"],
+            ),
+        )
+
+    quiz_feedback = QuizFeedback(
+        answers=[],  # Empty for inline mode - feedback is in inline_feedbacks
+        total_score=quiz_data["total_score"],
+        reasoning="",
+        thematic_insights=thematic_insights,
+        tutors_note=quiz_data.get("tutors_note"),
+    )
+
+    return recall_feedback, quiz_feedback, inline_feedbacks
+
+
 def parse_evaluation_response(response: str) -> tuple[RecallFeedback, QuizFeedback]:
     """Parse JSON from LLM evaluation response.
 

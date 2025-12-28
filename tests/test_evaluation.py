@@ -1228,3 +1228,66 @@ class TestInlinePromptSchema:
         prompt = build_evaluation_prompt(source, recall, quiz)
 
         assert "writing_note" in prompt
+
+
+class TestParseInlineResponse:
+    """Tests for parsing inline feedback responses."""
+
+    def test_parses_errors_array(self):
+        """Should parse errors[] with quoted_text and feedback."""
+        from edps.evaluation import parse_inline_response
+
+        response = '''{
+  "recall": {"points": [], "one_sentence_ok": true, "one_sentence_note": "", "score": 4, "reasoning": ""},
+  "quiz": {
+    "answers": [
+      {
+        "question_id": "q1",
+        "label": "Q1: Main Claim",
+        "score": 0.5,
+        "errors": [
+          {
+            "quoted_text": "Specialization leads to division",
+            "summary": "Causal inversion",
+            "feedback": "Exchange enables specialization."
+          }
+        ],
+        "writing_note": "Lead with causes."
+      }
+    ],
+    "total_score": 6,
+    "thematic_insights": {
+      "source_mastery": "Strong grasp.",
+      "reasoning_quality": "Sound logic.",
+      "writing_craft": {"precision": 4, "clarity": 4, "economy": 3, "suggestion": "Cut filler."}
+    },
+    "tutors_note": "Keep it up."
+  }
+}'''
+
+        recall_fb, quiz_fb, inline_feedbacks = parse_inline_response(response)
+
+        assert len(inline_feedbacks) == 1
+        assert inline_feedbacks[0].question_id == "q1"
+        assert len(inline_feedbacks[0].errors) == 1
+        assert inline_feedbacks[0].errors[0].quoted_text == "Specialization leads to division"
+        assert inline_feedbacks[0].writing_note == "Lead with causes."
+
+    def test_handles_empty_errors(self):
+        """Should handle answers with no errors."""
+        from edps.evaluation import parse_inline_response
+
+        response = '''{
+  "recall": {"points": [], "one_sentence_ok": true, "one_sentence_note": "", "score": 5, "reasoning": ""},
+  "quiz": {
+    "answers": [{"question_id": "q1", "label": "Q1", "score": 1.0, "errors": [], "writing_note": null}],
+    "total_score": 8,
+    "thematic_insights": null,
+    "tutors_note": null
+  }
+}'''
+
+        recall_fb, quiz_fb, inline_feedbacks = parse_inline_response(response)
+
+        assert len(inline_feedbacks[0].errors) == 0
+        assert inline_feedbacks[0].writing_note is None
