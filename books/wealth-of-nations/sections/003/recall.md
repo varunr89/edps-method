@@ -3,7 +3,7 @@
 
 > Section: THAT THE DIVISION OF LABOUR IS
 > Date: 2025-12-27
-> Time spent: 30 mins
+> Time spent: [X minutes]
 
 ---
 
@@ -11,7 +11,7 @@
 
 *Write these BEFORE looking at source or summary:*
 
-1. State mandated currency/coinage was needed
+1. [Main claim as I remember it]
 2. [Key mechanism or process]
 3. [Example I remember]
 4. [Modern parallel that came to mind]

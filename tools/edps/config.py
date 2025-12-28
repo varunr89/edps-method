@@ -115,9 +115,9 @@ def load_config(config_path: Optional[Path] = None) -> EdpsConfig:
         if "azure" in data:
             azure_data = data["azure"]
             config.azure = AzureConfig(
-                endpoint=azure_data.get("endpoint", ""),
-                api_key=_resolve_env_var(azure_data.get("api_key", "")),
-                model=azure_data.get("model", "claude-sonnet-4-20250514"),
+                endpoint=azure_data.get("endpoint") or "",
+                api_key=_resolve_env_var(azure_data.get("api_key")),
+                model=azure_data.get("model") or "claude-sonnet-4-20250514",
             )
 
         # Load vscode config
@@ -189,8 +189,10 @@ def save_config(config: EdpsConfig, config_path: Optional[Path] = None) -> None:
         yaml.dump(data, f, default_flow_style=False)
 
 
-def _resolve_env_var(value: str) -> str:
+def _resolve_env_var(value: Optional[str]) -> str:
     """Resolve ${ENV_VAR} syntax in config values."""
+    if value is None:
+        return ""
     if value.startswith("${") and value.endswith("}"):
         env_var = value[2:-1]
         return os.environ.get(env_var, "")
