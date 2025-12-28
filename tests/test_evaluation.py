@@ -1082,3 +1082,68 @@ Content here.
         result = strip_feedback(content)
         assert "## Summary" not in result
         assert "**Score:** 6/8" not in result
+
+
+class TestInjectInlineFeedback:
+    """Tests for inject_inline_feedback function."""
+
+    def test_injects_errors_into_answer(self):
+        """Should inject all errors and writing note into quiz content."""
+        from edps.evaluation import inject_inline_feedback, InlineAnswerFeedback, InlineError
+
+        content = '''### 1. Main Claim
+
+What is the origin?
+
+**Answer:** Division of labor results from exchange. Specialization leads to surplus.
+
+---
+'''
+        feedbacks = [
+            InlineAnswerFeedback(
+                question_id="q1",
+                label="Q1: Main Claim",
+                score=0.5,
+                errors=[
+                    InlineError(
+                        quoted_text="Specialization leads to surplus",
+                        summary="Causal inversion",
+                        feedback="Exchange enables specialization."
+                    )
+                ],
+                writing_note="Lead with causes before effects."
+            )
+        ]
+
+        result = inject_inline_feedback(content, feedbacks)
+
+        # Error should be injected after quoted text
+        assert "<summary>Causal inversion</summary>" in result
+        assert "Exchange enables specialization" in result
+
+        # Writing note should be at end of answer
+        assert "<summary>Writing</summary>" in result
+        assert "Lead with causes" in result
+
+    def test_handles_no_errors(self):
+        """Should leave answer unchanged if no errors and no writing note."""
+        from edps.evaluation import inject_inline_feedback, InlineAnswerFeedback
+
+        content = '''### 1. Q1
+
+**Answer:** Perfect answer.
+
+---
+'''
+        feedbacks = [
+            InlineAnswerFeedback(
+                question_id="q1",
+                label="Q1",
+                score=1.0,
+                errors=[],
+                writing_note=None
+            )
+        ]
+
+        result = inject_inline_feedback(content, feedbacks)
+        assert "<details>" not in result

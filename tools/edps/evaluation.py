@@ -201,6 +201,49 @@ def inject_error(content: str, error: "InlineError") -> str:
     return content.replace(error.quoted_text, error.quoted_text + feedback_html, 1)
 
 
+def inject_inline_feedback(content: str, feedbacks: list["InlineAnswerFeedback"]) -> str:
+    """Inject inline feedback annotations into quiz content.
+
+    For each answer:
+    1. Inject error annotations after quoted text
+    2. Append writing note at end of answer block
+
+    Args:
+        content: Raw quiz.md content
+        feedbacks: List of InlineAnswerFeedback for each question
+
+    Returns:
+        Content with inline annotations injected
+    """
+    result = content
+
+    for feedback in feedbacks:
+        # Inject each error annotation
+        for error in feedback.errors:
+            result = inject_error(result, error)
+
+        # Inject writing note - find answer section and append
+        if feedback.writing_note:
+            # Find pattern: **Answer:** ... until --- or ### or end
+            # Insert writing note before the separator
+            pattern = r'(\*\*Answer:\*\*.*?)(\n\n---|\n\n###|\Z)'
+
+            def insert_note(match):
+                answer_part = match.group(1)
+                separator = match.group(2) if match.group(2) else ''
+                note_block = f'''
+<details>
+<summary>Writing</summary>
+{feedback.writing_note}
+</details>
+'''
+                return answer_part + note_block + separator
+
+            result = re.sub(pattern, insert_note, result, count=1, flags=re.DOTALL)
+
+    return result
+
+
 def parse_recall_content(content: str) -> dict:
     """Parse recall.md content into structured data.
 
