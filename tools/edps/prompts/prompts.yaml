@@ -1,0 +1,585 @@
+# EDPS Method - Centralized Prompt Registry
+# All prompts for generation and evaluation tasks
+#
+# Syntax:
+#   {{partial_name}} - Expands partials at load time (double braces)
+#   {variable}       - Substituted at render time (single braces)
+
+partials:
+  edps_intro: |
+    You are using the EDPS Method (Ebbinghaus, Dunlosky, Paivio, Sweller) -
+    combining spaced repetition, active recall, dual coding, and cognitive load management.
+
+prompts:
+  # ============================================================================
+  # SECTION-LEVEL PROMPTS
+  # ============================================================================
+
+  summary:
+    version: 1
+    description: Generate structured section summaries
+    template: |
+      You are analyzing a section from "{book_title}" by {author}.
+
+      ## Section Details
+      - Section: {section_id}
+      - Title: {section_title}
+      - Location: {location}
+
+      ## Source Text
+      {source_text}
+
+      ## Task
+      Generate a structured summary following this EXACT format:
+
+      ---
+
+      # Section {section_id}: {section_title}
+
+      > Location: {location}
+      > Generator: AI-generated
+      > Last updated: {date}
+
+      ---
+
+      ## TLDR
+
+      [Write exactly 3 sentences summarizing the core claim.]
+
+      ---
+
+      ## Key Terms
+
+      - **[Term 1]**: [definition as used in this text]
+      - **[Term 2]**: [definition]
+      - **[Term 3]**: [definition]
+      - **[Term 4]**: [definition]
+      - **[Term 5]**: [definition]
+
+      ---
+
+      ## Argument Structure
+
+      1. [First premise or observation from the text]
+      2. [Second step in the author's reasoning]
+      3. [Third step]
+      4. [Fourth step]
+      5. [Conclusion or implication]
+
+      ---
+
+      ## Modern Application
+
+      [Write 3-5 sentences connecting this to something from the last 10 years: policy, technology, markets, or society. Be specific.]
+
+      ---
+
+      ## Source Pointers
+
+      - **Key passage**: [quote a key sentence and its approximate location]
+      - **Best example**: [describe the author's main example]
+      - **Strongest argument**: [identify the most compelling point]
+
+      ---
+
+      ## Generation Notes
+
+      - Model: {model}
+      - Prompt version: 1.0
+      - Human edits: none
+
+  quiz:
+    version: 1
+    description: Generate retrieval practice questions
+    template: |
+      You are generating a quiz to test understanding of a section from "{book_title}" by {author}.
+
+      ## Section Details
+      - Section: {section_id}
+      - Title: {section_title}
+      - Location: {location}
+
+      ## Summary
+      {summary_text}
+
+      ## Source Text
+      {source_text}
+
+      ## Instructions
+
+      Generate a challenging quiz with two parts:
+
+      ---
+
+      # Quiz: Section {section_id}
+
+      > Generator: AI-generated
+      > Total questions: 6-7
+      > Time estimate: 15-20 minutes
+
+      ---
+
+      ## Instructions
+
+      1. Answer all questions **from memory** - no peeking at notes or source
+      2. For MCQs, note the answer type before answering
+      3. For prose questions, write within the suggested sentence range
+      4. Score yourself after completing all questions
+
+      ---
+
+      ## Part A: Quick Recall (MCQ)
+
+      Create 3-4 multiple choice questions. For each question:
+      1. Specify the answer type: "one" (exactly one correct), "multiple" (2-3 correct), or "none" (none of the above is correct)
+      2. Include 4 options (A, B, C, D)
+      3. For "multiple" type: test which ASSUMPTIONS the argument depends on
+      4. For "none" type: test what would DISPROVE the argument (where none of the options actually would)
+      5. Make distractors plausible but distinguishable from correct answers
+
+      Format each MCQ as:
+
+      ### [number].
+
+      [Question text]
+
+      - A) [Option A]
+      - B) [Option B]
+      - C) [Option C]
+      - D) [Option D]
+
+      **Type:** [one/multiple/none]
+
+      **Your Answer:**
+
+
+      **Correct Answer(s):** [correct letters, e.g., "A" or "A, C, D" or "None"]
+
+      ---
+
+      ## Part B: Depth Questions (Prose)
+
+      Create 2-3 prose questions. Vary the types:
+
+      1. **Adversarial** (1-2 sentences): "A critic might argue [X]. How would Smith respond?"
+      2. **Comparative** (2-3 sentences): "How does this argument compare to [related concept]?"
+      3. **Socratic** (1-2 sentences): "If [assumption] were false, what would follow?"
+      4. **Synthesis** (2-3 sentences): "Connect this section's main claim to [earlier concept]."
+
+      Format each prose question as:
+
+      ### [number]. [Type: Adversarial/Comparative/Socratic/Synthesis]
+
+      [Question text]
+
+      **Length:** [X-Y sentences]
+
+      **Your Answer:**
+
+
+      **Model Answer:**
+
+      [Provide a brief model answer for self-checking]
+
+      ---
+
+      ## Quality Standards
+
+      - Questions should require understanding, not just recall
+      - Distractors should be genuinely tempting (common misconceptions)
+      - MCQs with "multiple" answers should have 2-3 correct options
+      - "None" type MCQs should have all options be genuine but insufficient to disprove
+      - Prose questions should push beyond simple restatement
+      - Include at least 2 different prose question types
+
+      ---
+
+      ## Score
+
+      - Part A (MCQ): __ / [number of MCQs]
+      - Part B (Prose): __ / [number of prose questions]
+      - **Total: __ / [total]**
+
+  podcast:
+    version: 1
+    description: Generate podcast script for audio learning
+    template: |
+      You are creating a podcast script about a section from "{book_title}" by {author}.
+
+      ## Section Details
+      - Section: {section_id}
+      - Title: {section_title}
+      - Location: {location}
+
+      ## Summary (for context)
+      {summary_text}
+
+      ## Source Text
+      {source_text}
+
+      ## Task
+      Create an 8-12 minute podcast script with two speakers:
+      - **Host**: Curious, asks clarifying questions, makes modern parallels
+      - **Analyst**: Expert, explains arguments, gives examples from the text
+
+      Follow this EXACT format:
+
+      ---
+
+      # Episode {section_id}: {section_title}
+
+      > Duration target: 8-12 minutes
+      > Generator: AI-generated
+      > Last updated: {date}
+
+      ---
+
+      ## Speakers
+
+      - **Host**: Sets context, asks questions, summarizes. Curious but not expert.
+      - **Analyst**: Explains arguments, gives examples, corrects misconceptions. Expert voice.
+
+      ---
+
+      ## Script
+
+      **[HOST]**: [Opening hook - why this matters to a modern listener, 2-3 sentences]
+
+      **[ANALYST]**: [Core claim in plain language]
+
+      **[HOST]**: [Clarifying question]
+
+      **[ANALYST]**: [Deeper explanation with example FROM THE TEXT]
+
+      **[HOST]**: [Modern parallel - "So this is kind of like..."]
+
+      **[ANALYST]**: [Confirm or correct the parallel]
+
+      **[HOST]**: [Potential objection]
+
+      **[ANALYST]**: [Address the objection]
+
+      **[HOST]**: [Recap - "So the key takeaway is..."]
+
+      **[ANALYST]**: [Confirm + one additional nuance]
+
+      ---
+
+      ## Closing Questions
+
+      1. **Recall**: [Factual question]
+      2. **Understand**: [Conceptual question]
+      3. **Apply**: [Modern connection question]
+
+      ---
+
+      ## Production Notes
+
+      - **Historical example used**: [brief description]
+      - **Modern parallel used**: [brief description]
+      - **Estimated read time**: [X minutes at natural pace]
+
+  # ============================================================================
+  # BOOK-LEVEL PROMPTS
+  # ============================================================================
+
+  teachable-outline:
+    version: 1
+    description: Generate 60-minute teaching outline
+    template: |
+      You are creating a 60-minute teaching outline for "{book_title}" by {author}.
+
+      ## Book Details
+      - Title: {book_title}
+      - Author: {author}
+      - Total sections: {section_count}
+
+      ## All Section Summaries
+      {all_summaries}
+
+      ## Task
+      Create a comprehensive 60-minute teaching plan following this EXACT format:
+
+      ---
+
+      # Teaching {book_title} in 60 Minutes
+
+      > Generator: AI-drafted, reader-refined
+      > Generated: {date}
+
+      ## Audience
+
+      [Describe the ideal audience: educated general reader, undergraduate, professional. What prior knowledge is assumed?]
+
+      ## Learning Objectives
+
+      By the end, students will be able to:
+      1. [First testable objective - what can they explain?]
+      2. [Second testable objective - what can they analyze?]
+      3. [Third testable objective - what can they apply?]
+
+      ## Outline
+
+      ### Segment 1: [Title] (10 min)
+      - **Key point**: [One sentence capturing the core idea]
+      - **From the book**: [Specific example or argument from the text]
+      - **Modern parallel**: [Contemporary example that illustrates this]
+      - **Transition**: [How this leads to the next segment]
+
+      ### Segment 2: [Title] (10 min)
+      - **Key point**: [One sentence capturing the core idea]
+      - **From the book**: [Specific example or argument from the text]
+      - **Modern parallel**: [Contemporary example that illustrates this]
+      - **Transition**: [How this leads to the next segment]
+
+      ### Segment 3: [Title] (10 min)
+      - **Key point**: [One sentence capturing the core idea]
+      - **From the book**: [Specific example or argument from the text]
+      - **Modern parallel**: [Contemporary example that illustrates this]
+      - **Transition**: [How this leads to the next segment]
+
+      ### Segment 4: [Title] (10 min)
+      - **Key point**: [One sentence capturing the core idea]
+      - **From the book**: [Specific example or argument from the text]
+      - **Modern parallel**: [Contemporary example that illustrates this]
+      - **Transition**: [How this leads to the next segment]
+
+      ### Segment 5: [Title] (10 min)
+      - **Key point**: [One sentence capturing the core idea]
+      - **From the book**: [Specific example or argument from the text]
+      - **Modern parallel**: [Contemporary example that illustrates this]
+      - **Transition**: [How this leads to the next segment]
+
+      ### Segment 6: Synthesis & Discussion (10 min)
+      - **Recap**: [The 5 key points in one paragraph]
+      - **Discussion questions**:
+        1. [Open-ended question for group discussion]
+        2. [Question that challenges assumptions]
+        3. [Question connecting to students' experiences]
+      - **If you remember one thing**: [The single most important takeaway]
+
+      ## Predicted Student Questions
+
+      1. **Q**: [Likely question a student would ask]
+         **A**: [Concise answer grounded in the text]
+
+      2. **Q**: [Likely question a student would ask]
+         **A**: [Concise answer grounded in the text]
+
+      3. **Q**: [Likely question a student would ask]
+         **A**: [Concise answer grounded in the text]
+
+      4. **Q**: [Likely question a student would ask]
+         **A**: [Concise answer grounded in the text]
+
+      5. **Q**: [Likely question a student would ask]
+         **A**: [Concise answer grounded in the text]
+
+      ---
+
+      ## Generation Notes
+
+      - Model: {model}
+      - Prompt version: 1.0
+      - Human edits: none
+
+  question-bank:
+    version: 1
+    description: Curate comprehensive question bank from all quizzes
+    template: |
+      You are curating a comprehensive question bank for "{book_title}" by {author}.
+
+      ## Book Details
+      - Title: {book_title}
+      - Author: {author}
+      - Sections covered: {section_range}
+
+      ## All Section Quizzes
+      {all_quizzes}
+
+      ## Task
+      Create a comprehensive question bank by:
+      1. Selecting the 25 best short-answer questions from the section quizzes (ensuring coverage across all major sections)
+      2. Creating 5 new essay prompts that require synthesis across sections
+
+      Follow this EXACT format:
+
+      ---
+
+      # Question Bank: {book_title}
+
+      > Generator: AI-curated
+      > Generated: {date}
+      > Sections covered: {section_range}
+
+      ---
+
+      ## Short Answer (25 questions)
+
+      *Answer each in 2-3 sentences.*
+
+      1. [Question text] *(Section [id])*
+      2. [Question text] *(Section [id])*
+      3. [Question text] *(Section [id])*
+      4. [Question text] *(Section [id])*
+      5. [Question text] *(Section [id])*
+      6. [Question text] *(Section [id])*
+      7. [Question text] *(Section [id])*
+      8. [Question text] *(Section [id])*
+      9. [Question text] *(Section [id])*
+      10. [Question text] *(Section [id])*
+      11. [Question text] *(Section [id])*
+      12. [Question text] *(Section [id])*
+      13. [Question text] *(Section [id])*
+      14. [Question text] *(Section [id])*
+      15. [Question text] *(Section [id])*
+      16. [Question text] *(Section [id])*
+      17. [Question text] *(Section [id])*
+      18. [Question text] *(Section [id])*
+      19. [Question text] *(Section [id])*
+      20. [Question text] *(Section [id])*
+      21. [Question text] *(Section [id])*
+      22. [Question text] *(Section [id])*
+      23. [Question text] *(Section [id])*
+      24. [Question text] *(Section [id])*
+      25. [Question text] *(Section [id])*
+
+      ---
+
+      ## Essay Prompts (5 questions)
+
+      *Answer each in 500-800 words.*
+
+      ### 1. Synthesis
+      [Prompt requiring the reader to connect ideas across multiple chapters. Should ask them to trace an argument or theme through the entire book.]
+
+      ### 2. Comparison
+      [Prompt asking the reader to compare the author's ideas with another thinker, framework, or school of thought. Name a specific comparison point.]
+
+      ### 3. Application
+      [Prompt asking the reader to apply the book's ideas to a specific modern issue, policy debate, or contemporary phenomenon. Be specific about the context.]
+
+      ### 4. Critique
+      [Prompt asking the reader to critically evaluate the author's argument. What are the weaknesses? What evidence is missing? What assumptions are questionable?]
+
+      ### 5. Reflection
+      [Prompt asking: "How has reading this book changed your thinking about [specific topic]?" Should invite personal reflection grounded in the text.]
+
+      ---
+
+      ## Generation Notes
+
+      - Model: {model}
+      - Prompt version: 1.0
+      - Human edits: none
+
+  # ============================================================================
+  # EVALUATION PROMPT
+  # ============================================================================
+
+  evaluation:
+    version: 1
+    description: Evaluate student recall and quiz answers
+    template: |
+      {{edps_intro}}
+
+      You are evaluating a student's understanding of a text.
+
+      # Source Text
+      {source_text}
+
+      # Student's Recall (from memory, before re-reading)
+
+      ## Memory Points
+      {recall_points_formatted}
+
+      ## One Sentence Summary
+      {one_sentence}
+
+      # Student's Quiz Answers
+
+      {quiz_answers_formatted}
+
+      # Evaluation Task
+
+      Provide comprehensive feedback on the student's work. Return as JSON:
+
+      ```json
+      {{
+        "recall": {{
+          "points": [
+            {{
+              "label": "Point description",
+              "correct": true,
+              "note": "Brief note (legacy)",
+              "accuracy": "What they got right/wrong factually",
+              "reasoning": "How their logic holds up",
+              "writing": "Prose quality feedback with specific suggestions"
+            }}
+          ],
+          "one_sentence_ok": true,
+          "one_sentence_note": "Feedback on summary",
+          "score": 0,
+          "reasoning": "Overall assessment"
+        }},
+        "quiz": {{
+          "answers": [
+            {{
+              "label": "Q1: Title",
+              "correct": true,
+              "score": 1,
+              "note": "Brief note (legacy)",
+              "accuracy": "Factual correctness analysis",
+              "reasoning": "Logic and argument analysis",
+              "writing": "Prose quality: precision, clarity, economy"
+            }}
+          ],
+          "total_score": 8,
+          "reasoning": "Legacy overall assessment",
+          "thematic_insights": {{
+            "source_mastery": "Patterns across answers—what they consistently get/miss. Cite specific examples.",
+            "reasoning_quality": "How they build arguments. Logical gaps. Strengths. Edges to develop.",
+            "writing_craft": {{
+              "precision": 4,
+              "clarity": 4,
+              "economy": 3,
+              "suggestion": "One concrete fix to practice"
+            }}
+          }},
+          "tutors_note": "Narrative synthesis (3-4 paragraphs): What they're doing well, 2-3 things to carry forward with depth, prompt for next section."
+        }}
+      }}
+      ```
+
+      ## Scoring & Feedback Guidelines
+
+      **Scoring Rubric:**
+      - Recall score (0-5): Based on accuracy and completeness of memory points
+        - Points 1-3 (Main Claim, Key Mechanism, Example): Evaluate against source text
+        - Point 4 (Modern Parallel): External connections are EXPECTED and CORRECT - evaluate thoughtfulness, not source accuracy
+        - Point 5 (Uncertainty): Questions/confusion are EXPECTED - evaluate self-awareness, not source accuracy
+      - Quiz scores: Each question worth 1 point (8 total questions)
+      - Mark partial credit as 0.5 when applicable
+      - Use booleans as true/false, no trailing commas
+
+      **Per-Answer Analysis:**
+      - **Accuracy:** Did they capture what the source actually says? Quote specifics.
+      - **Reasoning:** Is their causal logic sound? Do they identify correct relationships?
+      - **Writing:**
+        - Precision: Do they use the author's key terms correctly?
+        - Clarity: Do they lead with main points? Is structure clear?
+        - Economy: Can they say it in fewer words without losing meaning?
+
+      Keep per-answer explanations to 1-3 sentences; depth goes in thematic_insights and tutors_note.
+
+      **Thematic Insights:**
+      - Identify PATTERNS across all answers, not just per-question issues
+      - Be specific: "You wrote X but Smith says Y" not "some inaccuracies"
+      - writing_craft scores are 1-5 each
+
+      **Tutor's Note:**
+      - Open with genuine praise backed by evidence
+      - Give 2-3 actionable insights with depth (why it matters, how to apply)
+      - Close with what to watch for in the next section
+
+      Respond ONLY with the JSON object, no other text.
