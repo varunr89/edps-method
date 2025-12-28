@@ -6,6 +6,8 @@ from typing import Literal, Optional
 import re
 import json
 
+from difflib import SequenceMatcher
+
 from edps.core.prompts import load_prompt, render_prompt
 
 
@@ -177,8 +179,51 @@ def inject_writing_note(answer: str, writing_note: Optional[str]) -> str:
     return answer.rstrip() + note_html + "\n"
 
 
+def find_best_match(content: str, quoted: str, threshold: float = 0.8) -> Optional[str]:
+    """Find the best fuzzy match for quoted text in content.
+
+    Uses sliding window approach to find substrings that match above threshold.
+
+    Args:
+        content: The full text to search in
+        quoted: The text to find (may be slightly different)
+        threshold: Minimum similarity ratio (0-1)
+
+    Returns:
+        The matching substring from content, or None if no match above threshold
+    """
+    if not quoted or not content:
+        return None
+
+    # Try exact match first
+    if quoted in content:
+        return quoted
+
+    best_match = None
+    best_ratio = threshold
+
+    # Sliding window approach: try windows of similar length to quoted text
+    window_sizes = [len(quoted), len(quoted) - 5, len(quoted) + 5]
+
+    for window_size in window_sizes:
+        if window_size <= 0 or window_size > len(content):
+            continue
+
+        for i in range(len(content) - window_size + 1):
+            window = content[i:i + window_size]
+            ratio = SequenceMatcher(None, quoted.lower(), window.lower()).ratio()
+
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_match = window
+
+    return best_match
+
+
 def inject_error(content: str, error: "InlineError") -> str:
     """Inject a single error annotation after the quoted text.
+
+    Uses exact matching first, then falls back to fuzzy matching if needed.
 
     Args:
         content: The answer text to annotate
@@ -186,10 +231,17 @@ def inject_error(content: str, error: "InlineError") -> str:
 
     Returns:
         Content with <details> block inserted after quoted text,
-        or unchanged if quoted text not found
+        or unchanged if quoted text not found (even with fuzzy matching)
     """
-    if error.quoted_text not in content:
-        return content  # Text not found, skip
+    # Try exact match first
+    anchor = error.quoted_text
+    if anchor not in content:
+        # Fall back to fuzzy matching
+        fuzzy_match = find_best_match(content, anchor)
+        if fuzzy_match:
+            anchor = fuzzy_match
+        else:
+            return content  # No match found, skip
 
     feedback_html = f'''
 <details>
@@ -198,7 +250,7 @@ def inject_error(content: str, error: "InlineError") -> str:
 </details>'''
 
     # Replace only first occurrence
-    return content.replace(error.quoted_text, error.quoted_text + feedback_html, 1)
+    return content.replace(anchor, anchor + feedback_html, 1)
 
 
 def inject_inline_feedback(content: str, feedbacks: list["InlineAnswerFeedback"]) -> str:

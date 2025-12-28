@@ -1360,3 +1360,44 @@ class TestEvaluateSectionInline:
         # Should have summary section at end
         assert "## Summary" in quiz_content
         assert "<summary>Thematic Insights</summary>" in quiz_content
+
+
+class TestFuzzyMatching:
+    """Tests for fuzzy matching fallback."""
+
+    def test_fuzzy_matches_similar_text(self):
+        """Should find close match when exact text differs slightly."""
+        from edps.evaluation import find_best_match
+
+        content = "Division of labor results from the propensity to exchange."
+        quoted = "Division of labor results from propensity to exchange"  # Missing "the"
+
+        match = find_best_match(content, quoted, threshold=0.8)
+        assert match is not None
+        assert "propensity to exchange" in match
+
+    def test_returns_none_below_threshold(self):
+        """Should return None if no match above threshold."""
+        from edps.evaluation import find_best_match
+
+        content = "Completely different text here."
+        quoted = "Division of labor results from exchange."
+
+        match = find_best_match(content, quoted, threshold=0.8)
+        assert match is None
+
+    def test_inject_error_uses_fuzzy_fallback(self):
+        """inject_error should try fuzzy matching if exact match fails."""
+        from edps.evaluation import inject_error, InlineError
+
+        content = "Division of labor results from the propensity to exchange."
+        error = InlineError(
+            quoted_text="Division of labor results from propensity to exchange",  # Missing "the"
+            summary="Note",
+            feedback="Detail here."
+        )
+
+        result = inject_error(content, error)
+        # Should have injected using fuzzy match
+        assert "<details>" in result
+        assert "<summary>Note</summary>" in result
