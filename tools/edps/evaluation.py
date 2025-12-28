@@ -795,22 +795,27 @@ def evaluate_section(
         response = client.complete(prompt, model=config.models.evaluation, max_tokens=config.defaults.max_tokens)
         response_content = response.content
 
-    # Parse response
-    recall_feedback, quiz_feedback = parse_evaluation_response(response_content)
+    # Parse response using inline schema
+    recall_feedback, quiz_feedback, inline_feedbacks = parse_inline_response(response_content)
 
-    # Format and append feedback
     eval_date = date.today().isoformat()
-    recall_md = format_recall_feedback(recall_feedback, eval_date, source_file.name)
-    quiz_md = format_quiz_feedback(quiz_feedback, eval_date, source_file.name)
 
-    # Append to files (avoid duplicate)
+    # Format and append recall feedback (unchanged from before)
+    recall_md = format_recall_feedback(recall_feedback, eval_date, source_file.name)
     if "## AI Feedback" not in recall_raw:
         with open(recall_path, "a") as f:
             f.write(recall_md)
 
-    if "## AI Feedback" not in quiz_raw:
-        with open(quiz_path, "a") as f:
-            f.write(quiz_md)
+    # Handle quiz with inline feedback:
+    # 1. Strip old feedback
+    # 2. Inject inline annotations
+    # 3. Append summary section
+    # 4. Write complete file
+    quiz_content = strip_feedback(quiz_raw)
+    quiz_content = inject_inline_feedback(quiz_content, inline_feedbacks)
+    summary_md = format_summary_feedback(quiz_feedback, eval_date)
+    quiz_content = quiz_content.rstrip() + summary_md
+    quiz_path.write_text(quiz_content)
 
     return EvaluationResult(
         recall_score=recall_feedback.score,

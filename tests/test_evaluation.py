@@ -325,7 +325,7 @@ class TestEvaluateSection:
             assert mock_instance.complete.called
 
     def test_appends_feedback_to_files(self, tmp_path):
-        """Should append AI feedback to recall.md and quiz.md."""
+        """Should append AI feedback to recall.md and inline feedback to quiz.md."""
         from edps.evaluation import evaluate_section
 
         section = tmp_path / "sections" / "001"
@@ -334,15 +334,18 @@ class TestEvaluateSection:
         (section / "recall.md").write_text("# Recall\n\n## From Memory\n\n1. Point\n\n## One Sentence\n\nSum")
         (section / "quiz.md").write_text("### 1. Q1\n\nQ?\n\n**Answer:** A")
 
+        # Use inline schema for mock response
+        mock_response = '{"recall": {"points": [{"label": "P1", "correct": true, "note": "OK"}], "one_sentence_ok": true, "one_sentence_note": "Good", "score": 4, "reasoning": "Good"}, "quiz": {"answers": [{"question_id": "q1", "label": "Q1", "score": 1.0, "errors": [], "writing_note": null}], "total_score": 7, "thematic_insights": null, "tutors_note": null}}'
+
         with patch("edps.core.llm.LLMClient") as mock_client:
             mock_instance = MagicMock()
-            mock_instance.complete.return_value.content = '{"recall": {"points": [{"label": "P1", "correct": true, "note": "OK"}], "one_sentence_ok": true, "one_sentence_note": "Good", "score": 4, "reasoning": "Good"}, "quiz": {"answers": [{"label": "Q1", "correct": true, "score": 1.0, "note": "OK"}], "total_score": 7, "reasoning": "Good"}}'
+            mock_instance.complete.return_value.content = mock_response
             mock_client.return_value = mock_instance
             evaluate_section(section, "test", "001")
             recall_content = (section / "recall.md").read_text()
             quiz_content = (section / "quiz.md").read_text()
             assert "## AI Feedback" in recall_content
-            assert "## AI Feedback" in quiz_content
+            assert "## Summary" in quiz_content  # Inline feedback uses Summary section
 
     def test_raises_error_if_source_missing(self, tmp_path):
         """Should raise FileNotFoundError if source file doesn't exist."""
@@ -504,6 +507,7 @@ What increases productivity?
 
         with patch("edps.core.llm.LLMClient") as mock_client:
             mock_instance = MagicMock()
+            # Use inline schema for mock response
             mock_instance.complete.return_value.content = '''```json
 {
   "recall": {
@@ -518,10 +522,11 @@ What increases productivity?
   },
   "quiz": {
     "answers": [
-      {"label": "Q1", "correct": true, "score": 1.0, "note": "Correct"}
+      {"question_id": "q1", "label": "Q1", "score": 1.0, "errors": [], "writing_note": null}
     ],
     "total_score": 8,
-    "reasoning": "Perfect"
+    "thematic_insights": null,
+    "tutors_note": null
   }
 }
 ```'''
@@ -537,8 +542,8 @@ What increases productivity?
 
             assert "## AI Feedback" in recall_content
             assert "**Score:** 5/5" in recall_content
-            assert "## AI Feedback" in quiz_content
-            assert "**Total Score:** 8/8" in quiz_content
+            assert "## Summary" in quiz_content  # Inline feedback uses Summary section
+            assert "**Score:** 8/8" in quiz_content
 
 
 class TestExpandedEvaluationPrompt:
@@ -1291,3 +1296,67 @@ class TestParseInlineResponse:
 
         assert len(inline_feedbacks[0].errors) == 0
         assert inline_feedbacks[0].writing_note is None
+
+
+class TestEvaluateSectionInline:
+    """Tests for evaluate_section with inline feedback."""
+
+    def test_injects_inline_feedback_to_quiz(self, tmp_path):
+        """Should inject inline feedback instead of appending at end."""
+        from edps.evaluation import evaluate_section
+
+        section = tmp_path / "sections" / "001"
+        section.mkdir(parents=True)
+        (section / "EDPS-test-001.txt").write_text("Source content about exchange and specialization.")
+        (section / "recall.md").write_text("## From Memory\n\n1. Point\n\n## One Sentence\n\nSum")
+        (section / "quiz.md").write_text('''### 1. Q1
+
+**Answer:** Specialization leads to division of labor.
+
+---
+''')
+
+        mock_response = '''{
+  "recall": {"points": [], "one_sentence_ok": true, "one_sentence_note": "", "score": 4, "reasoning": ""},
+  "quiz": {
+    "answers": [
+      {
+        "question_id": "q1",
+        "label": "Q1: Main Claim",
+        "score": 0.5,
+        "errors": [
+          {
+            "quoted_text": "Specialization leads to division of labor",
+            "summary": "Causal inversion",
+            "feedback": "Exchange enables specialization, not the reverse."
+          }
+        ],
+        "writing_note": null
+      }
+    ],
+    "total_score": 6,
+    "thematic_insights": {
+      "source_mastery": "Good grasp.",
+      "reasoning_quality": "Sound logic.",
+      "writing_craft": {"precision": 4, "clarity": 4, "economy": 3, "suggestion": "Be concise."}
+    },
+    "tutors_note": "Keep it up."
+  }
+}'''
+
+        with patch("edps.core.llm.LLMClient") as mock_client:
+            mock_instance = MagicMock()
+            mock_instance.complete.return_value.content = mock_response
+            mock_client.return_value = mock_instance
+            evaluate_section(section, "test", "001")
+
+        quiz_content = (section / "quiz.md").read_text()
+
+        # Should have inline annotation
+        assert "<details>" in quiz_content
+        assert "<summary>Causal inversion</summary>" in quiz_content
+        assert "Exchange enables specialization" in quiz_content
+
+        # Should have summary section at end
+        assert "## Summary" in quiz_content
+        assert "<summary>Thematic Insights</summary>" in quiz_content
