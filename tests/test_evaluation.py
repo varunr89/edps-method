@@ -382,27 +382,31 @@ class TestEvaluateSection:
             assert result.quiz_feedback is not None
 
     def test_does_not_duplicate_feedback(self, tmp_path):
-        """Should not append feedback if it already exists."""
+        """Should not duplicate feedback - recall appends, quiz replaces."""
         from edps.evaluation import evaluate_section
 
         section = tmp_path / "sections" / "001"
         section.mkdir(parents=True)
         (section / "EDPS-test-001.txt").write_text("Source")
         (section / "recall.md").write_text("# Recall\n\n## From Memory\n\n1. Point\n\n## One Sentence\n\nSum\n\n---\n\n## AI Feedback\n\nExisting feedback")
-        (section / "quiz.md").write_text("### 1. Q1\n\nQ?\n\n**Answer:** A\n\n---\n\n## AI Feedback\n\nExisting feedback")
+        (section / "quiz.md").write_text("### 1. Q1\n\nQ?\n\n**Answer:** A\n\n---\n\n## Summary\n\n**Score:** 5/8\n\nExisting summary")
+
+        # Use inline schema for mock response
+        mock_response = '{"recall": {"points": [], "one_sentence_ok": true, "one_sentence_note": "", "score": 4, "reasoning": ""}, "quiz": {"answers": [{"question_id": "q1", "label": "Q1", "score": 1.0, "errors": [], "writing_note": null}], "total_score": 7, "thematic_insights": null, "tutors_note": null}}'
 
         with patch("edps.core.llm.LLMClient") as mock_client:
             mock_instance = MagicMock()
-            mock_instance.complete.return_value.content = '{"recall": {"points": [], "one_sentence_ok": true, "one_sentence_note": "", "score": 4, "reasoning": ""}, "quiz": {"answers": [], "total_score": 7, "reasoning": ""}}'
+            mock_instance.complete.return_value.content = mock_response
             mock_client.return_value = mock_instance
             evaluate_section(section, "test", "001")
 
             recall_content = (section / "recall.md").read_text()
             quiz_content = (section / "quiz.md").read_text()
 
-            # Should only have one instance of "## AI Feedback"
+            # Recall: should still have one instance of "## AI Feedback" (not duplicated)
             assert recall_content.count("## AI Feedback") == 1
-            assert quiz_content.count("## AI Feedback") == 1
+            # Quiz: should have exactly one "## Summary" (old stripped, new added)
+            assert quiz_content.count("## Summary") == 1
 
 
 class TestExpandedAnswerFeedback:
@@ -1087,6 +1091,34 @@ Content here.
         result = strip_feedback(content)
         assert "## Summary" not in result
         assert "**Score:** 6/8" not in result
+
+    def test_removes_legacy_ai_feedback_section(self):
+        """Should remove legacy ## AI Feedback section."""
+        from edps.evaluation import strip_feedback
+
+        content = '''### 1. Question
+
+**Answer:** My answer.
+
+------
+
+## AI Feedback
+
+**Evaluated:** 2025-12-28 | **Source:** test.txt
+**Total Score:** 7/8
+
+---
+
+### Per-Answer Analysis
+
+#### Q1 (1.0/1.0)
+
+Feedback here.
+'''
+        result = strip_feedback(content)
+        assert "## AI Feedback" not in result
+        assert "**Evaluated:**" not in result
+        assert "### 1. Question" in result
 
 
 class TestInjectInlineFeedback:

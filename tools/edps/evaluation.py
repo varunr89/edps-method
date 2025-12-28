@@ -140,7 +140,8 @@ def strip_feedback(content: str) -> str:
 
     Removes:
     - All <details>...</details> blocks (inline annotations)
-    - The ## Summary section at end of file
+    - The ## Summary section at end of file (new format)
+    - The ## AI Feedback section (legacy format)
 
     Args:
         content: Raw quiz.md content
@@ -151,8 +152,11 @@ def strip_feedback(content: str) -> str:
     # Remove all <details> blocks
     result = re.sub(r'<details>.*?</details>\n*', '', content, flags=re.DOTALL)
 
-    # Remove ## Summary section at end of file
+    # Remove ## Summary section at end of file (new format)
     result = re.sub(r'\n---\n\n## Summary.*', '', result, flags=re.DOTALL)
+
+    # Remove ## AI Feedback section (legacy format)
+    result = re.sub(r'\n*-+\n\n## AI Feedback.*', '', result, flags=re.DOTALL)
 
     return result
 
@@ -274,24 +278,23 @@ def inject_inline_feedback(content: str, feedbacks: list["InlineAnswerFeedback"]
         for error in feedback.errors:
             result = inject_error(result, error)
 
-        # Inject writing note - find answer section and append
-        if feedback.writing_note:
-            # Find pattern: **Answer:** ... until --- or ### or end
-            # Insert writing note before the separator
-            pattern = r'(\*\*Answer:\*\*.*?)(\n\n---|\n\n###|\Z)'
+    # Inject writing notes in reverse order to preserve positions
+    # Find all answer blocks and pair with feedbacks by position
+    answer_pattern = r'(\*\*Answer:\*\*.*?)(\n\n---|\n\n###|\Z)'
+    answer_matches = list(re.finditer(answer_pattern, result, flags=re.DOTALL))
 
-            def insert_note(match):
-                answer_part = match.group(1)
-                separator = match.group(2) if match.group(2) else ''
-                note_block = f'''
+    # Process in reverse to preserve string positions
+    for i, match in reversed(list(enumerate(answer_matches))):
+        if i < len(feedbacks) and feedbacks[i].writing_note:
+            note_block = f'''
 <details>
 <summary>Writing</summary>
-{feedback.writing_note}
+{feedbacks[i].writing_note}
 </details>
 '''
-                return answer_part + note_block + separator
-
-            result = re.sub(pattern, insert_note, result, count=1, flags=re.DOTALL)
+            # Insert note before the separator
+            insert_pos = match.end(1)
+            result = result[:insert_pos] + note_block + result[insert_pos:]
 
     return result
 
