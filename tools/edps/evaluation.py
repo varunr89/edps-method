@@ -133,6 +133,28 @@ def migrate_v0_to_v1(data: dict) -> dict:
     return result
 
 
+def strip_feedback(content: str) -> str:
+    """Remove all existing feedback annotations from quiz content.
+
+    Removes:
+    - All <details>...</details> blocks (inline annotations)
+    - The ## Summary section at end of file
+
+    Args:
+        content: Raw quiz.md content
+
+    Returns:
+        Content with feedback stripped, ready for fresh annotations
+    """
+    # Remove all <details> blocks
+    result = re.sub(r'<details>.*?</details>\n*', '', content, flags=re.DOTALL)
+
+    # Remove ## Summary section at end of file
+    result = re.sub(r'\n---\n\n## Summary.*', '', result, flags=re.DOTALL)
+
+    return result
+
+
 def parse_recall_content(content: str) -> dict:
     """Parse recall.md content into structured data.
 

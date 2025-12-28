@@ -921,3 +921,78 @@ class TestSchemaMigration:
 
         result = migrate_v0_to_v1(v1_data)
         assert result == v1_data  # Unchanged
+
+
+class TestStripFeedback:
+    """Tests for strip_feedback function."""
+
+    def test_removes_details_blocks(self):
+        """Should remove all <details> blocks from content."""
+        from edps.evaluation import strip_feedback
+
+        content = '''**Answer:** First sentence.
+Second sentence.
+<details>
+<summary>Error</summary>
+Feedback here.
+</details>
+Third sentence.
+'''
+        result = strip_feedback(content)
+        assert "<details>" not in result
+        assert "</details>" not in result
+        assert "First sentence" in result
+        assert "Third sentence" in result
+
+    def test_removes_multiple_details_blocks(self):
+        """Should remove multiple <details> blocks."""
+        from edps.evaluation import strip_feedback
+
+        content = '''Answer text.
+<details>
+<summary>Error 1</summary>
+Feedback 1.
+</details>
+More text.
+<details>
+<summary>Error 2</summary>
+Feedback 2.
+</details>
+Final text.
+'''
+        result = strip_feedback(content)
+        assert result.count("<details>") == 0
+        assert "Answer text" in result
+        assert "More text" in result
+        assert "Final text" in result
+
+    def test_preserves_content_without_details(self):
+        """Should return content unchanged if no <details> blocks."""
+        from edps.evaluation import strip_feedback
+
+        content = "Plain markdown without feedback."
+        result = strip_feedback(content)
+        assert result == content
+
+    def test_removes_summary_section(self):
+        """Should remove ## Summary section at end of file."""
+        from edps.evaluation import strip_feedback
+
+        content = '''### 1. Question
+
+**Answer:** My answer.
+
+---
+
+## Summary
+
+**Score:** 6/8
+
+<details>
+<summary>Thematic Insights</summary>
+Content here.
+</details>
+'''
+        result = strip_feedback(content)
+        assert "## Summary" not in result
+        assert "**Score:** 6/8" not in result
