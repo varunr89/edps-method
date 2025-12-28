@@ -923,6 +923,58 @@ class TestSchemaMigration:
         assert result == v1_data  # Unchanged
 
 
+class TestInjectError:
+    """Tests for inject_error function."""
+
+    def test_injects_after_quoted_text(self):
+        """Should insert <details> block after exact quoted text."""
+        from edps.evaluation import inject_error, InlineError
+
+        content = "Division of labor results from exchange. Specialization leads to surplus."
+        error = InlineError(
+            quoted_text="Specialization leads to surplus",
+            summary="Causal inversion",
+            feedback="Exchange enables specialization, not vice versa."
+        )
+
+        result = inject_error(content, error)
+
+        assert "Specialization leads to surplus" in result
+        assert "<details>" in result
+        assert "<summary>Causal inversion</summary>" in result
+        assert "Exchange enables specialization" in result
+        # Verify order: quoted text comes before details block
+        assert result.index("Specialization leads to surplus") < result.index("<details>")
+
+    def test_handles_text_not_found(self):
+        """Should return content unchanged if quoted text not found."""
+        from edps.evaluation import inject_error, InlineError
+
+        content = "Some answer text here."
+        error = InlineError(
+            quoted_text="nonexistent text",
+            summary="Error",
+            feedback="Feedback"
+        )
+
+        result = inject_error(content, error)
+        assert result == content  # Unchanged
+
+    def test_only_injects_first_occurrence(self):
+        """Should only annotate first occurrence of repeated text."""
+        from edps.evaluation import inject_error, InlineError
+
+        content = "Exchange is key. Exchange is key again."
+        error = InlineError(
+            quoted_text="Exchange is key",
+            summary="Clarification",
+            feedback="Be more specific."
+        )
+
+        result = inject_error(content, error)
+        assert result.count("<details>") == 1
+
+
 class TestStripFeedback:
     """Tests for strip_feedback function."""
 

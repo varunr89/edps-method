@@ -155,6 +155,30 @@ def strip_feedback(content: str) -> str:
     return result
 
 
+def inject_error(content: str, error: "InlineError") -> str:
+    """Inject a single error annotation after the quoted text.
+
+    Args:
+        content: The answer text to annotate
+        error: InlineError with quoted_text anchor and feedback
+
+    Returns:
+        Content with <details> block inserted after quoted text,
+        or unchanged if quoted text not found
+    """
+    if error.quoted_text not in content:
+        return content  # Text not found, skip
+
+    feedback_html = f'''
+<details>
+<summary>{error.summary}</summary>
+{error.feedback}
+</details>'''
+
+    # Replace only first occurrence
+    return content.replace(error.quoted_text, error.quoted_text + feedback_html, 1)
+
+
 def parse_recall_content(content: str) -> dict:
     """Parse recall.md content into structured data.
 
