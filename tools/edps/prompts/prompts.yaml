@@ -7,8 +7,9 @@
 
 partials:
   edps_intro: |
-    You are using the EDPS Method (Ebbinghaus, Dunlosky, Paivio, Sweller) -
-    combining spaced repetition, active recall, dual coding, and cognitive load management.
+    You are a expert Professor using the EDPS Method (Ebbinghaus, Dunlosky, Paivio, Sweller) -
+    combining spaced repetition, active recall, dual coding, and cognitive load management to helps 
+    readers develop deep understanding of complex texts. 
 
 prompts:
   # ============================================================================
@@ -175,11 +176,6 @@ prompts:
       **Length:** [X-Y sentences]
 
       **Your Answer:**
-
-
-      **Model Answer:**
-
-      [Provide a brief model answer for self-checking]
 
       ---
 
@@ -525,17 +521,20 @@ prompts:
         "quiz": {{
           "answers": [
             {{
+              "question_id": "q1",
               "label": "Q1: Title",
-              "correct": true,
               "score": 1,
-              "note": "Brief note (legacy)",
-              "accuracy": "Factual correctness analysis",
-              "reasoning": "Logic and argument analysis",
-              "writing": "Prose quality: precision, clarity, economy"
+              "errors": [
+                {{
+                  "quoted_text": "EXACT substring from student's answer containing the error",
+                  "summary": "Brief label (2-4 words) for the error type",
+                  "feedback": "Natural prose explaining what's wrong and why. Covers accuracy and reasoning implicitly."
+                }}
+              ],
+              "writing_note": "Holistic writing feedback for this answer with rewrite example. Null if writing is fine."
             }}
           ],
           "total_score": 8,
-          "reasoning": "Legacy overall assessment",
           "thematic_insights": {{
             "source_mastery": "Patterns across answers—what they consistently get/miss. Cite specific examples.",
             "reasoning_quality": "How they build arguments. Logical gaps. Strengths. Edges to develop.",
@@ -562,15 +561,19 @@ prompts:
       - Mark partial credit as 0.5 when applicable
       - Use booleans as true/false, no trailing commas
 
-      **Per-Answer Analysis:**
-      - **Accuracy:** Did they capture what the source actually says? Quote specifics.
-      - **Reasoning:** Is their causal logic sound? Do they identify correct relationships?
-      - **Writing:**
-        - Precision: Do they use the author's key terms correctly?
-        - Clarity: Do they lead with main points? Is structure clear?
-        - Economy: Can they say it in fewer words without losing meaning?
+      **Inline Error Annotations (CRITICAL):**
+      - For each error in a quiz answer, you MUST quote the EXACT text from the student's answer
+      - The `quoted_text` field must be a substring that appears verbatim in the student's answer
+      - Only annotate errors—correct claims get no annotation
+      - `summary` should be a brief label (e.g., "Causal inversion", "Missing qualifier", "Wrong term")
+      - `feedback` is natural prose covering both accuracy and reasoning
+      - If an answer has no errors, use an empty `errors` array: `[]`
 
-      Keep per-answer explanations to 1-3 sentences; depth goes in thematic_insights and tutors_note.
+      **Writing Notes:**
+      - Provide `writing_note` only if the writing needs improvement
+      - Include a concrete rewrite example showing the improvement
+      - Example: "Lead with causes before effects. Rewrite: 'Exchange certainty motivates specialization, which increases productivity.'"
+      - Set to `null` if writing is fine
 
       **Thematic Insights:**
       - Identify PATTERNS across all answers, not just per-question issues

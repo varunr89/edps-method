@@ -1199,3 +1199,32 @@ class TestFormatSummaryFeedback:
         assert "**Score:** 7/8" in result
         assert "Thematic Insights" not in result
         assert "Tutor's Note" not in result
+
+
+class TestInlinePromptSchema:
+    """Tests for inline feedback prompt schema."""
+
+    def test_prompt_requests_errors_array(self):
+        """Prompt should request errors[] with quoted_text."""
+        from edps.evaluation import build_evaluation_prompt
+
+        source = "Test source"
+        recall = "## From Memory\n\n1. Test\n\n## One Sentence\n\nTest"
+        quiz = "### 1. Q1\n\nQ?\n\n**Answer:** Test answer here."
+
+        prompt = build_evaluation_prompt(source, recall, quiz)
+
+        assert "errors" in prompt
+        assert "quoted_text" in prompt
+
+    def test_prompt_requests_writing_note(self):
+        """Prompt should request writing_note with rewrite example."""
+        from edps.evaluation import build_evaluation_prompt
+
+        source = "Test"
+        recall = "## From Memory\n\n1. Test\n\n## One Sentence\n\nTest"
+        quiz = "### 1. Q1\n\nQ?\n\n**Answer:** T"
+
+        prompt = build_evaluation_prompt(source, recall, quiz)
+
+        assert "writing_note" in prompt
