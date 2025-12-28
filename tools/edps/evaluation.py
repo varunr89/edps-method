@@ -25,6 +25,14 @@ class AnswerFeedback:
 
 
 @dataclass
+class InlineError:
+    """A single claim-level error with anchor text for injection."""
+    quoted_text: str  # Exact substring from user's answer
+    summary: str  # Brief label for <summary> tag
+    feedback: str  # Natural prose feedback
+
+
+@dataclass
 class RecallFeedback:
     """Complete feedback for recall.md evaluation."""
     points: list[AnswerFeedback]
