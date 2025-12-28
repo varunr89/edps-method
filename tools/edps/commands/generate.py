@@ -7,7 +7,8 @@ import typer
 import yaml
 from rich.console import Console
 
-from edps.config import load_config
+from edps.config import load_config, EdpsConfig
+from edps.core.council import Council
 from edps.core.llm import LLMClient
 from edps.core.prompts import load_prompt, render_prompt
 from edps.core.ui import confirm_action
@@ -324,6 +325,7 @@ def generate(
                 # Generate
                 result = _generate_content(
                     client=client,
+                    config=config,
                     gen_type=gen_type_item,
                     section=section,
                     source_text=source_text,
@@ -344,6 +346,7 @@ def generate(
     if generate_book:
         _generate_book_content(
             client=client,
+            config=config,
             book_dir=book_dir,
             meta=meta,
             sections=sections,
@@ -354,6 +357,7 @@ def generate(
 
 def _generate_content(
     client: LLMClient,
+    config: EdpsConfig,
     gen_type: str,
     section: dict,
     source_text: str,
@@ -433,17 +437,36 @@ This placeholder exists to preserve the workflow structure for future podcast ge
         elif action == "view":
             console.print(prompt[:2000] + "..." if len(prompt) > 2000 else prompt)
             # Re-prompt after viewing
-            return _generate_content(client, gen_type, section, source_text, meta, section_dir, skip_confirm)
+            return _generate_content(client, config, gen_type, section, source_text, meta, section_dir, skip_confirm)
 
-    # Execute
-    response = client.complete(prompt)
+    # Execute - check if council is enabled for this task type
+    if config.council.enabled and gen_type in config.council.tasks:
+        resolved_models = config.council.resolve_models(config.models)
+        resolved_chair = config.council.resolve_chair(config.models)
+        council = Council(
+            models=resolved_models,
+            chair=resolved_chair,
+            stages=config.council.stages,
+        )
+        console.print(f"[dim]Using council with {len(resolved_models)} models, {config.council.stages} stages[/dim]")
+        council_result = council.run(prompt, client)
+        response_content = council_result.final_answer
+        total_tokens = council_result.total_tokens
+        # Estimate cost (rough approximation)
+        cost = total_tokens * 0.00001  # placeholder
+        provider_label = "[COUNCIL]"
+    else:
+        response = client.complete(prompt)
+        response_content = response.content
+        total_tokens = response.input_tokens + response.output_tokens
+        cost = response.cost
+        provider_label = f"[{response.provider.upper()}]" if hasattr(response, 'provider') else "[AZURE]"
 
     # Save
     output_path = section_dir / f"{gen_type}.md"
-    output_path.write_text(response.content, encoding="utf-8")
+    output_path.write_text(response_content, encoding="utf-8")
 
-    provider_label = f"[{response.provider.upper()}]" if hasattr(response, 'provider') else "[AZURE]"
-    console.print(f"[dim]{provider_label} Tokens: {response.input_tokens} in, {response.output_tokens} out. Cost: ${response.cost:.4f}[/dim]")
+    console.print(f"[dim]{provider_label} Tokens: {total_tokens}. Cost: ${cost:.4f}[/dim]")
 
     return "done"
 
@@ -460,6 +483,7 @@ def _write_template(path: Path, template: str, **kwargs) -> None:
 
 def _generate_book_content(
     client: LLMClient,
+    config: EdpsConfig,
     book_dir: Path,
     meta: dict,
     sections: list,
@@ -504,6 +528,7 @@ def _generate_book_content(
     if not teachable_path.exists() and all_summaries:
         _generate_ai_book_content(
             client=client,
+            config=config,
             output_path=teachable_path,
             prompt_name="teachable-outline",
             meta=meta,
@@ -519,6 +544,7 @@ def _generate_book_content(
     if not qbank_path.exists() and all_quizzes:
         _generate_ai_book_content(
             client=client,
+            config=config,
             output_path=qbank_path,
             prompt_name="question-bank",
             meta=meta,
@@ -532,6 +558,7 @@ def _generate_book_content(
 
 def _generate_ai_book_content(
     client: LLMClient,
+    config: EdpsConfig,
     output_path: Path,
     prompt_name: str,
     meta: dict,
@@ -569,10 +596,29 @@ def _generate_ai_book_content(
         if action in ["quit", "skip"]:
             return
 
-    # Execute
-    response = client.complete(prompt)
-    output_path.write_text(response.content, encoding="utf-8")
+    # Execute - check if council is enabled for this task type
+    if config.council.enabled and prompt_name in config.council.tasks:
+        resolved_models = config.council.resolve_models(config.models)
+        resolved_chair = config.council.resolve_chair(config.models)
+        council = Council(
+            models=resolved_models,
+            chair=resolved_chair,
+            stages=config.council.stages,
+        )
+        console.print(f"[dim]Using council with {len(resolved_models)} models, {config.council.stages} stages[/dim]")
+        council_result = council.run(prompt, client)
+        response_content = council_result.final_answer
+        total_tokens = council_result.total_tokens
+        cost = total_tokens * 0.00001  # placeholder
+        provider_label = "[COUNCIL]"
+    else:
+        response = client.complete(prompt)
+        response_content = response.content
+        total_tokens = response.input_tokens + response.output_tokens
+        cost = response.cost
+        provider_label = f"[{response.provider.upper()}]" if hasattr(response, 'provider') else "[AZURE]"
+
+    output_path.write_text(response_content, encoding="utf-8")
 
     console.print(f"[green]✓[/green] Created {output_path.parent.name}/{output_path.name}")
-    provider_label = f"[{response.provider.upper()}]" if hasattr(response, 'provider') else "[AZURE]"
-    console.print(f"[dim]{provider_label} Tokens: {response.input_tokens} in, {response.output_tokens} out. Cost: ${response.cost:.4f}[/dim]")
+    console.print(f"[dim]{provider_label} Tokens: {total_tokens}. Cost: ${cost:.4f}[/dim]")

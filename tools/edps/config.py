@@ -30,6 +30,13 @@ class CouncilConfig:
     task roles from ModelsConfig. This avoids redundancy and ensures
     the council uses the same models configured for individual tasks.
 
+    Valid task names for the `tasks` list:
+        - "summary"           (section summaries)
+        - "quiz"              (section quizzes)
+        - "evaluation"        (homework evaluation)
+        - "teachable-outline" (book-level outline)
+        - "question-bank"     (book-level question bank)
+
     Example:
         member_roles: ["summary", "quiz", "evaluation"]
         chair_role: "evaluation"
