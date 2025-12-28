@@ -33,6 +33,16 @@ class InlineError:
 
 
 @dataclass
+class InlineAnswerFeedback:
+    """Per-answer feedback with inline errors and optional writing note."""
+    question_id: str
+    label: str
+    score: float
+    errors: list[InlineError] = field(default_factory=list)
+    writing_note: Optional[str] = None
+
+
+@dataclass
 class RecallFeedback:
     """Complete feedback for recall.md evaluation."""
     points: list[AnswerFeedback]

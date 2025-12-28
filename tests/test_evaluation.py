@@ -827,6 +827,62 @@ class TestExpandedEvaluationIntegration:
         assert quiz_word_count > 100  # Should be substantial
 
 
+class TestInlineErrorDataclass:
+    """Tests for InlineError dataclass."""
+
+    def test_inline_error_creation(self):
+        """InlineError should hold quoted text and feedback."""
+        from edps.evaluation import InlineError
+
+        error = InlineError(
+            quoted_text="Specialization leads to division of labor",
+            summary="Causal inversion",
+            feedback="Exchange certainty enables specialization, not the reverse."
+        )
+        assert error.quoted_text == "Specialization leads to division of labor"
+        assert error.summary == "Causal inversion"
+        assert error.feedback == "Exchange certainty enables specialization, not the reverse."
+
+
+class TestInlineAnswerFeedback:
+    """Tests for InlineAnswerFeedback dataclass."""
+
+    def test_inline_answer_feedback_creation(self):
+        """InlineAnswerFeedback should hold errors and writing note."""
+        from edps.evaluation import InlineAnswerFeedback, InlineError
+
+        feedback = InlineAnswerFeedback(
+            question_id="q1",
+            label="Q1: Main Claim",
+            score=0.5,
+            errors=[
+                InlineError(
+                    quoted_text="Specialization leads to division",
+                    summary="Causal inversion",
+                    feedback="Exchange enables specialization."
+                )
+            ],
+            writing_note="Lead with causes before effects. Example: 'Exchange certainty motivates specialization.'"
+        )
+        assert feedback.question_id == "q1"
+        assert len(feedback.errors) == 1
+        assert feedback.writing_note is not None
+
+    def test_inline_answer_feedback_optional_fields(self):
+        """InlineAnswerFeedback should allow empty errors and null writing_note."""
+        from edps.evaluation import InlineAnswerFeedback
+
+        feedback = InlineAnswerFeedback(
+            question_id="q2",
+            label="Q2: Mechanism",
+            score=1.0,
+            errors=[],
+            writing_note=None
+        )
+        assert len(feedback.errors) == 0
+        assert feedback.writing_note is None
+
+
 class TestSchemaMigration:
     """Tests for v0 -> v1 schema migration."""
 
