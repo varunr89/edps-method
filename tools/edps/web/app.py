@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -45,4 +45,19 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {
         "request": request,
         "books": books,
+    })
+
+
+@app.get("/book/{slug}")
+async def book_detail(request: Request, slug: str):
+    """Book detail page with section list."""
+    books_dir = get_books_dir()
+    book = load_book(books_dir, slug)
+
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    return templates.TemplateResponse("book.html", {
+        "request": request,
+        "book": book,
     })
