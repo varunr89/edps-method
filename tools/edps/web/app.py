@@ -129,3 +129,95 @@ async def save_quiz(slug: str, section_id: str, request: Request):
     update_quiz_answers(books_dir, slug, section_id, answers)
 
     return HTMLResponse("Saved &#10003;")
+
+
+@app.post("/book/{slug}/{section_id}/evaluate/recall")
+async def evaluate_recall_endpoint(slug: str, section_id: str):
+    """Trigger AI evaluation of recall answers."""
+    from edps.evaluation import evaluate_section
+    from edps.config import load_config
+
+    books_dir = get_books_dir()
+    section_dir = books_dir / slug / "sections" / section_id
+
+    try:
+        config = load_config()
+        result = evaluate_section(section_dir, slug, section_id, config)
+
+        # Return feedback summary HTML
+        html = f"""
+        <div class="card bg-surface p-6 rounded-lg border-l-4 border-success">
+            <h3 class="text-lg font-semibold mb-4">Recall Feedback</h3>
+            <p class="font-mono text-xl mb-4">Score: {result.recall_score}/5</p>
+            <p class="text-muted">{result.recall_feedback.reasoning}</p>
+        </div>
+        """
+        return HTMLResponse(html)
+
+    except Exception as e:
+        return HTMLResponse(f"""
+        <div class="card bg-surface p-6 rounded-lg border-l-4 border-error">
+            <h3 class="text-lg font-semibold mb-2 text-error">Evaluation Error</h3>
+            <p class="text-sm">{str(e)}</p>
+        </div>
+        """)
+
+
+@app.post("/book/{slug}/{section_id}/evaluate/quiz")
+async def evaluate_quiz_endpoint(slug: str, section_id: str):
+    """Trigger AI evaluation of quiz answers."""
+    from edps.evaluation import evaluate_section
+    from edps.config import load_config
+
+    books_dir = get_books_dir()
+    section_dir = books_dir / slug / "sections" / section_id
+
+    try:
+        config = load_config()
+        result = evaluate_section(section_dir, slug, section_id, config)
+
+        # Build feedback HTML
+        insights_html = ""
+        if result.quiz_feedback.thematic_insights:
+            ti = result.quiz_feedback.thematic_insights
+            insights_html = f"""
+            <details class="mb-4">
+                <summary class="text-muted cursor-pointer">Thematic Insights</summary>
+                <div class="mt-2 text-sm">
+                    <p><strong>Source Mastery:</strong> {ti.source_mastery}</p>
+                    <p><strong>Reasoning:</strong> {ti.reasoning_quality}</p>
+                    <p><strong>Writing:</strong> Precision {ti.writing_craft.precision}/5,
+                       Clarity {ti.writing_craft.clarity}/5, Economy {ti.writing_craft.economy}/5</p>
+                </div>
+            </details>
+            """
+
+        tutor_html = ""
+        if result.quiz_feedback.tutors_note:
+            tutor_html = f"""
+            <details>
+                <summary class="text-muted cursor-pointer">Tutor's Note</summary>
+                <div class="mt-2 text-sm italic">{result.quiz_feedback.tutors_note}</div>
+            </details>
+            """
+
+        html = f"""
+        <div class="card bg-surface p-6 rounded-lg border-l-4 border-accent">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Quiz Feedback</h3>
+                <span class="font-mono text-xl">{result.quiz_score}/8</span>
+            </div>
+            {insights_html}
+            {tutor_html}
+            <p class="text-sm text-muted mt-4">Reload the page to see inline feedback on your answers.</p>
+        </div>
+        """
+        return HTMLResponse(html)
+
+    except Exception as e:
+        return HTMLResponse(f"""
+        <div class="card bg-surface p-6 rounded-lg border-l-4 border-error">
+            <h3 class="text-lg font-semibold mb-2 text-error">Evaluation Error</h3>
+            <p class="text-sm">{str(e)}</p>
+        </div>
+        """)
