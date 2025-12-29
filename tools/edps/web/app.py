@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from edps.web.routes import load_registry, load_book, load_section
+from edps.web.parsers import parse_summary, parse_recall, parse_quiz, render_answer_with_highlights
 
 app = FastAPI(title="EDPS Method", docs_url=None, redoc_url=None)
 
@@ -80,4 +81,8 @@ async def section_workspace(request: Request, slug: str, section_id: str, tab: s
         "request": request,
         "section": section,
         "tab": tab,
+        "parse_summary": parse_summary,
+        "parse_recall": parse_recall,
+        "parse_quiz": parse_quiz,
+        "render_highlights": render_answer_with_highlights,
     })

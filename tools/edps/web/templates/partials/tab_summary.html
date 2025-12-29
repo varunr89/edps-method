@@ -1,0 +1,72 @@
+{% if section.summary_content %}
+    {% set summary = parse_summary(section.summary_content) %}
+
+    <!-- TLDR -->
+    <div class="card bg-surface p-6 rounded-lg mb-6">
+        <h3 class="text-lg font-semibold text-muted uppercase tracking-wide mb-3">TLDR</h3>
+        <blockquote class="text-xl leading-relaxed border-l-4 border-accent pl-4 italic">
+            {{ summary.tldr }}
+        </blockquote>
+    </div>
+
+    <!-- Key Terms -->
+    {% if summary.key_terms %}
+    <div class="card bg-surface p-6 rounded-lg mb-6">
+        <h3 class="text-lg font-semibold text-muted uppercase tracking-wide mb-4">Key Terms</h3>
+        <dl class="space-y-3">
+            {% for term, definition in summary.key_terms %}
+            <div>
+                <dt class="font-semibold text-accent">{{ term }}</dt>
+                <dd class="text-text/90 ml-4">{{ definition }}</dd>
+            </div>
+            {% endfor %}
+        </dl>
+    </div>
+    {% endif %}
+
+    <!-- Argument Structure -->
+    {% if summary.argument_steps %}
+    <div class="card bg-surface p-6 rounded-lg mb-6">
+        <h3 class="text-lg font-semibold text-muted uppercase tracking-wide mb-4">Argument Structure</h3>
+        <ol class="space-y-3">
+            {% for step in summary.argument_steps %}
+            <li class="flex items-start gap-3">
+                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-accent/20 text-accent text-sm flex items-center justify-center font-mono">{{ loop.index }}</span>
+                <span>{{ step }}</span>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+
+    <!-- Modern Application (collapsible) -->
+    {% if summary.modern_application %}
+    <details class="card bg-surface p-6 rounded-lg mb-6">
+        <summary class="text-lg font-semibold text-muted uppercase tracking-wide cursor-pointer">Modern Application</summary>
+        <div class="mt-4 text-text/90 leading-relaxed">
+            {{ summary.modern_application }}
+        </div>
+    </details>
+    {% endif %}
+
+    <!-- Source Pointers (collapsible) -->
+    {% if summary.source_pointers %}
+    <details class="card bg-surface p-6 rounded-lg">
+        <summary class="text-lg font-semibold text-muted uppercase tracking-wide cursor-pointer">Source Pointers</summary>
+        <dl class="mt-4 space-y-3">
+            {% for key, value in summary.source_pointers.items() %}
+            <div>
+                <dt class="font-medium text-muted">{{ key }}</dt>
+                <dd class="text-text/90 ml-4">{{ value }}</dd>
+            </div>
+            {% endfor %}
+        </dl>
+    </details>
+    {% endif %}
+
+{% else %}
+    <div class="text-center py-12 text-muted">
+        <p class="text-lg">Summary not yet generated.</p>
+        <p class="text-sm mt-2">Run <code class="bg-cream px-2 py-1 rounded">edps generate {{ section.book.slug }} {{ section.id }}</code></p>
+    </div>
+{% endif %}
