@@ -1,122 +1,50 @@
-"""Run command - interactive workflow runner."""
+"""Run command - launches web UI server."""
 from pathlib import Path
 from typing import Optional
+import webbrowser
 
 import typer
-import yaml
+import uvicorn
 from rich.console import Console
-from rich.panel import Panel
-from rich.prompt import Prompt
-
-from edps.config import load_config
-from edps.core.state import detect_book_state
-from edps.commands.generate import generate
 
 console = Console()
 
 
 def run(
-    book_slug: str = typer.Argument(..., help="Book slug"),
+    book_slug: Optional[str] = typer.Argument(None, help="Book slug (opens directly to book)"),
+    port: int = typer.Option(8000, "--port", "-p", help="Port to run on"),
+    no_browser: bool = typer.Option(False, "--no-browser", help="Don't auto-open browser"),
     books_dir: Optional[Path] = typer.Option(None, "--books-dir"),
-    config_path: Optional[Path] = typer.Option(None, "--config-path"),
 ) -> None:
-    """Interactive workflow runner for EDPS Method."""
+    """Launch the EDPS web UI."""
+    import os
 
+    # Set books directory for the app to find
     if books_dir is None:
         books_dir = Path.cwd() / "books"
+    os.environ["EDPS_BOOKS_DIR"] = str(books_dir.absolute())
 
-    book_dir = books_dir / book_slug
-    if not book_dir.exists():
-        console.print(f"[red]Error:[/red] Book not found: {book_dir}")
-        raise typer.Exit(1)
+    url = f"http://localhost:{port}"
+    if book_slug:
+        url = f"{url}/book/{book_slug}"
 
-    # Load metadata
-    meta_path = book_dir / "meta.yaml"
-    if meta_path.exists():
-        meta = yaml.safe_load(meta_path.read_text())
-    else:
-        meta = {"title": book_slug}
+    console.print(f"[bold green]Starting EDPS web UI...[/bold green]")
+    console.print(f"[dim]Open {url} in your browser[/dim]")
 
-    while True:
-        # Detect state
-        state = detect_book_state(book_dir)
+    if not no_browser:
+        # Open browser after slight delay to let server start
+        import threading
+        def open_browser():
+            import time
+            time.sleep(1)
+            webbrowser.open(url)
+        threading.Thread(target=open_browser, daemon=True).start()
 
-        # Show header
-        console.clear()
-        console.print(Panel(
-            f"[bold]{meta.get('title', book_slug)}[/bold]\n"
-            f"{meta.get('author', 'Unknown')}, {meta.get('year', '')}\n\n"
-            f"Status: {state.total_sections} sections, "
-            f"{state.summaries_done} summaries, "
-            f"{state.podcasts_done} podcasts, "
-            f"{state.quizzes_done} quizzes",
-            title="EDPS Method",
-            border_style="blue",
-        ))
-
-        # Build menu options
-        options = []
-
-        if not state.ingested:
-            console.print("\n[yellow]Book not ingested. Run 'edps ingest' first.[/yellow]")
-            break
-
-        if state.pending_sections:
-            options.append(f"[1] Continue generating ({len(state.pending_sections)} pending)")
-
-        if state.summaries_done > 0:
-            options.append("[2] Review existing outputs")
-
-        options.append("[3] Regenerate a specific section")
-
-        if state.summaries_done > 0:
-            options.append("[4] Generate recall templates (recall.md)")
-
-        options.append("[5] View cost summary")
-        options.append("[q] Quit")
-
-        console.print("\nWhat would you like to do?\n")
-        for opt in options:
-            console.print(f"  {opt}")
-
-        choice = Prompt.ask("\n>", default="1")
-
-        if choice == "q" or choice == "quit":
-            break
-        elif choice == "1" and state.pending_sections:
-            # Continue generating
-            generate(
-                book_slug=book_slug,
-                section_id=None,
-                books_dir=books_dir,
-                config_path=config_path,
-                yes=False,
-                gen_type="all",
-            )
-        elif choice == "3":
-            section_id = Prompt.ask("Section ID")
-            gen_type = Prompt.ask("Type (summary/podcast/quiz/all)", default="all")
-            generate(
-                book_slug=book_slug,
-                section_id=section_id,
-                books_dir=books_dir,
-                config_path=config_path,
-                yes=False,
-                gen_type=gen_type,
-            )
-        elif choice == "4":
-            generate(
-                book_slug=book_slug,
-                section_id=None,
-                books_dir=books_dir,
-                config_path=config_path,
-                yes=True,
-                gen_type="recall",
-            )
-        elif choice == "5":
-            console.print("\n[dim]Cost tracking not yet implemented[/dim]")
-            Prompt.ask("Press Enter to continue")
-
-        # Pause before loop
-        if choice not in ["q", "quit"]:
-            Prompt.ask("\nPress Enter to continue")
+    # Run uvicorn
+    uvicorn.run(
+        "edps.web.app:app",
+        host="127.0.0.1",
+        port=port,
+        reload=False,
+        log_level="warning",
+    )
