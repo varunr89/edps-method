@@ -22,7 +22,7 @@
 
 According to Smith, what is the primary cause of improvements in the productive powers of labour?
 
-**Answer:** division of labor: Dividing a output (example pin factory) into distinct tasks which allows a person to specialize in individual tasks. 
+**Answer:** A
 
 ---
 

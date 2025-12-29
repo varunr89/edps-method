@@ -7,6 +7,11 @@ import yaml
 
 from edps.core.state import detect_book_state
 
+# Compiled patterns for quiz answer parsing (state machine approach)
+_QUESTION_HEADER_RE = re.compile(r"^###\s+(\d+)\.")
+_SECTION_HEADER_RE = re.compile(r"^##\s+")
+_ANSWER_MARK = "**Answer:**"
+
 
 def load_registry(books_dir: Path) -> list[dict]:
     """Load book registry with state info."""
@@ -159,7 +164,14 @@ def write_recall(
 
 
 def update_quiz_answers(books_dir: Path, slug: str, section_id: str, answers: dict[str, str]) -> None:
-    """Update quiz answers in quiz.md, preserving structure and feedback."""
+    """Update quiz answers in quiz.md using line-by-line state machine.
+
+    This approach is more robust than regex because it:
+    - Handles empty answers (clearing)
+    - Handles multi-line answers
+    - Won't truncate if answer contains '---' or '###'
+    - Processes markdown as structural blocks, not pattern matches
+    """
     section_dir = books_dir / slug / "sections" / section_id
     quiz_path = section_dir / "quiz.md"
 
@@ -167,18 +179,107 @@ def update_quiz_answers(books_dir: Path, slug: str, section_id: str, answers: di
         return
 
     content = quiz_path.read_text()
+    lines = content.splitlines()
 
-    for q_key, answer in answers.items():
-        # q_key is like "q1", "q2", etc.
-        q_num = q_key[1:]  # Remove 'q' prefix
+    # Normalize keys like {"q1": "..."} -> {"1": "..."}
+    answers_by_num = {k[1:]: v for k, v in answers.items() if k.startswith("q")}
 
-        # Pattern to find and replace the answer for this question
-        # Matches: **Answer:** [anything until next section]
-        pattern = rf'(### {q_num}\..+?\n\n\*\*Answer:\*\*\s*)(.+?)(\n\n---|\n\n###|\n\n## |\Z)'
+    out: list[str] = []
+    i = 0
+    while i < len(lines):
+        m = _QUESTION_HEADER_RE.match(lines[i])
+        if not m:
+            out.append(lines[i])
+            i += 1
+            continue
 
-        def replace_answer(m):
-            return m.group(1) + answer + m.group(3)
+        q_num = m.group(1)
 
-        content = re.sub(pattern, replace_answer, content, flags=re.DOTALL)
+        # Find end of this question block (next question or next section)
+        j = i + 1
+        while j < len(lines):
+            if _QUESTION_HEADER_RE.match(lines[j]) or _SECTION_HEADER_RE.match(lines[j]):
+                break
+            j += 1
 
-    quiz_path.write_text(content)
+        block = lines[i:j]
+        if q_num in answers_by_num:
+            block = _replace_answer_in_block(block, answers_by_num[q_num])
+
+        out.extend(block)
+        i = j
+
+    quiz_path.write_text("\n".join(out))
+
+
+def _replace_answer_in_block(block_lines: list[str], new_answer: str) -> list[str]:
+    """Find **Answer:** line in block and replace answer content."""
+    for idx, line in enumerate(block_lines):
+        if _ANSWER_MARK in line:
+            return _splice_answer(block_lines, idx, new_answer)
+    return block_lines
+
+
+def _splice_answer(block_lines: list[str], answer_idx: int, new_answer: str) -> list[str]:
+    """Replace answer content starting at answer_idx line."""
+    end = len(block_lines)
+
+    # Find where the answer should end (blank line before a structural boundary)
+    k = answer_idx + 1
+    while k < len(block_lines):
+        if block_lines[k].strip() == "" and _next_nonempty_is_boundary(block_lines, k + 1):
+            end = k
+            break
+        if _is_boundary_start(block_lines, k):
+            # Keep the blank line before a boundary if present
+            end = k - 1 if k > answer_idx + 1 and block_lines[k - 1].strip() == "" else k
+            break
+        k += 1
+
+    prefix = block_lines[:answer_idx]
+    suffix = block_lines[end:]
+
+    marker_line = block_lines[answer_idx]
+    marker_pos = marker_line.find(_ANSWER_MARK)
+    if marker_pos == -1:
+        return block_lines
+
+    marker_prefix = marker_line[: marker_pos + len(_ANSWER_MARK)]
+
+    answer_lines = new_answer.splitlines()
+    if not answer_lines:
+        new_answer_block = [marker_prefix]
+    else:
+        first = answer_lines[0]
+        new_answer_block = [marker_prefix + (" " + first if first else "")]
+        if len(answer_lines) > 1:
+            new_answer_block.extend(answer_lines[1:])
+
+    return prefix + new_answer_block + suffix
+
+
+def _is_boundary_start(lines: list[str], idx: int) -> bool:
+    """Check if line at idx is a structural boundary."""
+    line = lines[idx]
+    if _QUESTION_HEADER_RE.match(line) or _SECTION_HEADER_RE.match(line):
+        return True
+    if line.strip() == "---":
+        # Treat '---' as a boundary only if a header follows
+        j = idx + 1
+        while j < len(lines) and lines[j].strip() == "":
+            j += 1
+        if j < len(lines) and (
+            _QUESTION_HEADER_RE.match(lines[j]) or _SECTION_HEADER_RE.match(lines[j])
+        ):
+            return True
+    return False
+
+
+def _next_nonempty_is_boundary(lines: list[str], start: int) -> bool:
+    """Check if next non-empty line is a structural boundary."""
+    j = start
+    while j < len(lines) and lines[j].strip() == "":
+        j += 1
+    if j >= len(lines):
+        return False
+    return _is_boundary_start(lines, j)
