@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EDPS Method{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FAF8F5',
+                        surface: '#FFFFFF',
+                        text: '#3D3229',
+                        muted: '#8B7355',
+                        accent: '#B8860B',
+                        success: '#5B7C5B',
+                        error: '#A65D57',
+                    },
+                    fontFamily: {
+                        serif: ['Crimson Pro', 'Georgia', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-cream text-text font-serif min-h-screen">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

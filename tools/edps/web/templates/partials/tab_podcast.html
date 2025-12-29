@@ -1,0 +1,25 @@
+{% if section.podcast_content %}
+    <div class="space-y-6">
+        <!-- Audio player if exists -->
+        {% set audio_path = "/static/audio/EDPS-" ~ section.book.slug ~ "-" ~ section.id ~ ".mp3" %}
+        <div class="card bg-surface p-6 rounded-lg">
+            <h3 class="text-lg font-semibold text-muted uppercase tracking-wide mb-4">Audio</h3>
+            <audio controls class="w-full">
+                <source src="{{ audio_path }}" type="audio/mpeg">
+                <p class="text-muted text-sm">Audio file not found. Generate with NotebookLM.</p>
+            </audio>
+            <p class="text-muted text-sm mt-2">Audio files should be placed in the static/audio directory.</p>
+        </div>
+
+        <!-- Script -->
+        <div class="card bg-surface p-6 rounded-lg">
+            <h3 class="text-lg font-semibold text-muted uppercase tracking-wide mb-4">Script</h3>
+            <div class="prose prose-lg max-w-none whitespace-pre-wrap">{{ section.podcast_content }}</div>
+        </div>
+    </div>
+{% else %}
+    <div class="text-center py-12 text-muted">
+        <p class="text-lg">Podcast script not yet generated.</p>
+        <p class="text-sm mt-2">Run <code class="bg-cream px-2 py-1 rounded">edps generate {{ section.book.slug }} {{ section.id }} --type podcast</code></p>
+    </div>
+{% endif %}

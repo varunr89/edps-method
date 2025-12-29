@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} - EDPS{% endblock %}
+
+{% block content %}
+<nav class="mb-8">
+    <a href="/" class="text-muted hover:text-accent transition-colors">&larr; All Books</a>
+</nav>
+
+<header class="mb-12">
+    <h1 class="text-3xl font-semibold mb-2">{{ book.title }}</h1>
+    <p class="text-muted text-lg">{{ book.author }} &middot; {{ book.year }}</p>
+
+    <div class="mt-6 flex items-center gap-4">
+        <div class="flex-1">
+            <div class="w-full h-3 bg-cream rounded-full overflow-hidden">
+                {% set pct = (book.state.completed / book.state.total_sections * 100) if book.state.total_sections > 0 else 0 %}
+                <div class="progress-bar h-full rounded-full" style="width: {{ pct }}%"></div>
+            </div>
+        </div>
+        <span class="font-mono text-sm text-muted">{{ book.state.completed }}/{{ book.state.total_sections }} sections</span>
+    </div>
+</header>
+
+<section>
+    <h2 class="text-xl font-semibold text-muted uppercase tracking-wide mb-6">Sections</h2>
+
+    <div class="space-y-3">
+    {% for section in book.sections %}
+        {% set is_complete = section.files.recall and section.has_feedback %}
+        {% set is_started = section.files.summary %}
+
+        <a href="/book/{{ book.slug }}/{{ section.id }}"
+           class="block card bg-surface p-4 rounded-lg hover:shadow-lg transition-shadow {% if not is_started %}opacity-50{% endif %}">
+            <div class="flex items-center gap-4">
+                <!-- Status icon -->
+                <div class="w-8 h-8 flex items-center justify-center rounded-full
+                    {% if is_complete %}bg-success/20 text-success
+                    {% elif is_started %}bg-accent/20 text-accent
+                    {% else %}bg-muted/20 text-muted{% endif %}">
+                    {% if is_complete %}&#10003;
+                    {% elif is_started %}&#9679;
+                    {% else %}&#9675;{% endif %}
+                </div>
+
+                <!-- Section info -->
+                <div class="flex-1">
+                    <div class="flex items-baseline gap-2">
+                        <span class="font-mono text-sm text-muted">{{ section.id }}</span>
+                        <h3 class="font-medium">{{ section.title }}</h3>
+                    </div>
+                    {% if section.word_count %}
+                    <p class="text-muted text-sm">~{{ (section.word_count / 250) | round | int }} min read</p>
+                    {% endif %}
+                </div>
+
+                <!-- File indicators -->
+                <div class="flex gap-2 text-xs">
+                    <span class="{% if section.files.summary %}text-success{% else %}text-muted/50{% endif %}" title="Summary">S</span>
+                    <span class="{% if section.files.recall %}text-success{% else %}text-muted/50{% endif %}" title="Recall">R</span>
+                    <span class="{% if section.files.quiz %}text-success{% else %}text-muted/50{% endif %}" title="Quiz">Q</span>
+                    <span class="{% if section.files.podcast %}text-success{% else %}text-muted/50{% endif %}" title="Podcast">P</span>
+                </div>
+            </div>
+        </a>
+    {% endfor %}
+    </div>
+</section>
+{% endblock %}

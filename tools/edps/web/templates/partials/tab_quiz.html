@@ -1,0 +1,105 @@
+{% set quiz = parse_quiz(section.quiz_content) if section.quiz_content else None %}
+
+{% if quiz %}
+<form id="quiz-form"
+      data-autosave
+      hx-post="/book/{{ section.book.slug }}/{{ section.id }}/save/quiz"
+      hx-trigger="save"
+      hx-swap="innerHTML"
+      hx-target="#quiz-save-indicator">
+
+    <div class="space-y-8">
+    {% for q in quiz.questions %}
+        <div class="card bg-surface p-6 rounded-lg">
+            <div class="flex items-baseline gap-3 mb-4">
+                <span class="font-mono text-sm text-muted">Q{{ q.number }}</span>
+                <h3 class="font-semibold">{{ q.title }}</h3>
+            </div>
+
+            <p class="text-text/90 mb-4">{{ q.question_text }}</p>
+
+            {% if q.question_type == 'mcq' %}
+                <!-- MCQ Options -->
+                <div class="space-y-2 mb-4">
+                {% for opt in q.options %}
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded hover:bg-cream/50">
+                        <input type="radio"
+                               name="q{{ q.number }}"
+                               value="{{ opt[0] }}"
+                               {% if q.answer and q.answer.startswith(opt[0]) %}checked{% endif %}
+                               class="w-4 h-4 text-accent">
+                        <span>{{ opt }}</span>
+                    </label>
+                {% endfor %}
+                </div>
+            {% else %}
+                <!-- Prose answer -->
+                {% if quiz.has_feedback %}
+                    <div class="prose prose-sm max-w-none p-4 bg-cream/30 rounded-lg">
+                        {{ render_highlights(q.answer) | safe }}
+                    </div>
+                {% else %}
+                    <textarea
+                        name="q{{ q.number }}"
+                        rows="4"
+                        class="w-full bg-cream/50 border border-muted/20 rounded-lg px-4 py-3 resize-none"
+                        placeholder="Your answer..."
+                    >{{ q.answer }}</textarea>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% endfor %}
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-between mt-8">
+        <span id="quiz-save-indicator" class="save-indicator opacity-0">Saved &#10003;</span>
+        <button type="button"
+                hx-post="/book/{{ section.book.slug }}/{{ section.id }}/evaluate/quiz"
+                hx-target="#quiz-feedback"
+                hx-swap="innerHTML"
+                hx-indicator="#quiz-eval-spinner"
+                class="bg-accent text-white px-6 py-2 rounded-lg hover:bg-accent/90 transition-colors">
+            Get Feedback
+        </button>
+    </div>
+
+    <div id="quiz-eval-spinner" class="htmx-indicator text-center py-4 text-muted">
+        Evaluating...
+    </div>
+</form>
+
+<!-- Feedback summary -->
+<div id="quiz-feedback" class="mt-8">
+    {% if quiz.has_feedback %}
+    <div class="card bg-surface p-6 rounded-lg border-l-4 border-accent">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Feedback Summary</h3>
+            {% if quiz.total_score is not none %}
+            <span class="font-mono text-xl">{{ quiz.total_score | round(1) }}/8</span>
+            {% endif %}
+        </div>
+
+        {% if quiz.thematic_insights %}
+        <details class="mb-4">
+            <summary class="text-muted cursor-pointer">Thematic Insights</summary>
+            <div class="mt-2 text-sm">{{ quiz.thematic_insights | safe }}</div>
+        </details>
+        {% endif %}
+
+        {% if quiz.tutors_note %}
+        <details>
+            <summary class="text-muted cursor-pointer">Tutor's Note</summary>
+            <div class="mt-2 text-sm italic">{{ quiz.tutors_note }}</div>
+        </details>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{% else %}
+<div class="text-center py-12 text-muted">
+    <p class="text-lg">Quiz not yet generated.</p>
+    <p class="text-sm mt-2">Run <code class="bg-cream px-2 py-1 rounded">edps generate {{ section.book.slug }} {{ section.id }} --type quiz</code></p>
+</div>
+{% endif %}

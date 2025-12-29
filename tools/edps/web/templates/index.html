@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}EDPS Reading Dashboard{% endblock %}
+
+{% block content %}
+<header class="mb-12">
+    <h1 class="text-4xl font-semibold text-text mb-2">EDPS Reading Dashboard</h1>
+    <p class="text-muted text-lg">Foundational texts for lasting knowledge</p>
+</header>
+
+{% set in_progress = books | selectattr('status', 'eq', 'in_progress') | list %}
+{% set planned = books | selectattr('status', 'eq', 'planned') | list %}
+
+{% if in_progress %}
+<section class="mb-12">
+    <h2 class="text-xl font-semibold text-muted uppercase tracking-wide mb-6">In Progress</h2>
+
+    <div class="space-y-4">
+    {% for book in in_progress %}
+        <a href="/book/{{ book.slug }}" class="block card bg-surface p-6 rounded-lg hover:shadow-lg transition-shadow">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-xl font-semibold">{{ book.title }}</h3>
+                    <p class="text-muted">{{ book.author }}, {{ book.year }}</p>
+                </div>
+                <div class="text-right">
+                    <span class="font-mono text-sm">{{ book.state.completed }}/{{ book.state.total_sections }}</span>
+                    <div class="w-32 h-2 bg-cream rounded-full mt-1 overflow-hidden">
+                        {% set pct = (book.state.completed / book.state.total_sections * 100) if book.state.total_sections > 0 else 0 %}
+                        <div class="progress-bar h-full rounded-full" style="width: {{ pct }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if planned %}
+<section>
+    <h2 class="text-xl font-semibold text-muted uppercase tracking-wide mb-6">Planned</h2>
+
+    <div class="space-y-3">
+    {% for book in planned %}
+        <div class="card bg-surface/50 p-4 rounded-lg opacity-75">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg">{{ book.title }}</h3>
+                    <p class="text-muted text-sm">{{ book.author }}, {{ book.year }}</p>
+                </div>
+                <span class="text-muted text-sm">{{ book.category }}</span>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
