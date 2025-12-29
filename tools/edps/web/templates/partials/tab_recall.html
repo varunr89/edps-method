@@ -1,4 +1,119 @@
-<!-- Recall tab - placeholder -->
-<div class="text-center py-12 text-muted">
-    <p class="text-lg">Recall tab coming soon.</p>
+{% set recall = parse_recall(section.recall_content) if section.recall_content else None %}
+
+<form id="recall-form"
+      data-autosave
+      hx-post="/book/{{ section.book.slug }}/{{ section.id }}/save/recall"
+      hx-trigger="save"
+      hx-swap="innerHTML"
+      hx-target="#save-indicator">
+
+    <!-- From Memory -->
+    <div class="card bg-surface p-6 rounded-lg mb-6">
+        <h3 class="text-lg font-semibold text-muted uppercase tracking-wide mb-2">From Memory</h3>
+        <p class="text-muted text-sm mb-4">Write 5 key points before re-reading the source.</p>
+
+        <div class="space-y-4">
+            {% for i in range(5) %}
+            <div class="flex gap-3">
+                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-muted/20 text-muted text-sm flex items-center justify-center font-mono">{{ i + 1 }}</span>
+                <textarea
+                    name="memory_{{ i }}"
+                    rows="2"
+                    class="flex-1 bg-cream/50 border border-muted/20 rounded-lg px-4 py-2 resize-none"
+                    placeholder="Key point {{ i + 1 }}..."
+                >{{ recall.memory_points[i] if recall else '' }}</textarea>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- After Reading -->
+    <div class="card bg-surface p-6 rounded-lg mb-6">
+        <h3 class="text-lg font-semibold text-muted uppercase tracking-wide mb-2">After Selective Reading</h3>
+        <p class="text-muted text-sm mb-4">What did you miss? What needs correction?</p>
+
+        <textarea
+            name="after_reading"
+            rows="4"
+            class="w-full bg-cream/50 border border-muted/20 rounded-lg px-4 py-3 resize-none"
+            placeholder="Corrections and additions..."
+        >{{ recall.after_reading if recall else '' }}</textarea>
+    </div>
+
+    <!-- Self-Assessment -->
+    <div class="card bg-surface p-6 rounded-lg mb-6">
+        <h3 class="text-lg font-semibold text-muted uppercase tracking-wide mb-4">Self-Assessment</h3>
+
+        <div class="flex flex-wrap gap-8">
+            <div>
+                <label class="block text-sm text-muted mb-2">Score (0-5)</label>
+                <div class="flex gap-2">
+                    {% for i in range(6) %}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="score" value="{{ i }}" class="sr-only peer"
+                            {% if recall and recall.score == i %}checked{% endif %}>
+                        <span class="block w-10 h-10 rounded-full border-2 border-muted/30
+                                     peer-checked:border-accent peer-checked:bg-accent/20
+                                     flex items-center justify-center font-mono text-sm
+                                     hover:border-muted transition-colors">{{ i }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm text-muted mb-2">Confidence</label>
+                <div class="flex gap-2">
+                    {% for level in ['Low', 'Medium', 'High'] %}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="confidence" value="{{ level }}" class="sr-only peer"
+                            {% if recall and recall.confidence == level %}checked{% endif %}>
+                        <span class="block px-4 py-2 rounded-full border-2 border-muted/30
+                                     peer-checked:border-accent peer-checked:bg-accent/20
+                                     text-sm hover:border-muted transition-colors">{{ level }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- One Sentence Summary -->
+    <div class="card bg-surface p-6 rounded-lg mb-6">
+        <h3 class="text-lg font-semibold text-muted uppercase tracking-wide mb-2">One Sentence Summary</h3>
+        <input
+            type="text"
+            name="one_sentence"
+            class="w-full bg-cream/50 border border-muted/20 rounded-lg px-4 py-3"
+            placeholder="Capture the essence in one sentence..."
+            value="{{ recall.one_sentence if recall else '' }}">
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-between">
+        <span id="save-indicator" class="save-indicator opacity-0">Saved &#10003;</span>
+        <button type="button"
+                hx-post="/book/{{ section.book.slug }}/{{ section.id }}/evaluate/recall"
+                hx-target="#recall-feedback"
+                hx-swap="innerHTML"
+                hx-indicator="#eval-spinner"
+                class="bg-accent text-white px-6 py-2 rounded-lg hover:bg-accent/90 transition-colors">
+            Get Feedback
+        </button>
+    </div>
+
+    <div id="eval-spinner" class="htmx-indicator text-center py-4 text-muted">
+        Evaluating...
+    </div>
+</form>
+
+<!-- Feedback area -->
+<div id="recall-feedback" class="mt-8">
+    {% if recall and recall.has_feedback %}
+        <!-- Show existing feedback -->
+        <div class="card bg-surface p-6 rounded-lg border-l-4 border-success">
+            <h3 class="text-lg font-semibold mb-4">Feedback</h3>
+            <p class="text-muted">Feedback has been provided. See recall.md for details.</p>
+        </div>
+    {% endif %}
 </div>

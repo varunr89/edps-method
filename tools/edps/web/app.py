@@ -2,11 +2,14 @@
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from typing import Optional
+
+from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from edps.web.routes import load_registry, load_book, load_section
+from edps.web.routes import load_registry, load_book, load_section, write_recall, update_quiz_answers
 from edps.web.parsers import parse_summary, parse_recall, parse_quiz, render_answer_with_highlights
 
 app = FastAPI(title="EDPS Method", docs_url=None, redoc_url=None)
@@ -86,3 +89,31 @@ async def section_workspace(request: Request, slug: str, section_id: str, tab: s
         "parse_quiz": parse_quiz,
         "render_highlights": render_answer_with_highlights,
     })
+
+
+@app.post("/book/{slug}/{section_id}/save/recall")
+async def save_recall(
+    slug: str,
+    section_id: str,
+    memory_0: str = Form(""),
+    memory_1: str = Form(""),
+    memory_2: str = Form(""),
+    memory_3: str = Form(""),
+    memory_4: str = Form(""),
+    after_reading: str = Form(""),
+    score: Optional[int] = Form(None),
+    confidence: Optional[str] = Form(None),
+    one_sentence: str = Form(""),
+):
+    """Save recall form data to recall.md."""
+    books_dir = get_books_dir()
+    write_recall(
+        books_dir, slug, section_id,
+        memory_points=[memory_0, memory_1, memory_2, memory_3, memory_4],
+        after_reading=after_reading,
+        score=score,
+        confidence=confidence,
+        one_sentence=one_sentence,
+    )
+
+    return HTMLResponse("Saved &#10003;")
