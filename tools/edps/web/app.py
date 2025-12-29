@@ -6,6 +6,8 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from edps.web.routes import load_registry, load_book, load_section
+
 app = FastAPI(title="EDPS Method", docs_url=None, redoc_url=None)
 
 # Paths
@@ -37,7 +39,10 @@ async def health():
 @app.get("/")
 async def index(request: Request):
     """Book list page."""
+    books_dir = get_books_dir()
+    books = load_registry(books_dir)
+
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "title": "EDPS Reading Dashboard",
+        "books": books,
     })
