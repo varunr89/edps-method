@@ -153,8 +153,11 @@ prompts:
 
       **Your Answer:**
 
+      <details>
+      <summary>Reveal Answer</summary>
 
-      **Correct Answer(s):** [correct letters, e.g., "A" or "A, C, D" or "None"]
+      **Correct:** [correct letters, e.g., "A" or "A, C, D" or "None"]
+      </details>
 
       ---
 
