@@ -61,3 +61,23 @@ async def book_detail(request: Request, slug: str):
         "request": request,
         "book": book,
     })
+
+
+@app.get("/book/{slug}/{section_id}")
+async def section_workspace(request: Request, slug: str, section_id: str, tab: str = "summary"):
+    """Section workspace with tabs."""
+    books_dir = get_books_dir()
+    section = load_section(books_dir, slug, section_id)
+
+    if not section:
+        raise HTTPException(status_code=404, detail="Section not found")
+
+    # Default to summary tab, or first available
+    if tab not in ["summary", "recall", "quiz", "podcast"]:
+        tab = "summary"
+
+    return templates.TemplateResponse("section.html", {
+        "request": request,
+        "section": section,
+        "tab": tab,
+    })

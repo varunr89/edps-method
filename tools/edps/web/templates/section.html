@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }} - {{ section.book.title }}{% endblock %}
+
+{% block content %}
+<nav class="mb-8 flex justify-between items-center">
+    <a href="/book/{{ section.book.slug }}" class="text-muted hover:text-accent transition-colors">
+        &larr; {{ section.book.title }}
+    </a>
+    <span class="text-muted text-sm">Section {{ section.id }} of {{ section.book.sections | length }}</span>
+</nav>
+
+<header class="mb-8">
+    <h1 class="text-2xl font-semibold">{{ section.title }}</h1>
+</header>
+
+<!-- Tabs -->
+<div class="border-b border-muted/20 mb-8">
+    <nav class="flex gap-8">
+        <a href="?tab=summary"
+           class="tab py-3 px-1 text-lg {% if tab == 'summary' %}active text-text{% else %}text-muted hover:text-text{% endif %} {% if not section.summary_content %}opacity-50{% endif %}">
+            Summary
+        </a>
+        <a href="?tab=recall"
+           class="tab py-3 px-1 text-lg {% if tab == 'recall' %}active text-text{% else %}text-muted hover:text-text{% endif %} {% if not section.files.summary %}opacity-50 pointer-events-none{% endif %}">
+            Recall
+        </a>
+        <a href="?tab=quiz"
+           class="tab py-3 px-1 text-lg {% if tab == 'quiz' %}active text-text{% else %}text-muted hover:text-text{% endif %} {% if not section.files.quiz %}opacity-50 pointer-events-none{% endif %}">
+            Quiz
+        </a>
+        <a href="?tab=podcast"
+           class="tab py-3 px-1 text-lg {% if tab == 'podcast' %}active text-text{% else %}text-muted hover:text-text{% endif %} {% if not section.files.podcast %}opacity-50 pointer-events-none{% endif %}">
+            Podcast
+        </a>
+    </nav>
+</div>
+
+<!-- Tab content -->
+<div class="tab-content">
+    {% if tab == 'summary' %}
+        {% include "partials/tab_summary.html" %}
+    {% elif tab == 'recall' %}
+        {% include "partials/tab_recall.html" %}
+    {% elif tab == 'quiz' %}
+        {% include "partials/tab_quiz.html" %}
+    {% elif tab == 'podcast' %}
+        {% include "partials/tab_podcast.html" %}
+    {% endif %}
+</div>
+{% endblock %}
