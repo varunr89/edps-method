@@ -117,3 +117,15 @@ async def save_recall(
     )
 
     return HTMLResponse("Saved &#10003;")
+
+
+@app.post("/book/{slug}/{section_id}/save/quiz")
+async def save_quiz(slug: str, section_id: str, request: Request):
+    """Save quiz answers to quiz.md."""
+    form_data = await request.form()
+    answers = {k: v for k, v in form_data.items() if k.startswith('q')}
+
+    books_dir = get_books_dir()
+    update_quiz_answers(books_dir, slug, section_id, answers)
+
+    return HTMLResponse("Saved &#10003;")
